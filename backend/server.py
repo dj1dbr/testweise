@@ -738,6 +738,164 @@ async def refresh_market_data():
     await process_market_data()
     return {"success": True, "message": "Market data refreshed"}
 
+# MT5 Integration Endpoints
+@api_router.get("/mt5/account")
+async def get_mt5_account():
+    """Get real MT5 account information"""
+    try:
+        settings = await db.trading_settings.find_one({"id": "trading_settings"})
+        if not settings or not settings.get('mt5_login'):
+            raise HTTPException(status_code=400, detail="MT5 credentials not configured")
+        
+        from mt5_connector import get_mt5_connector
+        
+        connector = await get_mt5_connector(
+            login=settings['mt5_login'],
+            password=settings['mt5_password'],
+            server=settings['mt5_server']
+        )
+        
+        account_info = await connector.get_account_info()
+        if not account_info:
+            raise HTTPException(status_code=503, detail="Failed to get MT5 account info")
+        
+        return account_info
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting MT5 account: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/mt5/positions")
+async def get_mt5_positions():
+    """Get open positions from MT5"""
+    try:
+        settings = await db.trading_settings.find_one({"id": "trading_settings"})
+        if not settings or not settings.get('mt5_login'):
+            raise HTTPException(status_code=400, detail="MT5 credentials not configured")
+        
+        from mt5_connector import get_mt5_connector
+        
+        connector = await get_mt5_connector(
+            login=settings['mt5_login'],
+            password=settings['mt5_password'],
+            server=settings['mt5_server']
+        )
+        
+        positions = await connector.get_positions()
+        return {"positions": positions}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting MT5 positions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/mt5/order")
+async def place_mt5_order(
+    symbol: str,
+    order_type: str,
+    volume: float,
+    price: Optional[float] = None,
+    stop_loss: Optional[float] = None,
+    take_profit: Optional[float] = None
+):
+    """Place order on MT5"""
+    try:
+        settings = await db.trading_settings.find_one({"id": "trading_settings"})
+        if not settings or not settings.get('mt5_login'):
+            raise HTTPException(status_code=400, detail="MT5 credentials not configured")
+        
+        from mt5_connector import get_mt5_connector
+        
+        connector = await get_mt5_connector(
+            login=settings['mt5_login'],
+            password=settings['mt5_password'],
+            server=settings['mt5_server']
+        )
+        
+        result = await connector.place_order(
+            symbol=symbol,
+            order_type=order_type.upper(),
+            volume=volume,
+            price=price,
+            sl=stop_loss,
+            tp=take_profit
+        )
+        
+        if not result:
+            raise HTTPException(status_code=500, detail="Failed to place order on MT5")
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error placing MT5 order: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/mt5/close/{ticket}")
+async def close_mt5_position(ticket: int):
+    """Close position on MT5"""
+    try:
+        settings = await db.trading_settings.find_one({"id": "trading_settings"})
+        if not settings or not settings.get('mt5_login'):
+            raise HTTPException(status_code=400, detail="MT5 credentials not configured")
+        
+        from mt5_connector import get_mt5_connector
+        
+        connector = await get_mt5_connector(
+            login=settings['mt5_login'],
+            password=settings['mt5_password'],
+            server=settings['mt5_server']
+        )
+        
+        success = await connector.close_position(ticket)
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to close position on MT5")
+        
+        return {"success": True, "ticket": ticket}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error closing MT5 position: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/mt5/status")
+async def get_mt5_status():
+    """Check MT5 connection status"""
+    try:
+        settings = await db.trading_settings.find_one({"id": "trading_settings"})
+        if not settings or not settings.get('mt5_login'):
+            return {
+                "connected": False,
+                "message": "MT5 credentials not configured"
+            }
+        
+        from mt5_connector import get_mt5_connector
+        
+        connector = await get_mt5_connector(
+            login=settings['mt5_login'],
+            password=settings['mt5_password'],
+            server=settings['mt5_server']
+        )
+        
+        account_info = await connector.get_account_info()
+        
+        return {
+            "connected": connector.connected,
+            "mt5_available": connector.mt5_available,
+            "mode": "DIRECT" if connector.mt5_available else "REST_API/MOCK",
+            "server": settings['mt5_server'],
+            "login": settings['mt5_login'],
+            "balance": account_info.get('balance') if account_info else None,
+            "trade_mode": account_info.get('trade_mode') if account_info else None
+        }
+    except Exception as e:
+        logger.error(f"Error checking MT5 status: {e}")
+        return {
+            "connected": False,
+            "error": str(e)
+        }
+
 # Include the router in the main app
 app.include_router(api_router)
 
