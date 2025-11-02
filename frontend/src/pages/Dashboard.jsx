@@ -43,6 +43,7 @@ const Dashboard = () => {
         fetchTrades();
         fetchStats();
         updateBalance();
+        fetchMT5Account(); // Fetch real MT5 data
       }
     }, 10000);  // Every 10 seconds
 
