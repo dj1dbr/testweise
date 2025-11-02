@@ -144,10 +144,8 @@ const Dashboard = () => {
       const response = await axios.get(`${API}/mt5/account`);
       setMt5Account(response.data);
       setMt5Connected(true);
-      // Update balance with real MT5 data
-      if (settings?.mode === 'MT5') {
-        setBalance(response.data.balance);
-      }
+      // Always update balance immediately when MT5 data is fetched
+      setBalance(response.data.balance);
     } catch (error) {
       console.error('Error fetching MT5 account:', error);
       setMt5Connected(false);
