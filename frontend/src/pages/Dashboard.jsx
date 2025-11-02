@@ -57,7 +57,8 @@ const Dashboard = () => {
       fetchHistoricalData(),
       fetchTrades(),
       fetchStats(),
-      fetchSettings()
+      fetchSettings(),
+      fetchMT5Account() // Fetch real MT5 account data
     ]);
     setLoading(false);
   };
