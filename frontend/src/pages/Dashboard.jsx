@@ -127,10 +127,10 @@ const Dashboard = () => {
   };
 
   const updateBalance = () => {
-    // Use real MT5 balance if connected, otherwise calculate from paper trading
-    if (mt5Account && settings?.mode === 'MT5') {
+    // Use real MT5 balance if connected and mode is MT5, otherwise calculate from paper trading
+    if (mt5Connected && mt5Account && settings?.mode === 'MT5') {
       setBalance(mt5Account.balance);
-    } else {
+    } else if (settings?.mode === 'PAPER') {
       // Calculate balance based on trades P/L for paper trading
       if (stats) {
         const newBalance = 10000 + (stats.total_profit_loss || 0);
