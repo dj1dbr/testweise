@@ -127,10 +127,30 @@ const Dashboard = () => {
   };
 
   const updateBalance = () => {
-    // Calculate balance based on trades P/L
-    if (stats) {
-      const newBalance = 10000 + (stats.total_profit_loss || 0);
-      setBalance(newBalance);
+    // Use real MT5 balance if connected, otherwise calculate from paper trading
+    if (mt5Account && settings?.mode === 'MT5') {
+      setBalance(mt5Account.balance);
+    } else {
+      // Calculate balance based on trades P/L for paper trading
+      if (stats) {
+        const newBalance = 10000 + (stats.total_profit_loss || 0);
+        setBalance(newBalance);
+      }
+    }
+  };
+
+  const fetchMT5Account = async () => {
+    try {
+      const response = await axios.get(`${API}/mt5/account`);
+      setMt5Account(response.data);
+      setMt5Connected(true);
+      // Update balance with real MT5 data
+      if (settings?.mode === 'MT5') {
+        setBalance(response.data.balance);
+      }
+    } catch (error) {
+      console.error('Error fetching MT5 account:', error);
+      setMt5Connected(false);
     }
   };
 
