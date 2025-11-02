@@ -24,6 +24,8 @@ const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [settings, setSettings] = useState(null);
   const [balance, setBalance] = useState(10000); // Simulated balance
+  const [mt5Account, setMt5Account] = useState(null); // Real MT5 account data
+  const [mt5Connected, setMt5Connected] = useState(false);
   const [gpt5Active, setGpt5Active] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
