@@ -340,16 +340,45 @@ const Dashboard = () => {
         {/* Balance Card */}
         <Card className="bg-gradient-to-r from-emerald-900/30 to-cyan-900/30 border-emerald-500/30 p-6 mb-6" data-testid="balance-card">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-slate-400 mb-1">Aktuelles Guthaben</p>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-sm text-slate-400">
+                  {mt5Connected && settings?.mode === 'MT5' ? 'MT5 Konto' : 'Paper Trading'}
+                </p>
+                {mt5Connected && settings?.mode === 'MT5' && (
+                  <Badge variant="success" className="bg-emerald-500/20 text-emerald-400 border-emerald-500/50">
+                    ✓ Verbunden
+                  </Badge>
+                )}
+                {settings?.mode === 'PAPER' && (
+                  <Badge variant="secondary" className="bg-slate-500/20 text-slate-400 border-slate-500/50">
+                    Simulation
+                  </Badge>
+                )}
+              </div>
               <h2 className="text-4xl font-bold text-emerald-400" data-testid="current-balance">
-                ${balance.toFixed(2)}
+                {mt5Account && settings?.mode === 'MT5' 
+                  ? `€${balance.toFixed(2)}` 
+                  : `$${balance.toFixed(2)}`}
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Startwert: $10,000.00 | P/L: 
-                <span className={stats?.total_profit_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}>
-                  {' '}${stats?.total_profit_loss?.toFixed(2) || '0.00'}
-                </span>
+                {mt5Connected && settings?.mode === 'MT5' ? (
+                  <>
+                    Equity: €{mt5Account?.equity?.toFixed(2)} | Margin: €{mt5Account?.margin?.toFixed(2)}
+                    {mt5Account?.trade_mode && (
+                      <span className={mt5Account.trade_mode === 'REAL' ? 'text-amber-400 ml-2' : 'text-blue-400 ml-2'}>
+                        [{mt5Account.trade_mode}]
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    Startwert: $10,000.00 | P/L: 
+                    <span className={stats?.total_profit_loss >= 0 ? 'text-emerald-400' : 'text-rose-400'}>
+                      {' '}${stats?.total_profit_loss?.toFixed(2) || '0.00'}
+                    </span>
+                  </>
+                )}
               </p>
             </div>
             <DollarSign className="w-16 h-16 text-emerald-400/20" />
