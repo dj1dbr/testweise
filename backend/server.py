@@ -848,6 +848,57 @@ async def refresh_market_data():
     await process_market_data()
     return {"success": True, "message": "Market data refreshed"}
 
+@api_router.post("/trailing-stop/update")
+async def update_trailing_stops_endpoint():
+    """Update trailing stops for all open positions"""
+    try:
+        # Get current market data
+        settings = await db.trading_settings.find_one({"id": "trading_settings"})
+        
+        if not settings or not settings.get('use_trailing_stop', False):
+            return {"success": False, "message": "Trailing stop not enabled"}
+        
+        # Get latest prices for all commodities
+        current_prices = {}
+        enabled = settings.get('enabled_commodities', ['WTI_CRUDE'])
+        
+        for commodity_id in enabled:
+            market_data = await db.market_data.find_one(
+                {"commodity": commodity_id},
+                sort=[("timestamp", -1)]
+            )
+            if market_data:
+                current_prices[commodity_id] = market_data['price']
+        
+        # Update trailing stops
+        await update_trailing_stops(db, current_prices, settings)
+        
+        # Check for stop loss triggers
+        trades_to_close = await check_stop_loss_triggers(db, current_prices)
+        
+        # Close triggered positions
+        for trade_info in trades_to_close:
+            await db.trades.update_one(
+                {"id": trade_info['id']},
+                {
+                    "$set": {
+                        "status": "CLOSED",
+                        "exit_price": trade_info['exit_price'],
+                        "closed_at": datetime.now(timezone.utc),
+                        "strategy_signal": trade_info['reason']
+                    }
+                }
+            )
+        
+        return {
+            "success": True,
+            "message": "Trailing stops updated",
+            "closed_positions": len(trades_to_close)
+        }
+    except Exception as e:
+        logger.error(f"Error updating trailing stops: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # MT5 Integration Endpoints
 @api_router.get("/mt5/account")
 async def get_mt5_account():
