@@ -866,8 +866,17 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
               id="max_trades"
               type="number"
               min="1"
-              value={formData.max_trades_per_hour || ''}
-              onChange={(e) => setFormData({ ...formData, max_trades_per_hour: e.target.value ? parseInt(e.target.value) : 3 })}
+              value={formData.max_trades_per_hour ?? 3}
+              onChange={(e) => {
+                const val = e.target.value;
+                setFormData({ ...formData, max_trades_per_hour: val === '' ? '' : parseInt(val) || 3 });
+              }}
+              onBlur={(e) => {
+                // Set default value on blur if empty
+                if (e.target.value === '') {
+                  setFormData({ ...formData, max_trades_per_hour: 3 });
+                }
+              }}
               className="bg-slate-800 border-slate-700"
               data-testid="max-trades-input"
             />
