@@ -255,6 +255,8 @@ class TradingSettings(BaseModel):
     ollama_model: Optional[str] = "llama2"  # Default Ollama model
     stop_loss_percent: float = 2.0
     take_profit_percent: float = 4.0
+    use_trailing_stop: bool = False  # Enable trailing stop
+    trailing_stop_distance: float = 1.5  # Trailing stop distance in %
     max_trades_per_hour: int = 3
     position_size: float = 1.0
     max_portfolio_risk_percent: float = 20.0  # Max 20% of balance for all open positions
