@@ -54,7 +54,15 @@ class MetaAPIConnector:
         try:
             url = f"{self.base_url}/users/current/accounts/{self.account_id}/account-information"
             
-            async with aiohttp.ClientSession() as session:
+            # Create SSL context that doesn't verify certificates
+            import ssl
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            
+            connector = aiohttp.TCPConnector(ssl=ssl_context)
+            
+            async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.get(url, headers=self._get_headers(), timeout=aiohttp.ClientTimeout(total=10)) as response:
                     if response.status == 200:
                         data = await response.json()
