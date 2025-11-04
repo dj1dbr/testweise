@@ -444,9 +444,11 @@ const Dashboard = () => {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <p className="text-sm text-slate-400">
-                  {mt5Connected && settings?.mode === 'MT5' ? 'MT5 Konto' : 'Paper Trading'}
+                  {settings?.mode === 'MT5' ? '🔷 MT5 Konto' : 
+                   settings?.mode === 'BITPANDA' ? '🟢 Bitpanda' : 
+                   '📊 Paper Trading'}
                 </p>
-                {mt5Connected && settings?.mode === 'MT5' && (
+                {mt5Connected && (settings?.mode === 'MT5' || settings?.mode === 'BITPANDA') && (
                   <Badge variant="success" className="bg-emerald-500/20 text-emerald-400 border-emerald-500/50">
                     ✓ Verbunden
                   </Badge>
@@ -458,18 +460,21 @@ const Dashboard = () => {
                 )}
               </div>
               <h2 className="text-4xl font-bold text-emerald-400" data-testid="current-balance">
-                {mt5Account && settings?.mode === 'MT5' 
+                {settings?.mode === 'MT5' || settings?.mode === 'BITPANDA' 
                   ? `€${balance.toFixed(2)}` 
                   : `$${balance.toFixed(2)}`}
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                {mt5Connected && settings?.mode === 'MT5' ? (
+                {mt5Connected && (settings?.mode === 'MT5' || settings?.mode === 'BITPANDA') ? (
                   <>
                     Equity: €{mt5Account?.equity?.toFixed(2)} | Margin: €{mt5Account?.margin?.toFixed(2)}
                     {mt5Account?.trade_mode && (
-                      <span className={mt5Account.trade_mode === 'REAL' ? 'text-amber-400 ml-2' : 'text-blue-400 ml-2'}>
+                      <span className={mt5Account.trade_mode === 'REAL' || mt5Account.trade_mode === 'LIVE' ? 'text-amber-400 ml-2' : 'text-blue-400 ml-2'}>
                         [{mt5Account.trade_mode}]
                       </span>
+                    )}
+                    {settings?.mode === 'BITPANDA' && mt5Account?.broker && (
+                      <span className="text-cyan-400 ml-2">• {mt5Account.broker}</span>
                     )}
                   </>
                 ) : (
