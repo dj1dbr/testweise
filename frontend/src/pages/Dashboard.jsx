@@ -83,14 +83,18 @@ const Dashboard = () => {
     try {
       const response = await axios.get(`${API}/market/all`);
       setAllMarkets(response.data.markets || {});
-      // Calculate total exposure
-      const exposure = Object.values(response.data.markets || {}).reduce((sum, market) => {
-        return sum + (market.price || 0);
-      }, 0);
-      setTotalExposure(exposure);
     } catch (error) {
       console.error('Error fetching all markets:', error);
     }
+  };
+  
+  const calculateTotalExposure = () => {
+    // Calculate actual exposure from open trades
+    const openTrades = trades.filter(t => t.status === 'OPEN');
+    const exposure = openTrades.reduce((sum, trade) => {
+      return sum + (trade.entry_price * trade.quantity);
+    }, 0);
+    setTotalExposure(exposure);
   };
 
   const fetchMarketData = async () => {
