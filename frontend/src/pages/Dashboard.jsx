@@ -242,12 +242,12 @@ const Dashboard = () => {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold" style={{ color: '#2dd4bf' }} data-testid="dashboard-title">
-                WTI Smart Trader
+                Rohstoff Trader
               </h1>
               {gpt5Active && (
                 <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white flex items-center gap-1 px-3 py-1 animate-pulse" data-testid="gpt5-active-badge">
                   <Zap className="w-4 h-4" />
-                  GPT-5 AKTIV
+                  KI AKTIV
                 </Badge>
               )}
               {!gpt5Active && settings?.auto_trading && (
@@ -257,7 +257,7 @@ const Dashboard = () => {
                 </Badge>
               )}
             </div>
-            <p className="text-base md:text-lg text-slate-400">Automatisierter Rohöl-Handel mit GPT-5 KI</p>
+            <p className="text-base md:text-lg text-slate-400">Multi-Commodity Trading mit KI-Analyse</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
