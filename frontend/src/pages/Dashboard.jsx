@@ -545,10 +545,15 @@ const Dashboard = () => {
           <Card className="bg-amber-900/20 border-amber-500/50 p-4 mb-8">
             <div className="flex items-center gap-3">
               <AlertCircle className="w-6 h-6 text-amber-400" />
-              <div>
+              <div className="flex-1">
                 <h4 className="font-semibold text-amber-400">Portfolio-Risiko-Warnung</h4>
-                <p className="text-sm text-slate-300">
-                  Aktuelle Exposition: {totalExposure.toFixed(2)} EUR ({((totalExposure / balance) * 100).toFixed(1)}%) - Empfohlen max. 20%
+                <p className="text-sm text-slate-300 mb-2">
+                  <strong>Offene Positionen:</strong> €{totalExposure.toFixed(2)} ({((totalExposure / balance) * 100).toFixed(1)}% Ihrer Balance)
+                </p>
+                <p className="text-xs text-slate-400">
+                  • Ihre Balance: €{balance.toFixed(2)}<br/>
+                  • Empfohlenes Maximum (20%): €{(balance * 0.2).toFixed(2)}<br/>
+                  • Sie sollten Positionen reduzieren, um Risiko zu minimieren
                 </p>
               </div>
             </div>
