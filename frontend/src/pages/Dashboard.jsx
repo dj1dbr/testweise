@@ -65,9 +65,22 @@ const Dashboard = () => {
       fetchTrades(),
       fetchStats(),
       fetchSettings(),
-      fetchMT5Account() // Fetch real MT5 account data
+      fetchAccountData() // Unified account data fetching
     ]);
     setLoading(false);
+  };
+
+  const fetchAccountData = async () => {
+    // Fetch account data based on current mode
+    if (settings?.mode === 'MT5') {
+      await fetchMT5Account();
+    } else if (settings?.mode === 'BITPANDA') {
+      await fetchBitpandaAccount();
+    } else {
+      // Paper trading - no external account needed
+      await fetchStats();
+      updateBalance();
+    }
   };
 
   const fetchCommodities = async () => {
