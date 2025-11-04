@@ -42,6 +42,7 @@ const Dashboard = () => {
     // Live ticker - refresh market data every 10 seconds
     const liveInterval = setInterval(() => {
       if (autoRefresh) {
+        fetchAllMarkets(); // Fetch all commodity markets
         refreshMarketData(); // This will trigger backend to fetch new data
         fetchTrades();
         fetchStats();
