@@ -792,8 +792,9 @@ const SettingsForm = ({ settings, onSave }) => {
             <Input
               id="max_trades"
               type="number"
-              value={formData.max_trades_per_hour || 3}
-              onChange={(e) => setFormData({ ...formData, max_trades_per_hour: parseInt(e.target.value) })}
+              min="1"
+              value={formData.max_trades_per_hour || ''}
+              onChange={(e) => setFormData({ ...formData, max_trades_per_hour: e.target.value ? parseInt(e.target.value) : 3 })}
               className="bg-slate-800 border-slate-700"
               data-testid="max-trades-input"
             />
