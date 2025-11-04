@@ -1,0 +1,260 @@
+"""
+Bitpanda Pro API Connector for Cryptocurrency Trading
+"""
+
+import logging
+import os
+import aiohttp
+from typing import Optional, Dict, Any, List
+from datetime import datetime
+
+logger = logging.getLogger(__name__)
+
+class BitpandaConnector:
+    """Bitpanda Pro API connection handler"""
+    
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        self.base_url = "https://api.exchange.bitpanda.com/public/v1"
+        self.connected = False
+        self.balance = 0.0
+        self.balances = {}
+        
+        logger.info(f"Bitpanda Connector initialized")
+    
+    def _get_headers(self) -> Dict[str, str]:
+        """Get authorization headers for Bitpanda"""
+        return {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        }
+    
+    async def connect(self) -> bool:
+        """Connect to Bitpanda and verify credentials"""
+        try:
+            account_info = await self.get_account_info()
+            if account_info:
+                self.connected = True
+                logger.info(f"✅ Connected to Bitpanda Pro")
+                return True
+            else:
+                logger.error("Failed to connect to Bitpanda")
+                return False
+        except Exception as e:
+            logger.error(f"Bitpanda connection error: {e}")
+            return False
+    
+    async def get_account_info(self) -> Optional[Dict[str, Any]]:
+        """Get account information from Bitpanda"""
+        try:
+            url = f"{self.base_url}/account/balances"
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, headers=self._get_headers(), timeout=aiohttp.ClientTimeout(total=10)) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        
+                        # Parse balances
+                        balances_data = data.get('balances', [])
+                        total_balance_eur = 0
+                        
+                        for balance in balances_data:
+                            currency = balance.get('currency_code', '')
+                            available = float(balance.get('available', 0))
+                            locked = float(balance.get('locked', 0))
+                            total = available + locked
+                            
+                            self.balances[currency] = {
+                                'available': available,
+                                'locked': locked,
+                                'total': total
+                            }
+                            
+                            # Estimate EUR value (simplified)
+                            if currency == 'EUR':
+                                total_balance_eur += total
+                        
+                        self.balance = total_balance_eur
+                        
+                        logger.info(f"Bitpanda Account Info: Balance={self.balance:.2f} EUR")
+                        
+                        return {
+                            "balance": self.balance,
+                            "equity": self.balance,
+                            "margin": 0.0,
+                            "free_margin": self.balance,
+                            "profit": 0.0,
+                            "currency": "EUR",
+                            "leverage": 1,
+                            "login": "Bitpanda Account",
+                            "server": "Bitpanda Pro",
+                            "trade_mode": "LIVE",
+                            "name": "Bitpanda Trading Account",
+                            "broker": "Bitpanda Pro",
+                            "balances": self.balances
+                        }
+                    else:
+                        error_text = await response.text()
+                        logger.error(f"Bitpanda error {response.status}: {error_text}")
+                        return None
+        except Exception as e:
+            logger.error(f"Error getting Bitpanda account info: {e}")
+            return None
+    
+    async def get_market_price(self, symbol: str) -> Optional[float]:
+        """Get current market price for a symbol"""
+        try:
+            # Bitpanda uses ticker endpoint
+            url = f"{self.base_url}/market-ticker/{symbol}"
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        price = float(data.get('last_price', 0))
+                        return price
+                    else:
+                        logger.error(f"Failed to get price for {symbol}")
+                        return None
+        except Exception as e:
+            logger.error(f"Error getting market price for {symbol}: {e}")
+            return None
+    
+    async def get_positions(self) -> List[Dict[str, Any]]:
+        """Get open positions (orders) from Bitpanda"""
+        try:
+            url = f"{self.base_url}/account/orders"
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, headers=self._get_headers(), timeout=aiohttp.ClientTimeout(total=10)) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        orders = data.get('order_history', [])
+                        
+                        result = []
+                        for order in orders:
+                            if order.get('status') == 'FILLED_FULLY':
+                                continue  # Skip filled orders
+                            
+                            result.append({
+                                "ticket": order.get('order_id', ''),
+                                "symbol": order.get('instrument_code', ''),
+                                "type": order.get('side', 'BUY').upper(),
+                                "volume": float(order.get('amount', 0)),
+                                "price_open": float(order.get('price', 0)),
+                                "price_current": float(order.get('price', 0)),
+                                "profit": 0.0,
+                                "swap": 0.0,
+                                "time": order.get('time', ''),
+                                "sl": order.get('stop_price'),
+                                "tp": order.get('take_profit')
+                            })
+                        
+                        logger.info(f"Bitpanda Positions: {len(result)} open")
+                        return result
+                    else:
+                        logger.error(f"Failed to get positions")
+                        return []
+        except Exception as e:
+            logger.error(f"Error getting Bitpanda positions: {e}")
+            return []
+    
+    async def place_order(self, symbol: str, order_type: str, volume: float, 
+                         price: Optional[float] = None,
+                         sl: Optional[float] = None, 
+                         tp: Optional[float] = None) -> Optional[Dict[str, Any]]:
+        """Place a trading order via Bitpanda"""
+        try:
+            url = f"{self.base_url}/account/orders"
+            
+            # Prepare order payload
+            payload = {
+                "instrument_code": symbol,
+                "side": "BUY" if order_type.upper() == "BUY" else "SELL",
+                "amount": str(volume),
+                "type": "MARKET" if not price else "LIMIT"
+            }
+            
+            if price:
+                payload["price"] = str(price)
+            if sl:
+                payload["stop_price"] = str(sl)
+            if tp:
+                payload["take_profit"] = str(tp)
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    url, 
+                    headers=self._get_headers(), 
+                    json=payload,
+                    timeout=aiohttp.ClientTimeout(total=15)
+                ) as response:
+                    if response.status in [200, 201]:
+                        result = await response.json()
+                        
+                        logger.info(f"✅ Bitpanda Order placed: {order_type} {volume} {symbol}")
+                        
+                        return {
+                            "success": True,
+                            "ticket": result.get('order_id', 'unknown'),
+                            "volume": volume,
+                            "price": price or 0.0,
+                            "type": order_type,
+                            "response": result
+                        }
+                    else:
+                        error_text = await response.text()
+                        logger.error(f"Bitpanda order failed {response.status}: {error_text}")
+                        return None
+        except Exception as e:
+            logger.error(f"Error placing Bitpanda order: {e}")
+            return None
+    
+    async def close_position(self, position_id: str) -> bool:
+        """Close an open position via Bitpanda"""
+        try:
+            url = f"{self.base_url}/account/orders/{position_id}"
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.delete(
+                    url, 
+                    headers=self._get_headers(),
+                    timeout=aiohttp.ClientTimeout(total=15)
+                ) as response:
+                    if response.status in [200, 204]:
+                        logger.info(f"✅ Bitpanda Position {position_id} closed")
+                        return True
+                    else:
+                        error_text = await response.text()
+                        logger.error(f"Bitpanda close failed {response.status}: {error_text}")
+                        return False
+        except Exception as e:
+            logger.error(f"Error closing Bitpanda position: {e}")
+            return False
+    
+    def disconnect(self):
+        """Disconnect from Bitpanda"""
+        self.connected = False
+        logger.info("Disconnected from Bitpanda")
+
+
+# Global Bitpanda connector instance
+_bitpanda_connector: Optional[BitpandaConnector] = None
+
+async def get_bitpanda_connector(api_key: str = None) -> BitpandaConnector:
+    """Get or create Bitpanda connector instance"""
+    global _bitpanda_connector
+    
+    # Use environment variable if not provided
+    if api_key is None:
+        api_key = os.environ.get('BITPANDA_API_KEY')
+    
+    if not api_key:
+        raise ValueError("Bitpanda API key not provided")
+    
+    if _bitpanda_connector is None:
+        _bitpanda_connector = BitpandaConnector(api_key)
+        await _bitpanda_connector.connect()
+    
+    return _bitpanda_connector
