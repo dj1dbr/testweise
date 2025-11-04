@@ -782,7 +782,7 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="mode">Trading Modus</Label>
+            <Label htmlFor="mode">Trading Plattform</Label>
             <select
               id="mode"
               className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md text-white"
@@ -790,9 +790,15 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
               onChange={(e) => setFormData({ ...formData, mode: e.target.value })}
               data-testid="mode-select"
             >
-              <option value="PAPER">Paper Trading (Simulation)</option>
-              <option value="MT5">MetaTrader 5 (Live)</option>
+              <option value="PAPER">📊 Paper Trading (Simulation)</option>
+              <option value="MT5">🔷 MetaTrader 5 (Rohstoffe)</option>
+              <option value="BITPANDA">🟢 Bitpanda (Krypto & Rohstoffe)</option>
             </select>
+            <p className="text-xs text-slate-500">
+              {formData.mode === 'PAPER' && 'Simuliertes Trading ohne echtes Geld'}
+              {formData.mode === 'MT5' && 'Echtes Trading über MetaTrader 5 - Traditionelle Rohstoffe'}
+              {formData.mode === 'BITPANDA' && 'Echtes Trading über Bitpanda - Kryptowährungen & Rohstoffe'}
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
