@@ -21,6 +21,7 @@ const Dashboard = () => {
   const [marketData, setMarketData] = useState(null);
   const [allMarkets, setAllMarkets] = useState({});  // All commodity markets
   const [commodities, setCommodities] = useState({}); // Commodity definitions
+  const [currentCommodityIndex, setCurrentCommodityIndex] = useState(0); // For carousel
   const [historicalData, setHistoricalData] = useState([]);
   const [trades, setTrades] = useState([]);
   const [stats, setStats] = useState(null);
