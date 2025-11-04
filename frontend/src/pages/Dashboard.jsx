@@ -945,8 +945,11 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
 
         {/* MT5 Settings */}
         {formData.mode === 'MT5' && (
-          <div className="space-y-4">
-            <h4 className="font-semibold text-lg">MetaTrader 5 Credentials</h4>
+          <div className="space-y-4 mt-6">
+            <h4 className="font-semibold text-lg flex items-center gap-2">
+              <span className="text-2xl">🔷</span>
+              MetaTrader 5 Credentials
+            </h4>
             <div className="space-y-2">
               <Label htmlFor="mt5_login">MT5 Login</Label>
               <Input
@@ -979,6 +982,41 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
                 className="bg-slate-800 border-slate-700"
                 placeholder="MT5 Server Adresse"
               />
+            </div>
+          </div>
+        )}
+
+        {/* Bitpanda Settings */}
+        {formData.mode === 'BITPANDA' && (
+          <div className="space-y-4 mt-6">
+            <h4 className="font-semibold text-lg flex items-center gap-2">
+              <span className="text-2xl">🟢</span>
+              Bitpanda Pro Credentials
+            </h4>
+            <div className="space-y-2">
+              <Label htmlFor="bitpanda_email">Bitpanda Email</Label>
+              <Input
+                id="bitpanda_email"
+                type="email"
+                value={formData.bitpanda_email || ''}
+                onChange={(e) => setFormData({ ...formData, bitpanda_email: e.target.value })}
+                className="bg-slate-800 border-slate-700"
+                placeholder="ihre.email@example.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bitpanda_api_key">Bitpanda API Key</Label>
+              <Input
+                id="bitpanda_api_key"
+                type="password"
+                value={formData.bitpanda_api_key || ''}
+                onChange={(e) => setFormData({ ...formData, bitpanda_api_key: e.target.value })}
+                className="bg-slate-800 border-slate-700"
+                placeholder="Ihr Bitpanda API Key"
+              />
+              <p className="text-xs text-slate-500">
+                Erstellen Sie einen API Key in Ihrem Bitpanda Pro Account unter Einstellungen → API Keys
+              </p>
             </div>
           </div>
         )}
