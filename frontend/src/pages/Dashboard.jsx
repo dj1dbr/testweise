@@ -212,6 +212,19 @@ const Dashboard = () => {
     }
   };
 
+  // Carousel navigation
+  const enabledCommodities = Object.keys(allMarkets);
+  const currentCommodityId = enabledCommodities[currentCommodityIndex];
+  const currentMarket = allMarkets[currentCommodityId];
+  
+  const nextCommodity = () => {
+    setCurrentCommodityIndex((prev) => (prev + 1) % enabledCommodities.length);
+  };
+  
+  const prevCommodity = () => {
+    setCurrentCommodityIndex((prev) => (prev - 1 + enabledCommodities.length) % enabledCommodities.length);
+  };
+
   const handleCloseTrade = async (tradeId) => {
     if (!marketData) return;
     
