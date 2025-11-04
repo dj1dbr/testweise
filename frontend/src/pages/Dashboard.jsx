@@ -323,7 +323,7 @@ const Dashboard = () => {
                 <DialogHeader>
                   <DialogTitle className="text-2xl">Trading Einstellungen</DialogTitle>
                 </DialogHeader>
-                <SettingsForm settings={settings} onSave={handleUpdateSettings} />
+                <SettingsForm settings={settings} onSave={handleUpdateSettings} commodities={commodities} balance={balance} />
               </DialogContent>
             </Dialog>
           </div>
