@@ -421,67 +421,97 @@ const Dashboard = () => {
           </div>
         </Card>
 
-        {/* Live Price & Signal Card */}
-        <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-slate-700/50 backdrop-blur-sm p-6 mb-8 shadow-2xl" data-testid="live-price-card">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-1">
-              <div className="flex items-center gap-2 mb-2">
-                <Activity className="w-5 h-5 text-cyan-400" />
-                <p className="text-sm text-slate-400">Live WTI Preis</p>
-                {autoRefresh && (
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                  </span>
-                )}
-              </div>
-              <h2 className="text-5xl font-bold mb-1" style={{ color: '#2dd4bf' }} data-testid="current-price">
-                ${marketData?.price?.toFixed(2) || '0.00'}
-              </h2>
-              <p className="text-xs text-slate-500">
-                {marketData?.timestamp ? new Date(marketData.timestamp).toLocaleString('de-DE') : ''}
-              </p>
-            </div>
+        {/* Commodity Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+          {Object.entries(allMarkets).map(([commodityId, market]) => {
+            const commodity = commodities[commodityId];
+            if (!commodity) return null;
             
-            <div className="md:col-span-1 flex flex-col justify-center">
-              <div className="text-center">
-                <p className="text-sm text-slate-400 mb-3">Aktuelles Signal</p>
-                <div className={`inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-slate-800/50 border-2 ${marketData?.signal === 'BUY' ? 'border-emerald-500/50' : marketData?.signal === 'SELL' ? 'border-rose-500/50' : 'border-slate-600/50'}`} data-testid="current-signal">
-                  <span className={getSignalColor(marketData?.signal)}>
-                    {getSignalIcon(marketData?.signal)}
-                  </span>
-                  <span className={`text-2xl font-bold ${getSignalColor(marketData?.signal)}`}>
-                    {marketData?.signal || 'HOLD'}
-                  </span>
+            return (
+              <Card key={commodityId} className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-slate-700/50 backdrop-blur-sm p-6 shadow-2xl" data-testid={`commodity-card-${commodityId}`}>
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Activity className="w-5 h-5 text-cyan-400" />
+                      <h3 className="text-lg font-semibold text-slate-200">{commodity.name}</h3>
+                    </div>
+                    {autoRefresh && (
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-500">{commodity.category}</p>
                 </div>
-                <p className="text-xs text-slate-500 mt-2">
-                  Trend: <span className={marketData?.trend === 'UP' ? 'text-emerald-400' : marketData?.trend === 'DOWN' ? 'text-rose-400' : 'text-slate-400'}>{marketData?.trend || 'NEUTRAL'}</span>
+                
+                <div className="mb-4">
+                  <h2 className="text-3xl font-bold mb-1" style={{ color: '#2dd4bf' }} data-testid={`price-${commodityId}`}>
+                    ${market.price?.toFixed(2) || '0.00'}
+                  </h2>
+                  <p className="text-xs text-slate-500">{commodity.unit}</p>
+                </div>
+                
+                <div className="mb-4">
+                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800/50 border ${market.signal === 'BUY' ? 'border-emerald-500/50' : market.signal === 'SELL' ? 'border-rose-500/50' : 'border-slate-600/50'}`}>
+                    <span className={getSignalColor(market.signal)}>
+                      {getSignalIcon(market.signal)}
+                    </span>
+                    <span className={`text-lg font-bold ${getSignalColor(market.signal)}`}>
+                      {market.signal || 'HOLD'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2">
+                    Trend: <span className={market.trend === 'UP' ? 'text-emerald-400' : market.trend === 'DOWN' ? 'text-rose-400' : 'text-slate-400'}>{market.trend || 'NEUTRAL'}</span>
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="bg-slate-800/50 p-2 rounded">
+                    <span className="text-slate-400">RSI:</span> <span className="text-slate-200 font-medium">{market.rsi?.toFixed(1) || 'N/A'}</span>
+                  </div>
+                  <div className="bg-slate-800/50 p-2 rounded">
+                    <span className="text-slate-400">MACD:</span> <span className="text-slate-200 font-medium">{market.macd?.toFixed(2) || 'N/A'}</span>
+                  </div>
+                </div>
+                
+                <div className="mt-4 flex gap-2">
+                  <Button
+                    onClick={() => handleManualTrade('BUY', commodityId)}
+                    size="sm"
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white"
+                  >
+                    <TrendingUp className="w-3 h-3 mr-1" />
+                    KAUFEN
+                  </Button>
+                  <Button
+                    onClick={() => handleManualTrade('SELL', commodityId)}
+                    size="sm"
+                    className="flex-1 bg-rose-600 hover:bg-rose-500 text-white"
+                  >
+                    <TrendingDown className="w-3 h-3 mr-1" />
+                    VERKAUFEN
+                  </Button>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+        
+        {/* Portfolio Exposure Warning */}
+        {totalExposure > (balance * 0.2) && (
+          <Card className="bg-amber-900/20 border-amber-500/50 p-4 mb-8">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-6 h-6 text-amber-400" />
+              <div>
+                <h4 className="font-semibold text-amber-400">Portfolio-Risiko-Warnung</h4>
+                <p className="text-sm text-slate-300">
+                  Aktuelle Exposition: {totalExposure.toFixed(2)} EUR ({((totalExposure / balance) * 100).toFixed(1)}%) - Empfohlen max. 20%
                 </p>
               </div>
             </div>
-
-            <div className="md:col-span-1 flex flex-col justify-center">
-              <div className="space-y-3">
-                <Button
-                  onClick={() => handleManualTrade('BUY')}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3"
-                  data-testid="manual-buy-button"
-                >
-                  <TrendingUp className="w-4 h-4 mr-2" />
-                  Manuell KAUFEN
-                </Button>
-                <Button
-                  onClick={() => handleManualTrade('SELL')}
-                  className="w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold py-3"
-                  data-testid="manual-sell-button"
-                >
-                  <TrendingDown className="w-4 h-4 mr-2" />
-                  Manuell VERKAUFEN
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
