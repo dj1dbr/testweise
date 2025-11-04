@@ -272,23 +272,57 @@ class TradeStats(BaseModel):
     losing_trades: int
 
 # Helper Functions
-def fetch_wti_data():
-    """Fetch WTI crude oil data from Yahoo Finance"""
+def fetch_commodity_data(commodity_id: str):
+    """Fetch commodity data from Yahoo Finance"""
     try:
-        # CL=F is WTI Crude Oil Futures
-        ticker = yf.Ticker("CL=F")
+        if commodity_id not in COMMODITIES:
+            logger.error(f"Unknown commodity: {commodity_id}")
+            return None
+            
+        commodity = COMMODITIES[commodity_id]
+        ticker = yf.Ticker(commodity["symbol"])
         
         # Get historical data for the last 100 days with 1-hour intervals
         hist = ticker.history(period="100d", interval="1h")
         
         if hist.empty:
-            logger.error("No data received from Yahoo Finance")
+            logger.error(f"No data received for {commodity['name']}")
             return None
             
         return hist
     except Exception as e:
-        logger.error(f"Error fetching WTI data: {e}")
+        logger.error(f"Error fetching {commodity_id} data: {e}")
         return None
+
+async def calculate_position_size(balance: float, price: float, max_risk_percent: float = 20.0) -> float:
+    """Calculate position size ensuring max 20% portfolio risk"""
+    try:
+        # Get all open positions
+        open_trades = await db.trades.find({"status": "OPEN"}).to_list(100)
+        
+        # Calculate total exposure from open positions
+        total_exposure = sum([trade.get('entry_price', 0) * trade.get('quantity', 0) for trade in open_trades])
+        
+        # Calculate available capital (20% of balance minus current exposure)
+        max_portfolio_value = balance * (max_risk_percent / 100)
+        available_capital = max(0, max_portfolio_value - total_exposure)
+        
+        # Calculate lot size (simple division, can be refined based on commodity)
+        if available_capital > 0 and price > 0:
+            lot_size = round(available_capital / price, 2)
+        else:
+            lot_size = 0.0
+            
+        logger.info(f"Position size calculated: {lot_size} (Balance: {balance}, Price: {price}, Exposure: {total_exposure}/{max_portfolio_value})")
+        
+        return lot_size
+    except Exception as e:
+        logger.error(f"Error calculating position size: {e}")
+        return 0.0
+
+def fetch_wti_data():
+    """Fetch WTI crude oil data - backward compatibility"""
+    return fetch_commodity_data("WTI_CRUDE")
 
 def calculate_indicators(df):
     """Calculate technical indicators"""
