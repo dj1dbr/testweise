@@ -581,11 +581,11 @@ async def process_commodity_market_data(commodity_id: str, settings):
     except Exception as e:
         logger.error(f"Error processing {commodity_id} market data: {e}")
 
-async def execute_trade_logic(signal, price, settings):
+async def execute_trade_logic(signal, price, settings, commodity_id='WTI_CRUDE'):
     """Execute trade based on signal"""
     try:
-        # Check for open positions
-        open_trades = await db.trades.find({"status": "OPEN"}).to_list(100)
+        # Check for open positions for this commodity
+        open_trades = await db.trades.find({"status": "OPEN", "commodity": commodity_id}).to_list(100)
         
         if signal == "BUY" and len([t for t in open_trades if t['type'] == 'BUY']) == 0:
             # Open BUY position
@@ -593,6 +593,7 @@ async def execute_trade_logic(signal, price, settings):
             take_profit = price * (1 + settings.get('take_profit_percent', 4.0) / 100)
             
             trade = Trade(
+                commodity=commodity_id,
                 type="BUY",
                 price=price,
                 quantity=settings.get('position_size', 1.0),
@@ -606,7 +607,7 @@ async def execute_trade_logic(signal, price, settings):
             doc = trade.model_dump()
             doc['timestamp'] = doc['timestamp'].isoformat()
             await db.trades.insert_one(doc)
-            logger.info(f"BUY trade executed at {price}")
+            logger.info(f"{commodity_id}: BUY trade executed at {price}")
             
         elif signal == "SELL" and len([t for t in open_trades if t['type'] == 'BUY']) > 0:
             # Close BUY position
@@ -622,9 +623,9 @@ async def execute_trade_logic(signal, price, settings):
                             "closed_at": datetime.now(timezone.utc).isoformat()
                         }}
                     )
-                    logger.info(f"Position closed at {price}, P/L: {profit_loss}")
+                    logger.info(f"{commodity_id}: Position closed at {price}, P/L: {profit_loss}")
     except Exception as e:
-        logger.error(f"Error executing trade: {e}")
+        logger.error(f"Error executing trade for {commodity_id}: {e}")
 
 def reset_trade_count():
     """Reset hourly trade count"""
