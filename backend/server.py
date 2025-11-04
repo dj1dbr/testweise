@@ -18,6 +18,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import asyncio
 from threading import Thread
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+from commodity_processor import COMMODITIES, fetch_commodity_data, calculate_indicators, generate_signal, calculate_position_size
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
