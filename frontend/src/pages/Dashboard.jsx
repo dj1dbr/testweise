@@ -256,16 +256,29 @@ const Dashboard = () => {
       toast.success('Einstellungen gespeichert');
       setSettingsOpen(false);
       
-      // Reload MT5 data if mode changed to MT5
+      // Reload balance based on platform
       if (newSettings.mode === 'MT5') {
         await fetchMT5Account();
+      } else if (newSettings.mode === 'BITPANDA') {
+        await fetchBitpandaAccount();
       } else {
-        // Reset to paper trading balance
+        // Paper trading - calculate from stats
         await fetchStats();
         updateBalance();
       }
     } catch (error) {
       toast.error('Fehler beim Speichern');
+    }
+  };
+  
+  const fetchBitpandaAccount = async () => {
+    try {
+      // TODO: Implement Bitpanda account endpoint
+      // For now, set a placeholder
+      setBalance(0);
+      toast.info('Bitpanda Integration - Coming Soon');
+    } catch (error) {
+      console.error('Error fetching Bitpanda account:', error);
     }
   };
 
