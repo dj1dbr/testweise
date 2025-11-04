@@ -183,12 +183,31 @@ def init_ai_chat(provider="emergent", api_key=None, model="gpt-5", ollama_base_u
         logger.error(f"Failed to initialize AI chat: {e}")
         return None
 
+# Commodity definitions
+COMMODITIES = {
+    "WTI_CRUDE": {"name": "WTI Crude Oil", "symbol": "CL=F", "mt5_symbol": "USOIL", "category": "Energie"},
+    "BRENT_CRUDE": {"name": "Brent Crude Oil", "symbol": "BZ=F", "mt5_symbol": "UKOIL", "category": "Energie"},
+    "GOLD": {"name": "Gold", "symbol": "GC=F", "mt5_symbol": "XAUUSD", "category": "Edelmetalle"},
+    "SILVER": {"name": "Silber", "symbol": "SI=F", "mt5_symbol": "XAGUSD", "category": "Edelmetalle"},
+    "PLATINUM": {"name": "Platin", "symbol": "PL=F", "mt5_symbol": "XPTUSD", "category": "Edelmetalle"},
+    "PALLADIUM": {"name": "Palladium", "symbol": "PA=F", "mt5_symbol": "XPDUSD", "category": "Edelmetalle"},
+    "COPPER": {"name": "Kupfer", "symbol": "HG=F", "mt5_symbol": "COPPER", "category": "Industriemetalle"},
+    "ALUMINUM": {"name": "Aluminium", "symbol": "ALI=F", "mt5_symbol": "ALUMINUM", "category": "Industriemetalle"},
+    "NATURAL_GAS": {"name": "Natural Gas", "symbol": "NG=F", "mt5_symbol": "NATURALGAS", "category": "Energie"},
+    "HEATING_OIL": {"name": "Heizöl", "symbol": "HO=F", "mt5_symbol": "HEATINGOIL", "category": "Energie"},
+    "WHEAT": {"name": "Weizen", "symbol": "ZW=F", "mt5_symbol": "WHEAT", "category": "Agrar"},
+    "CORN": {"name": "Mais", "symbol": "ZC=F", "mt5_symbol": "CORN", "category": "Agrar"},
+    "SOYBEANS": {"name": "Sojabohnen", "symbol": "ZS=F", "mt5_symbol": "SOYBEANS", "category": "Agrar"},
+    "COFFEE": {"name": "Kaffee", "symbol": "KC=F", "mt5_symbol": "COFFEE", "category": "Agrar"}
+}
+
 # Models
 class MarketData(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    commodity: str = "WTI_CRUDE"  # Commodity identifier
     price: float
     volume: Optional[float] = None
     sma_20: Optional[float] = None
@@ -205,6 +224,7 @@ class Trade(BaseModel):
     
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    commodity: str = "WTI_CRUDE"  # Commodity identifier
     type: Literal["BUY", "SELL"]
     price: float
     quantity: float = 1.0
@@ -236,6 +256,8 @@ class TradingSettings(BaseModel):
     take_profit_percent: float = 4.0
     max_trades_per_hour: int = 3
     position_size: float = 1.0
+    max_portfolio_risk_percent: float = 20.0  # Max 20% of balance for all open positions
+    enabled_commodities: List[str] = ["WTI_CRUDE"]  # List of enabled commodity IDs
     mt5_login: Optional[str] = None
     mt5_password: Optional[str] = None
     mt5_server: Optional[str] = None
