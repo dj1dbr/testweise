@@ -814,6 +814,47 @@ const SettingsForm = ({ settings, onSave }) => {
           </div>
         </div>
 
+        {/* Commodity Selection */}
+        <div className="space-y-4 mt-6">
+          <h4 className="font-semibold text-lg">Rohstoff-Auswahl</h4>
+          <p className="text-sm text-slate-400">Wählen Sie die Rohstoffe aus, die gehandelt werden sollen:</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Object.entries(commodities).map(([id, commodity]) => (
+              <div key={id} className="flex items-center space-x-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                <input
+                  type="checkbox"
+                  id={`commodity_${id}`}
+                  checked={formData.enabled_commodities?.includes(id) || false}
+                  onChange={(e) => {
+                    const enabled = formData.enabled_commodities || ['WTI_CRUDE'];
+                    if (e.target.checked) {
+                      setFormData({ ...formData, enabled_commodities: [...enabled, id] });
+                    } else {
+                      setFormData({ ...formData, enabled_commodities: enabled.filter(c => c !== id) });
+                    }
+                  }}
+                  className="w-4 h-4 text-emerald-600 bg-slate-700 border-slate-600 rounded focus:ring-emerald-500"
+                />
+                <label htmlFor={`commodity_${id}`} className="flex-1 cursor-pointer">
+                  <div className="font-medium text-slate-200">{commodity.name}</div>
+                  <div className="text-xs text-slate-500">{commodity.category} • {commodity.unit}</div>
+                </label>
+              </div>
+            ))}
+          </div>
+          
+          <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+            <div className="flex items-center gap-2 text-amber-400 mb-2">
+              <AlertCircle className="w-4 h-4" />
+              <span className="font-medium">Portfolio-Risiko</span>
+            </div>
+            <p className="text-sm text-slate-400">
+              Max. 20% des Gesamtguthabens ({(balance * 0.2).toFixed(2)} EUR) für alle offenen Positionen zusammen
+            </p>
+          </div>
+        </div>
+
         {/* MT5 Settings */}
         {formData.mode === 'MT5' && (
           <div className="space-y-4">
