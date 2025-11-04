@@ -136,6 +136,12 @@ const Dashboard = () => {
     try {
       const response = await axios.get(`${API}/trades/list`);
       setTrades(response.data.trades || []);
+      // Calculate exposure after loading trades
+      const openTrades = (response.data.trades || []).filter(t => t.status === 'OPEN');
+      const exposure = openTrades.reduce((sum, trade) => {
+        return sum + (trade.entry_price * trade.quantity);
+      }, 0);
+      setTotalExposure(exposure);
     } catch (error) {
       console.error('Error fetching trades:', error);
     }
