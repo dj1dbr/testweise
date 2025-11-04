@@ -273,12 +273,17 @@ const Dashboard = () => {
   
   const fetchBitpandaAccount = async () => {
     try {
-      // TODO: Implement Bitpanda account endpoint
-      // For now, set a placeholder
-      setBalance(0);
-      toast.info('Bitpanda Integration - Coming Soon');
+      const response = await axios.get(`${API}/bitpanda/account`);
+      setMt5Account(response.data); // Use same state for unified handling
+      setMt5Connected(true);
+      // Update balance with Bitpanda data
+      if (settings?.mode === 'BITPANDA') {
+        setBalance(response.data.balance);
+      }
     } catch (error) {
       console.error('Error fetching Bitpanda account:', error);
+      setMt5Connected(false);
+      toast.error('Bitpanda Verbindung fehlgeschlagen - Prüfen Sie API Key');
     }
   };
 
