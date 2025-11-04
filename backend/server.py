@@ -804,30 +804,20 @@ async def place_mt5_order(
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/mt5/close/{ticket}")
-async def close_mt5_position(ticket: int):
-    """Close position on MT5"""
+async def close_mt5_position(ticket: str):
+    """Close position on MetaAPI"""
     try:
-        settings = await db.trading_settings.find_one({"id": "trading_settings"})
-        if not settings or not settings.get('mt5_login'):
-            raise HTTPException(status_code=400, detail="MT5 credentials not configured")
+        from metaapi_connector import get_metaapi_connector
         
-        from mt5_connector import get_mt5_connector
-        
-        connector = await get_mt5_connector(
-            login=settings['mt5_login'],
-            password=settings['mt5_password'],
-            server=settings['mt5_server']
-        )
-        
+        connector = await get_metaapi_connector()
         success = await connector.close_position(ticket)
+        
         if not success:
-            raise HTTPException(status_code=500, detail="Failed to close position on MT5")
+            raise HTTPException(status_code=500, detail="Failed to close position on MetaAPI")
         
         return {"success": True, "ticket": ticket}
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"Error closing MT5 position: {e}")
+        logger.error(f"Error closing MetaAPI position: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/mt5/status")
