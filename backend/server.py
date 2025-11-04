@@ -822,36 +822,23 @@ async def close_mt5_position(ticket: str):
 
 @api_router.get("/mt5/status")
 async def get_mt5_status():
-    """Check MT5 connection status"""
+    """Check MetaAPI connection status"""
     try:
-        settings = await db.trading_settings.find_one({"id": "trading_settings"})
-        if not settings or not settings.get('mt5_login'):
-            return {
-                "connected": False,
-                "message": "MT5 credentials not configured"
-            }
+        from metaapi_connector import get_metaapi_connector
         
-        from mt5_connector import get_mt5_connector
-        
-        connector = await get_mt5_connector(
-            login=settings['mt5_login'],
-            password=settings['mt5_password'],
-            server=settings['mt5_server']
-        )
-        
+        connector = await get_metaapi_connector()
         account_info = await connector.get_account_info()
         
         return {
             "connected": connector.connected,
-            "mt5_available": connector.mt5_available,
-            "mode": "DIRECT" if connector.mt5_available else "REST_API/MOCK",
-            "server": settings['mt5_server'],
-            "login": settings['mt5_login'],
+            "mode": "METAAPI_REST",
+            "account_id": connector.account_id,
             "balance": account_info.get('balance') if account_info else None,
-            "trade_mode": account_info.get('trade_mode') if account_info else None
+            "trade_mode": account_info.get('trade_mode') if account_info else None,
+            "broker": account_info.get('broker') if account_info else None
         }
     except Exception as e:
-        logger.error(f"Error checking MT5 status: {e}")
+        logger.error(f"Error checking MetaAPI status: {e}")
         return {
             "connected": False,
             "error": str(e)
