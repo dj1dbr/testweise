@@ -193,14 +193,19 @@ const Dashboard = () => {
     setRefreshing(false);
   };
 
-  const handleManualTrade = async (type) => {
-    if (!marketData) return;
+  const handleManualTrade = async (type, commodityId = 'WTI_CRUDE') => {
+    const market = commodityId ? allMarkets[commodityId] : marketData;
+    if (!market) {
+      toast.error('Marktdaten nicht verfügbar');
+      return;
+    }
     
     try {
-      await axios.post(`${API}/trades/execute?trade_type=${type}&price=${marketData.price}&quantity=1`);
-      toast.success(`${type} Order ausgeführt`);
+      await axios.post(`${API}/trades/execute?trade_type=${type}&price=${market.price}&quantity=1&commodity=${commodityId}`);
+      toast.success(`${type} Order für ${commodities[commodityId]?.name || commodityId} ausgeführt`);
       fetchTrades();
       fetchStats();
+      fetchAllMarkets();
     } catch (error) {
       toast.error('Fehler beim Ausführen der Order');
     }
