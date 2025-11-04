@@ -244,7 +244,7 @@ class TradingSettings(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
     id: str = "trading_settings"
-    mode: Literal["PAPER", "MT5"] = "PAPER"
+    mode: Literal["PAPER", "MT5", "BITPANDA"] = "PAPER"
     auto_trading: bool = False
     use_ai_analysis: bool = True  # Enable AI analysis
     ai_provider: Literal["emergent", "openai", "gemini", "anthropic", "ollama"] = "emergent"
@@ -262,9 +262,15 @@ class TradingSettings(BaseModel):
     position_size: float = 1.0
     max_portfolio_risk_percent: float = 20.0  # Max 20% of balance for all open positions
     enabled_commodities: List[str] = ["WTI_CRUDE"]  # List of enabled commodity IDs
+    
+    # MT5 Credentials
     mt5_login: Optional[str] = None
     mt5_password: Optional[str] = None
     mt5_server: Optional[str] = None
+    
+    # Bitpanda Credentials
+    bitpanda_api_key: Optional[str] = None
+    bitpanda_email: Optional[str] = None
 
 class TradeStats(BaseModel):
     total_trades: int
