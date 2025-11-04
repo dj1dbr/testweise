@@ -19,6 +19,8 @@ const API = `${BACKEND_URL}/api`;
 
 const Dashboard = () => {
   const [marketData, setMarketData] = useState(null);
+  const [allMarkets, setAllMarkets] = useState({});  // All commodity markets
+  const [commodities, setCommodities] = useState({}); // Commodity definitions
   const [historicalData, setHistoricalData] = useState([]);
   const [trades, setTrades] = useState([]);
   const [stats, setStats] = useState(null);
@@ -26,6 +28,7 @@ const Dashboard = () => {
   const [balance, setBalance] = useState(10000); // Simulated balance
   const [mt5Account, setMt5Account] = useState(null); // Real MT5 account data
   const [mt5Connected, setMt5Connected] = useState(false);
+  const [totalExposure, setTotalExposure] = useState(0); // Total exposure for 20% limit
   const [gpt5Active, setGpt5Active] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
