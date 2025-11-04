@@ -598,8 +598,8 @@ const Dashboard = () => {
   );
 };
 
-const SettingsForm = ({ settings, onSave }) => {
-  const [formData, setFormData] = useState(settings || {});
+const SettingsForm = ({ settings, onSave, commodities, balance }) => {
+  const [formData, setFormData] = useState(settings || { enabled_commodities: ['WTI_CRUDE'] });
 
   const handleSubmit = (e) => {
     e.preventDefault();
