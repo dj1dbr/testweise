@@ -56,6 +56,8 @@ const Dashboard = () => {
   const fetchAllData = async () => {
     setLoading(true);
     await Promise.all([
+      fetchCommodities(),
+      fetchAllMarkets(),
       refreshMarketData(), // Use refresh instead of just fetching cached data
       fetchHistoricalData(),
       fetchTrades(),
@@ -64,6 +66,29 @@ const Dashboard = () => {
       fetchMT5Account() // Fetch real MT5 account data
     ]);
     setLoading(false);
+  };
+
+  const fetchCommodities = async () => {
+    try {
+      const response = await axios.get(`${API}/commodities`);
+      setCommodities(response.data.commodities || {});
+    } catch (error) {
+      console.error('Error fetching commodities:', error);
+    }
+  };
+
+  const fetchAllMarkets = async () => {
+    try {
+      const response = await axios.get(`${API}/market/all`);
+      setAllMarkets(response.data.markets || {});
+      // Calculate total exposure
+      const exposure = Object.values(response.data.markets || {}).reduce((sum, market) => {
+        return sum + (market.price || 0);
+      }, 0);
+      setTotalExposure(exposure);
+    } catch (error) {
+      console.error('Error fetching all markets:', error);
+    }
   };
 
   const fetchMarketData = async () => {
