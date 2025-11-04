@@ -48,12 +48,17 @@ const Dashboard = () => {
         fetchTrades();
         fetchStats();
         updateBalance();
-        fetchMT5Account(); // Fetch real MT5 data
+        // Fetch account data based on mode
+        if (settings?.mode === 'MT5') {
+          fetchMT5Account();
+        } else if (settings?.mode === 'BITPANDA') {
+          fetchBitpandaAccount();
+        }
       }
     }, 10000);  // Every 10 seconds
 
     return () => clearInterval(liveInterval);
-  }, [autoRefresh]);
+  }, [autoRefresh, settings?.mode]);
 
   const fetchAllData = async () => {
     setLoading(true);
