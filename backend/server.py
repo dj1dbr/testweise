@@ -975,6 +975,70 @@ async def get_mt5_account():
         logger.error(f"Error getting MetaAPI account: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Bitpanda Integration Endpoints
+@api_router.get("/bitpanda/account")
+async def get_bitpanda_account():
+    """Get Bitpanda account information"""
+    try:
+        from bitpanda_connector import get_bitpanda_connector
+        
+        # Get API key from settings or environment
+        settings = await db.trading_settings.find_one({"id": "trading_settings"})
+        api_key = settings.get('bitpanda_api_key') if settings else None
+        
+        if not api_key:
+            api_key = os.environ.get('BITPANDA_API_KEY')
+        
+        if not api_key:
+            raise HTTPException(status_code=400, detail="Bitpanda API Key not configured")
+        
+        connector = await get_bitpanda_connector(api_key)
+        account_info = await connector.get_account_info()
+        
+        if not account_info:
+            raise HTTPException(status_code=503, detail="Failed to get Bitpanda account info")
+        
+        return account_info
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error getting Bitpanda account: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/bitpanda/status")
+async def get_bitpanda_status():
+    """Check Bitpanda connection status"""
+    try:
+        settings = await db.trading_settings.find_one({"id": "trading_settings"})
+        api_key = settings.get('bitpanda_api_key') if settings else None
+        
+        if not api_key:
+            api_key = os.environ.get('BITPANDA_API_KEY')
+        
+        if not api_key:
+            return {
+                "connected": False,
+                "message": "Bitpanda API Key not configured"
+            }
+        
+        from bitpanda_connector import get_bitpanda_connector
+        
+        connector = await get_bitpanda_connector(api_key)
+        account_info = await connector.get_account_info()
+        
+        return {
+            "connected": connector.connected,
+            "mode": "BITPANDA_REST",
+            "balance": account_info.get('balance') if account_info else None,
+            "email": settings.get('bitpanda_email') if settings else None
+        }
+    except Exception as e:
+        logger.error(f"Error checking Bitpanda status: {e}")
+        return {
+            "connected": False,
+            "error": str(e)
+        }
+
 @api_router.get("/mt5/positions")
 async def get_mt5_positions():
     """Get open positions from MetaAPI"""
