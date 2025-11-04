@@ -591,7 +591,57 @@ def run_async_task():
 # API Endpoints
 @api_router.get("/")
 async def root():
-    return {"message": "WTI Smart Trader API"}
+    return {"message": "Rohstoff Trader API"}
+
+@api_router.get("/commodities")
+async def get_commodities():
+    """Get list of all available commodities"""
+    return {"commodities": COMMODITIES}
+
+@api_router.get("/market/current")
+async def get_current_market(commodity: str = "WTI_CRUDE"):
+    """Get current market data for a specific commodity"""
+    if commodity not in COMMODITIES:
+        raise HTTPException(status_code=400, detail=f"Unknown commodity: {commodity}")
+    
+    # Check if commodity is enabled
+    settings = await db.trading_settings.find_one({"id": "trading_settings"})
+    if settings and commodity not in settings.get('enabled_commodities', ["WTI_CRUDE"]):
+        raise HTTPException(status_code=403, detail=f"Commodity {commodity} is not enabled")
+    
+    # Fetch latest data from database
+    market_data = await db.market_data.find_one(
+        {"commodity": commodity},
+        sort=[("timestamp", -1)]
+    )
+    
+    if not market_data:
+        raise HTTPException(status_code=503, detail=f"Market data not available for {commodity}")
+    
+    market_data.pop('_id', None)
+    return market_data
+
+@api_router.get("/market/all")
+async def get_all_markets():
+    """Get current market data for all enabled commodities"""
+    try:
+        settings = await db.trading_settings.find_one({"id": "trading_settings"})
+        enabled = settings.get('enabled_commodities', ["WTI_CRUDE"]) if settings else ["WTI_CRUDE"]
+        
+        results = {}
+        for commodity_id in enabled:
+            market_data = await db.market_data.find_one(
+                {"commodity": commodity_id},
+                {"_id": 0},
+                sort=[("timestamp", -1)]
+            )
+            if market_data:
+                results[commodity_id] = market_data
+        
+        return {"markets": results, "enabled_commodities": enabled}
+    except Exception as e:
+        logger.error(f"Error fetching all markets: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/market/current", response_model=MarketData)
 async def get_current_market():
