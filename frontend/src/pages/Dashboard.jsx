@@ -822,6 +822,44 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
             </div>
           </div>
 
+          {/* Trailing Stop Settings */}
+          <div className="space-y-4 mt-6">
+            <div className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+              <div className="flex-1">
+                <Label htmlFor="trailing_stop" className="text-base font-semibold">Trailing Stop aktivieren</Label>
+                <p className="text-sm text-slate-400 mt-1">
+                  Stop Loss folgt automatisch dem Preis und sichert Gewinne ab
+                </p>
+              </div>
+              <Switch
+                id="trailing_stop"
+                checked={formData.use_trailing_stop || false}
+                onCheckedChange={(checked) => setFormData({ ...formData, use_trailing_stop: checked })}
+                className="data-[state=checked]:bg-emerald-600"
+              />
+            </div>
+
+            {formData.use_trailing_stop && (
+              <div className="space-y-2 pl-4">
+                <Label htmlFor="trailing_distance">Trailing Stop Distanz (%)</Label>
+                <Input
+                  id="trailing_distance"
+                  type="number"
+                  step="0.1"
+                  min="0.5"
+                  max="10"
+                  value={formData.trailing_stop_distance || 1.5}
+                  onChange={(e) => setFormData({ ...formData, trailing_stop_distance: parseFloat(e.target.value) })}
+                  className="bg-slate-800 border-slate-700"
+                  placeholder="z.B. 1.5"
+                />
+                <p className="text-xs text-slate-500">
+                  Stop Loss hält {formData.trailing_stop_distance || 1.5}% Abstand zum aktuellen Preis
+                </p>
+              </div>
+            )}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="max_trades">Max. Trades pro Stunde</Label>
             <Input
