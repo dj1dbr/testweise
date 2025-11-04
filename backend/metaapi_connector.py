@@ -16,7 +16,8 @@ class MetaAPIConnector:
     def __init__(self, account_id: str, token: str):
         self.account_id = account_id
         self.token = token
-        self.base_url = "https://mt-client-api-v1.agiliumtrade.agiliumtrade.ai"
+        # Correct MetaAPI base URL
+        self.base_url = "https://mt-client-api-v1.new-york.agiliumtrade.ai"
         self.connected = False
         self.balance = 0.0
         self.equity = 0.0
