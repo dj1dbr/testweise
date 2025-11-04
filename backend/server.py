@@ -390,7 +390,7 @@ def generate_signal(latest_data):
         logger.error(f"Error generating signal: {e}")
         return "HOLD", "NEUTRAL"
 
-async def get_ai_analysis(market_data: dict, df: pd.DataFrame) -> dict:
+async def get_ai_analysis(market_data: dict, df: pd.DataFrame, commodity_id: str = 'WTI_CRUDE') -> dict:
     """Get AI analysis for trading decision"""
     global ai_chat
     
@@ -399,11 +399,14 @@ async def get_ai_analysis(market_data: dict, df: pd.DataFrame) -> dict:
         return None
     
     try:
+        # Get commodity name
+        commodity_name = COMMODITIES.get(commodity_id, {}).get('name', commodity_id)
+        
         # Prepare market context
         latest = df.iloc[-1]
         last_5 = df.tail(5)
         
-        analysis_prompt = f"""Analyze the following WTI crude oil market data and provide a trading recommendation:
+        analysis_prompt = f"""Analyze the following {commodity_name} market data and provide a trading recommendation:
 
 **Current Market Data:**
 - Price: ${latest['Close']:.2f}
@@ -437,8 +440,7 @@ Provide your trading recommendation in JSON format."""
             json_str = response_text[json_start:json_end]
             ai_recommendation = json.loads(json_str)
             
-            logger.info(f"AI Recommendation: {ai_recommendation.get('signal')} (Confidence: {ai_recommendation.get('confidence')}%)")
-            logger.info(f"AI Reasoning: {ai_recommendation.get('reasoning')}")
+            logger.info(f"{commodity_id} AI: {ai_recommendation.get('signal')} (Confidence: {ai_recommendation.get('confidence')}%)")
             
             return ai_recommendation
         else:
@@ -446,7 +448,7 @@ Provide your trading recommendation in JSON format."""
             return None
             
     except Exception as e:
-        logger.error(f"Error getting AI analysis: {e}")
+        logger.error(f"Error getting AI analysis for {commodity_id}: {e}")
         return None
 
 async def process_market_data():
