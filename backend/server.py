@@ -450,15 +450,67 @@ Provide your trading recommendation in JSON format."""
         return None
 
 async def process_market_data():
-    """Background task to fetch and process market data"""
+    """Background task to fetch and process market data for ALL enabled commodities"""
     global latest_market_data, auto_trading_enabled, trade_count_per_hour
     
     try:
-        logger.info("Fetching WTI market data...")
-        df = fetch_wti_data()
+        # Get settings to check enabled commodities
+        settings = await db.trading_settings.find_one({"id": "trading_settings"})
+        enabled_commodities = settings.get('enabled_commodities', ['WTI_CRUDE']) if settings else ['WTI_CRUDE']
+        
+        logger.info(f"Fetching market data for {len(enabled_commodities)} commodities: {enabled_commodities}")
+        
+        # Process each enabled commodity
+        for commodity_id in enabled_commodities:
+            try:
+                await process_commodity_market_data(commodity_id, settings)
+            except Exception as e:
+                logger.error(f"Error processing {commodity_id}: {e}")
+                continue
+        
+        # Update trailing stops for all commodities
+        if settings and settings.get('use_trailing_stop', False):
+            current_prices = {}
+            for commodity_id in enabled_commodities:
+                market_data = await db.market_data.find_one(
+                    {"commodity": commodity_id},
+                    sort=[("timestamp", -1)]
+                )
+                if market_data:
+                    current_prices[commodity_id] = market_data['price']
+            
+            await update_trailing_stops(db, current_prices, settings)
+            
+            # Check for stop loss triggers
+            trades_to_close = await check_stop_loss_triggers(db, current_prices)
+            for trade_info in trades_to_close:
+                await db.trades.update_one(
+                    {"id": trade_info['id']},
+                    {
+                        "$set": {
+                            "status": "CLOSED",
+                            "exit_price": trade_info['exit_price'],
+                            "closed_at": datetime.now(timezone.utc),
+                            "strategy_signal": trade_info['reason']
+                        }
+                    }
+                )
+                logger.info(f"Position auto-closed: {trade_info['reason']}")
+        
+        logger.info("Market data processing complete for all commodities")
+        
+    except Exception as e:
+        logger.error(f"Error processing market data: {e}")
+
+
+async def process_commodity_market_data(commodity_id: str, settings):
+    """Process market data for a specific commodity"""
+    try:
+        logger.info(f"Fetching {commodity_id} market data...")
+        df = fetch_commodity_data(commodity_id)
         
         if df is None or df.empty:
-            logger.error("Failed to fetch market data")
+            logger.warning(f"No data available for {commodity_id}")
             return
         
         # Calculate indicators
@@ -471,7 +523,6 @@ async def process_market_data():
         signal, trend = generate_signal(latest)
         
         # Get AI analysis if enabled
-        settings = await db.trading_settings.find_one({"id": "trading_settings"})
         use_ai = settings.get('use_ai_analysis', True) if settings else True
         
         ai_signal = None
@@ -479,7 +530,7 @@ async def process_market_data():
         ai_reasoning = None
         
         if use_ai and ai_chat:
-            ai_analysis = await get_ai_analysis(latest.to_dict(), df)
+            ai_analysis = await get_ai_analysis(latest.to_dict(), df, commodity_id)
             if ai_analysis:
                 ai_signal = ai_analysis.get('signal', signal)
                 ai_confidence = ai_analysis.get('confidence', 0)
@@ -488,12 +539,13 @@ async def process_market_data():
                 # Use AI signal if confidence is high enough
                 if ai_confidence >= 60:
                     signal = ai_signal
-                    logger.info(f"Using AI signal: {signal} (Confidence: {ai_confidence}%)")
+                    logger.info(f"{commodity_id}: Using AI signal: {signal} (Confidence: {ai_confidence}%)")
                 else:
-                    logger.info(f"AI confidence too low ({ai_confidence}%), using technical signal: {signal}")
+                    logger.info(f"{commodity_id}: AI confidence too low ({ai_confidence}%), using technical signal: {signal}")
         
         # Create market data object
         market_data = MarketData(
+            commodity=commodity_id,
             price=float(latest['Close']),
             volume=float(latest['Volume']) if not pd.isna(latest['Volume']) else None,
             sma_20=float(latest['SMA_20']) if not pd.isna(latest['SMA_20']) else None,
@@ -506,9 +558,7 @@ async def process_market_data():
             signal=signal
         )
         
-        latest_market_data = market_data
-        
-        # Store in database with AI analysis
+        # Store in database
         doc = market_data.model_dump()
         doc['timestamp'] = doc['timestamp'].isoformat()
         if ai_reasoning:
@@ -523,16 +573,13 @@ async def process_market_data():
         if settings and settings.get('auto_trading') and signal in ["BUY", "SELL"]:
             max_trades = settings.get('max_trades_per_hour', 3)
             if trade_count_per_hour < max_trades:
-                await execute_trade_logic(signal, market_data.price, settings)
+                await execute_trade_logic(signal, market_data.price, settings, commodity_id)
                 trade_count_per_hour += 1
         
-        analysis_info = f"Price={market_data.price}, Signal={signal}, Trend={trend}"
-        if ai_reasoning:
-            analysis_info += f", AI: {ai_signal} ({ai_confidence}%)"
-        logger.info(f"Market data processed: {analysis_info}")
+        logger.info(f"{commodity_id}: Price={market_data.price}, Signal={signal}, Trend={trend}")
         
     except Exception as e:
-        logger.error(f"Error processing market data: {e}")
+        logger.error(f"Error processing {commodity_id} market data: {e}")
 
 async def execute_trade_logic(signal, price, settings):
     """Execute trade based on signal"""
