@@ -741,29 +741,21 @@ async def refresh_market_data():
 # MT5 Integration Endpoints
 @api_router.get("/mt5/account")
 async def get_mt5_account():
-    """Get real MT5 account information"""
+    """Get real MT5 account information via MetaAPI"""
     try:
-        settings = await db.trading_settings.find_one({"id": "trading_settings"})
-        if not settings or not settings.get('mt5_login'):
-            raise HTTPException(status_code=400, detail="MT5 credentials not configured")
+        from metaapi_connector import get_metaapi_connector
         
-        from mt5_connector import get_mt5_connector
-        
-        connector = await get_mt5_connector(
-            login=settings['mt5_login'],
-            password=settings['mt5_password'],
-            server=settings['mt5_server']
-        )
-        
+        connector = await get_metaapi_connector()
         account_info = await connector.get_account_info()
+        
         if not account_info:
-            raise HTTPException(status_code=503, detail="Failed to get MT5 account info")
+            raise HTTPException(status_code=503, detail="Failed to get MetaAPI account info")
         
         return account_info
-    except HTTPException:
-        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error(f"Error getting MT5 account: {e}")
+        logger.error(f"Error getting MetaAPI account: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/mt5/positions")
