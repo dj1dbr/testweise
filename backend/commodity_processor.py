@@ -13,20 +13,30 @@ logger = logging.getLogger(__name__)
 
 # Commodity definitions
 COMMODITIES = {
-    "WTI_CRUDE": {"name": "WTI Crude Oil", "symbol": "CL=F", "mt5_symbol": "USOIL", "category": "Energie", "unit": "USD/Barrel"},
-    "BRENT_CRUDE": {"name": "Brent Crude Oil", "symbol": "BZ=F", "mt5_symbol": "UKOIL", "category": "Energie", "unit": "USD/Barrel"},
-    "GOLD": {"name": "Gold", "symbol": "GC=F", "mt5_symbol": "XAUUSD", "category": "Edelmetalle", "unit": "USD/oz"},
-    "SILVER": {"name": "Silber", "symbol": "SI=F", "mt5_symbol": "XAGUSD", "category": "Edelmetalle", "unit": "USD/oz"},
-    "PLATINUM": {"name": "Platin", "symbol": "PL=F", "mt5_symbol": "XPTUSD", "category": "Edelmetalle", "unit": "USD/oz"},
-    "PALLADIUM": {"name": "Palladium", "symbol": "PA=F", "mt5_symbol": "XPDUSD", "category": "Edelmetalle", "unit": "USD/oz"},
-    "COPPER": {"name": "Kupfer", "symbol": "HG=F", "mt5_symbol": "COPPER", "category": "Industriemetalle", "unit": "USD/lb"},
-    "ALUMINUM": {"name": "Aluminium", "symbol": "ALI=F", "mt5_symbol": "ALUMINUM", "category": "Industriemetalle", "unit": "USD/ton"},
-    "NATURAL_GAS": {"name": "Natural Gas", "symbol": "NG=F", "mt5_symbol": "NATURALGAS", "category": "Energie", "unit": "USD/MMBtu"},
-    "HEATING_OIL": {"name": "Heizöl", "symbol": "HO=F", "mt5_symbol": "HEATINGOIL", "category": "Energie", "unit": "USD/Gallon"},
-    "WHEAT": {"name": "Weizen", "symbol": "ZW=F", "mt5_symbol": "WHEAT", "category": "Agrar", "unit": "USD/Bushel"},
-    "CORN": {"name": "Mais", "symbol": "ZC=F", "mt5_symbol": "CORN", "category": "Agrar", "unit": "USD/Bushel"},
-    "SOYBEANS": {"name": "Sojabohnen", "symbol": "ZS=F", "mt5_symbol": "SOYBEANS", "category": "Agrar", "unit": "USD/Bushel"},
-    "COFFEE": {"name": "Kaffee", "symbol": "KC=F", "mt5_symbol": "COFFEE", "category": "Agrar", "unit": "USD/lb"}
+    "WTI_CRUDE": {"name": "WTI Crude Oil", "symbol": "CL=F", "mt5_symbol": "USOIL", "category": "Energie", "unit": "USD/Barrel", "platform": "MT5"},
+    "BRENT_CRUDE": {"name": "Brent Crude Oil", "symbol": "BZ=F", "mt5_symbol": "UKOIL", "category": "Energie", "unit": "USD/Barrel", "platform": "MT5"},
+    "GOLD": {"name": "Gold", "symbol": "GC=F", "mt5_symbol": "XAUUSD", "category": "Edelmetalle", "unit": "USD/oz", "platform": "MT5"},
+    "SILVER": {"name": "Silber", "symbol": "SI=F", "mt5_symbol": "XAGUSD", "category": "Edelmetalle", "unit": "USD/oz", "platform": "MT5"},
+    "PLATINUM": {"name": "Platin", "symbol": "PL=F", "mt5_symbol": "XPTUSD", "category": "Edelmetalle", "unit": "USD/oz", "platform": "MT5"},
+    "PALLADIUM": {"name": "Palladium", "symbol": "PA=F", "mt5_symbol": "XPDUSD", "category": "Edelmetalle", "unit": "USD/oz", "platform": "MT5"},
+    "COPPER": {"name": "Kupfer", "symbol": "HG=F", "mt5_symbol": "COPPER", "category": "Industriemetalle", "unit": "USD/lb", "platform": "MT5"},
+    "ALUMINUM": {"name": "Aluminium", "symbol": "ALI=F", "mt5_symbol": "ALUMINUM", "category": "Industriemetalle", "unit": "USD/ton", "platform": "MT5"},
+    "NATURAL_GAS": {"name": "Natural Gas", "symbol": "NG=F", "mt5_symbol": "NATURALGAS", "category": "Energie", "unit": "USD/MMBtu", "platform": "MT5"},
+    "HEATING_OIL": {"name": "Heizöl", "symbol": "HO=F", "mt5_symbol": "HEATINGOIL", "category": "Energie", "unit": "USD/Gallon", "platform": "MT5"},
+    "WHEAT": {"name": "Weizen", "symbol": "ZW=F", "mt5_symbol": "WHEAT", "category": "Agrar", "unit": "USD/Bushel", "platform": "MT5"},
+    "CORN": {"name": "Mais", "symbol": "ZC=F", "mt5_symbol": "CORN", "category": "Agrar", "unit": "USD/Bushel", "platform": "MT5"},
+    "SOYBEANS": {"name": "Sojabohnen", "symbol": "ZS=F", "mt5_symbol": "SOYBEANS", "category": "Agrar", "unit": "USD/Bushel", "platform": "MT5"},
+    "COFFEE": {"name": "Kaffee", "symbol": "KC=F", "mt5_symbol": "COFFEE", "category": "Agrar", "unit": "USD/lb", "platform": "MT5"},
+    
+    # Kryptowährungen (Bitpanda)
+    "BITCOIN": {"name": "Bitcoin", "symbol": "BTC-USD", "bitpanda_symbol": "BTC_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
+    "ETHEREUM": {"name": "Ethereum", "symbol": "ETH-USD", "bitpanda_symbol": "ETH_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
+    "RIPPLE": {"name": "Ripple", "symbol": "XRP-USD", "bitpanda_symbol": "XRP_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
+    "CARDANO": {"name": "Cardano", "symbol": "ADA-USD", "bitpanda_symbol": "ADA_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
+    "SOLANA": {"name": "Solana", "symbol": "SOL-USD", "bitpanda_symbol": "SOL_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
+    "POLKADOT": {"name": "Polkadot", "symbol": "DOT-USD", "bitpanda_symbol": "DOT_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
+    "LITECOIN": {"name": "Litecoin", "symbol": "LTC-USD", "bitpanda_symbol": "LTC_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
+    "CHAINLINK": {"name": "Chainlink", "symbol": "LINK-USD", "bitpanda_symbol": "LINK_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
 }
 
 
