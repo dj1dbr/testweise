@@ -760,26 +760,16 @@ async def get_mt5_account():
 
 @api_router.get("/mt5/positions")
 async def get_mt5_positions():
-    """Get open positions from MT5"""
+    """Get open positions from MetaAPI"""
     try:
-        settings = await db.trading_settings.find_one({"id": "trading_settings"})
-        if not settings or not settings.get('mt5_login'):
-            raise HTTPException(status_code=400, detail="MT5 credentials not configured")
+        from metaapi_connector import get_metaapi_connector
         
-        from mt5_connector import get_mt5_connector
-        
-        connector = await get_mt5_connector(
-            login=settings['mt5_login'],
-            password=settings['mt5_password'],
-            server=settings['mt5_server']
-        )
-        
+        connector = await get_metaapi_connector()
         positions = await connector.get_positions()
+        
         return {"positions": positions}
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"Error getting MT5 positions: {e}")
+        logger.error(f"Error getting MetaAPI positions: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/mt5/order")
