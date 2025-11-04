@@ -197,6 +197,15 @@ const Dashboard = () => {
       setGpt5Active(newSettings.use_ai_analysis && newSettings.auto_trading);
       toast.success('Einstellungen gespeichert');
       setSettingsOpen(false);
+      
+      // Reload MT5 data if mode changed to MT5
+      if (newSettings.mode === 'MT5') {
+        await fetchMT5Account();
+      } else {
+        // Reset to paper trading balance
+        await fetchStats();
+        updateBalance();
+      }
     } catch (error) {
       toast.error('Fehler beim Speichern');
     }
