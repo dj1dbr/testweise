@@ -476,6 +476,11 @@ const Dashboard = () => {
                     {settings?.mode === 'BITPANDA' && mt5Account?.broker && (
                       <span className="text-cyan-400 ml-2">• {mt5Account.broker}</span>
                     )}
+                    {mt5Account?.free_margin !== undefined && (
+                      <span className={mt5Account.free_margin < 500 ? 'text-red-400 ml-2' : 'text-green-400 ml-2'}>
+                        | Freie Margin: €{mt5Account.free_margin?.toFixed(2)}
+                      </span>
+                    )}
                   </>
                 ) : (
                   <>
