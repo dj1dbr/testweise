@@ -148,28 +148,37 @@ def generate_signal(latest_data):
         return "HOLD", "NEUTRAL"
 
 
-async def calculate_position_size(balance: float, price: float, db, max_risk_percent: float = 20.0) -> float:
-    """Calculate position size ensuring max portfolio risk"""
+async def calculate_position_size(balance: float, price: float, db, max_risk_percent: float = 20.0, free_margin: float = None) -> float:
+    """Calculate position size ensuring max portfolio risk and considering free margin"""
     try:
-        # Get all open positions
+        # Get all open positions from database
         open_trades = await db.trades.find({"status": "OPEN"}).to_list(100)
         
         # Calculate total exposure from open positions
         total_exposure = sum([trade.get('entry_price', 0) * trade.get('quantity', 0) for trade in open_trades])
         
-        # Calculate available capital (20% of balance minus current exposure)
+        # Calculate available capital (max_risk_percent of balance minus current exposure)
         max_portfolio_value = balance * (max_risk_percent / 100)
         available_capital = max(0, max_portfolio_value - total_exposure)
         
+        # WICHTIG: Wenn free_margin übergeben wurde, limitiere auf verfügbare Margin
+        if free_margin is not None and free_margin < 100:
+            # Bei wenig freier Margin (< 100 EUR), nutze nur 50% davon für neue Order
+            max_order_value = free_margin * 0.5
+            available_capital = min(available_capital, max_order_value)
+            logger.warning(f"⚠️ Geringe freie Margin ({free_margin:.2f} EUR) - Order auf {max_order_value:.2f} EUR limitiert")
+        
         # Calculate lot size
         if available_capital > 0 and price > 0:
-            lot_size = round(available_capital / price, 2)
+            lot_size = round(available_capital / price, 4)  # 4 Dezimalstellen für kleinere Lots
+            # Minimum 0.001, maximum 0.01 für Sicherheit
+            lot_size = max(0.001, min(lot_size, 0.01))
         else:
-            lot_size = 0.0
+            lot_size = 0.001  # Minimum Lot Size
             
-        logger.info(f"Position size: {lot_size} lots (Balance: {balance}, Price: {price}, Exposure: {total_exposure:.2f}/{max_portfolio_value:.2f})")
+        logger.info(f"Position size: {lot_size} lots (Balance: {balance}, Price: {price}, Free Margin: {free_margin}, Exposure: {total_exposure:.2f}/{max_portfolio_value:.2f})")
         
         return lot_size
     except Exception as e:
         logger.error(f"Error calculating position size: {e}")
-        return 0.0
+        return 0.001  # Minimum fallback
