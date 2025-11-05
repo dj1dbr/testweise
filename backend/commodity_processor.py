@@ -91,13 +91,14 @@ def calculate_indicators(df):
 
 
 def generate_signal(latest_data):
-    """Generate trading signal based on indicators - AGGRESSIVE für Testing"""
+    """Generate trading signal based on indicators - REALISTISCHE Strategie"""
     try:
         rsi = latest_data.get('RSI')
         macd = latest_data.get('MACD')
         macd_signal = latest_data.get('MACD_signal')
         price = latest_data.get('Close')
         ema = latest_data.get('EMA_20')
+        sma = latest_data.get('SMA_20')
         
         if pd.isna(rsi) or pd.isna(macd) or pd.isna(macd_signal):
             return "HOLD", "NEUTRAL"
@@ -105,38 +106,30 @@ def generate_signal(latest_data):
         # Determine trend
         trend = "NEUTRAL"
         if not pd.isna(ema) and not pd.isna(price):
-            if price > ema:
+            if price > ema * 1.002:
                 trend = "UP"
-            elif price < ema:
+            elif price < ema * 0.998:
                 trend = "DOWN"
         
-        # AGGRESSIVE TRADING STRATEGIE für viele Signale
+        # REALISTISCHE TRADING STRATEGIE
         signal = "HOLD"
         
-        # BUY Bedingungen (mehrere Szenarien):
-        # 1. RSI ist niedrig (überverkauft)
-        if rsi < 35:
+        # BUY Bedingungen (konservativ):
+        # 1. RSI überverkauft UND positives MACD Momentum
+        if rsi < 35 and macd > macd_signal:
             signal = "BUY"
         
-        # 2. MACD Momentum positiv
-        elif macd > macd_signal and rsi < 55:
+        # 2. Starker Aufwärtstrend mit Bestätigung
+        elif trend == "UP" and rsi < 60 and macd > macd_signal:
             signal = "BUY"
         
-        # 3. Starker Aufwärtstrend
-        elif trend == "UP" and not pd.isna(ema) and price > ema * 1.005:
-            signal = "BUY"
-        
-        # SELL Bedingungen (mehrere Szenarien):
-        # 1. RSI ist hoch (überkauft)
-        elif rsi > 65:
+        # SELL Bedingungen (konservativ):
+        # 1. RSI überkauft UND negatives MACD Momentum
+        elif rsi > 65 and macd < macd_signal:
             signal = "SELL"
         
-        # 2. MACD Momentum negativ
-        elif macd < macd_signal and rsi > 45:
-            signal = "SELL"
-        
-        # 3. Starker Abwärtstrend
-        elif trend == "DOWN" and not pd.isna(ema) and price < ema * 0.995:
+        # 2. Starker Abwärtstrend mit Bestätigung
+        elif trend == "DOWN" and rsi > 40 and macd < macd_signal:
             signal = "SELL"
         
         return signal, trend
