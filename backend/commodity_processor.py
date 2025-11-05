@@ -91,7 +91,7 @@ def calculate_indicators(df):
 
 
 def generate_signal(latest_data):
-    """Generate trading signal based on indicators"""
+    """Generate trading signal based on indicators - AGGRESSIVE für Testing"""
     try:
         rsi = latest_data.get('RSI')
         macd = latest_data.get('MACD')
@@ -110,22 +110,33 @@ def generate_signal(latest_data):
             elif price < ema:
                 trend = "DOWN"
         
-        # Generate signal - GELOCKERTE Bedingungen für mehr Trades
+        # AGGRESSIVE TRADING STRATEGIE für viele Signale
         signal = "HOLD"
         
-        # BUY signal: RSI < 50 (statt 40) und MACD positiv
-        if rsi < 50 and macd > macd_signal:
+        # BUY Bedingungen (mehrere Szenarien):
+        # 1. RSI ist niedrig (überverkauft)
+        if rsi < 35:
             signal = "BUY"
         
-        # SELL signal: RSI > 50 (statt 60) und MACD negativ
-        elif rsi > 50 and macd < macd_signal:
+        # 2. MACD Momentum positiv
+        elif macd > macd_signal and rsi < 55:
+            signal = "BUY"
+        
+        # 3. Starker Aufwärtstrend
+        elif trend == "UP" and not pd.isna(ema) and price > ema * 1.005:
+            signal = "BUY"
+        
+        # SELL Bedingungen (mehrere Szenarien):
+        # 1. RSI ist hoch (überkauft)
+        elif rsi > 65:
             signal = "SELL"
         
-        # Alternative: Starke Trends allein können auch Signale geben
-        elif trend == "UP" and rsi < 45 and price > ema * 1.001:
-            signal = "BUY"
+        # 2. MACD Momentum negativ
+        elif macd < macd_signal and rsi > 45:
+            signal = "SELL"
         
-        elif trend == "DOWN" and rsi > 55 and price < ema * 0.999:
+        # 3. Starker Abwärtstrend
+        elif trend == "DOWN" and not pd.isna(ema) and price < ema * 0.995:
             signal = "SELL"
         
         return signal, trend
