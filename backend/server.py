@@ -746,17 +746,23 @@ async def get_market_history(limit: int = 100):
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/trades/execute")
-async def execute_trade(trade_type: str, price: float, quantity: float = 1.0):
+async def execute_trade(trade_type: str, price: float, quantity: float = 1.0, commodity: str = "WTI_CRUDE"):
     """Manually execute a trade"""
     try:
         settings = await db.trading_settings.find_one({"id": "trading_settings"})
         if not settings:
             settings = TradingSettings().model_dump()
         
-        stop_loss = price * (1 - settings.get('stop_loss_percent', 2.0) / 100)
-        take_profit = price * (1 + settings.get('take_profit_percent', 4.0) / 100)
+        # Stop Loss und Take Profit richtig berechnen für BUY und SELL
+        if trade_type.upper() == 'BUY':
+            stop_loss = price * (1 - settings.get('stop_loss_percent', 2.0) / 100)
+            take_profit = price * (1 + settings.get('take_profit_percent', 4.0) / 100)
+        else:  # SELL
+            stop_loss = price * (1 + settings.get('stop_loss_percent', 2.0) / 100)
+            take_profit = price * (1 - settings.get('take_profit_percent', 4.0) / 100)
         
         trade = Trade(
+            commodity=commodity,
             type=trade_type.upper(),
             price=price,
             quantity=quantity,
@@ -771,7 +777,9 @@ async def execute_trade(trade_type: str, price: float, quantity: float = 1.0):
         doc['timestamp'] = doc['timestamp'].isoformat()
         await db.trades.insert_one(doc)
         
-        return {"success": True, "trade": trade}
+        logger.info(f"✅ Manual trade executed: {trade_type} {quantity} {commodity} @ {price}")
+        
+        return {"success": True, "trade": doc}
     except Exception as e:
         logger.error(f"Error executing manual trade: {e}")
         raise HTTPException(status_code=500, detail=str(e))
