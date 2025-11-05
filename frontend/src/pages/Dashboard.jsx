@@ -451,11 +451,7 @@ const Dashboard = () => {
                     ✓ Verbunden
                   </Badge>
                 )}
-                {settings?.mode === 'PAPER' && (
-                  <Badge variant="secondary" className="bg-slate-500/20 text-slate-400 border-slate-500/50">
-                    Simulation
-                  </Badge>
-                )}
+                {/* Paper Trading Mode entfernt */}
               </div>
               <h2 className="text-4xl font-bold text-emerald-400" data-testid="current-balance">
                 {settings?.mode === 'MT5' || settings?.mode === 'BITPANDA' 
