@@ -110,15 +110,22 @@ def generate_signal(latest_data):
             elif price < ema:
                 trend = "DOWN"
         
-        # Generate signal
+        # Generate signal - GELOCKERTE Bedingungen für mehr Trades
         signal = "HOLD"
         
-        # BUY signal: RSI < 40 and MACD crosses above signal line and upward trend
-        if rsi < 40 and macd > macd_signal and trend == "UP":
+        # BUY signal: RSI < 50 (statt 40) und MACD positiv
+        if rsi < 50 and macd > macd_signal:
             signal = "BUY"
         
-        # SELL signal: RSI > 60 and MACD crosses below signal line and downward trend
-        elif rsi > 60 and macd < macd_signal and trend == "DOWN":
+        # SELL signal: RSI > 50 (statt 60) und MACD negativ
+        elif rsi > 50 and macd < macd_signal:
+            signal = "SELL"
+        
+        # Alternative: Starke Trends allein können auch Signale geben
+        elif trend == "UP" and rsi < 45 and price > ema * 1.001:
+            signal = "BUY"
+        
+        elif trend == "DOWN" and rsi > 55 and price < ema * 0.999:
             signal = "SELL"
         
         return signal, trend
