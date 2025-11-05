@@ -831,6 +831,157 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Chart Modal */}
+      <Dialog open={chartModalOpen} onOpenChange={setChartModalOpen}>
+        <DialogContent className="max-w-5xl max-h-[90vh] bg-slate-900 border-slate-700 overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-cyan-400 flex items-center gap-2">
+              <LineChart className="w-6 h-6" />
+              {selectedCommodity?.name} - Detaillierte Analyse
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedCommodity && (
+            <div className="space-y-6 mt-4">
+              {/* Price Info */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-slate-800/50 p-4 rounded-lg">
+                  <p className="text-xs text-slate-400 mb-1">Aktueller Preis</p>
+                  <p className="text-2xl font-bold text-white">
+                    ${selectedCommodity.marketData?.price?.toFixed(2) || 'N/A'}
+                  </p>
+                </div>
+                <div className="bg-slate-800/50 p-4 rounded-lg">
+                  <p className="text-xs text-slate-400 mb-1">24h Änderung</p>
+                  <p className={`text-2xl font-bold ${selectedCommodity.marketData?.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {selectedCommodity.marketData?.change24h >= 0 ? '+' : ''}{selectedCommodity.marketData?.change24h?.toFixed(2) || 'N/A'}%
+                  </p>
+                </div>
+                <div className="bg-slate-800/50 p-4 rounded-lg">
+                  <p className="text-xs text-slate-400 mb-1">Signal</p>
+                  <Badge className={
+                    selectedCommodity.marketData?.signal === 'BUY' ? 'bg-green-600' :
+                    selectedCommodity.marketData?.signal === 'SELL' ? 'bg-red-600' :
+                    'bg-slate-600'
+                  }>
+                    {selectedCommodity.marketData?.signal || 'HOLD'}
+                  </Badge>
+                </div>
+                <div className="bg-slate-800/50 p-4 rounded-lg">
+                  <p className="text-xs text-slate-400 mb-1">Trend</p>
+                  <div className="flex items-center gap-2">
+                    {selectedCommodity.marketData?.trend === 'UP' && <TrendingUp className="w-5 h-5 text-green-400" />}
+                    {selectedCommodity.marketData?.trend === 'DOWN' && <TrendingDown className="w-5 h-5 text-red-400" />}
+                    {selectedCommodity.marketData?.trend === 'NEUTRAL' && <Minus className="w-5 h-5 text-slate-400" />}
+                    <span className="font-semibold">{selectedCommodity.marketData?.trend || 'NEUTRAL'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Large Chart */}
+              <Card className="bg-slate-800/50 border-slate-700 p-6">
+                <h3 className="text-lg font-semibold mb-4 text-cyan-400">Preisverlauf (100 Tage)</h3>
+                {historicalData.length > 0 ? (
+                  <div className="h-96">
+                    <PriceChart data={historicalData} commodityName={selectedCommodity.name} />
+                  </div>
+                ) : (
+                  <div className="h-96 flex items-center justify-center text-slate-400">
+                    Lade Chart-Daten...
+                  </div>
+                )}
+              </Card>
+
+              {/* Technical Indicators */}
+              <Card className="bg-slate-800/50 border-slate-700 p-6">
+                <h3 className="text-lg font-semibold mb-4 text-cyan-400">Technische Indikatoren</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <p className="text-xs text-slate-400 mb-1">RSI</p>
+                    <p className="text-xl font-bold">{selectedCommodity.marketData?.rsi?.toFixed(2) || 'N/A'}</p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      {selectedCommodity.marketData?.rsi > 70 ? 'Überkauft' :
+                       selectedCommodity.marketData?.rsi < 30 ? 'Überverkauft' : 'Neutral'}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-slate-400 mb-1">MACD</p>
+                    <p className="text-xl font-bold">{selectedCommodity.marketData?.macd?.toFixed(2) || 'N/A'}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-slate-400 mb-1">SMA 20</p>
+                    <p className="text-xl font-bold">${selectedCommodity.marketData?.sma_20?.toFixed(2) || 'N/A'}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-slate-400 mb-1">EMA 20</p>
+                    <p className="text-xl font-bold">${selectedCommodity.marketData?.ema_20?.toFixed(2) || 'N/A'}</p>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Commodity Info */}
+              <Card className="bg-slate-800/50 border-slate-700 p-6">
+                <h3 className="text-lg font-semibold mb-4 text-cyan-400">Informationen</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-slate-400 mb-1">Kategorie</p>
+                    <p className="text-base font-semibold">{selectedCommodity.category}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400 mb-1">Einheit</p>
+                    <p className="text-base font-semibold">{selectedCommodity.unit || selectedCommodity.marketData?.unit || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400 mb-1">Verfügbar auf</p>
+                    <div className="flex gap-2">
+                      {['GOLD', 'SILVER', 'PLATINUM', 'PALLADIUM'].includes(selectedCommodity.id) ? (
+                        <>
+                          <Badge className="bg-blue-600">MT5</Badge>
+                          <Badge className="bg-green-600">Bitpanda</Badge>
+                        </>
+                      ) : (
+                        <Badge className="bg-green-600">Bitpanda</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400 mb-1">Letztes Update</p>
+                    <p className="text-base font-semibold">
+                      {selectedCommodity.marketData?.timestamp ? 
+                        new Date(selectedCommodity.marketData.timestamp).toLocaleString('de-DE') : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Trading Actions */}
+              <div className="flex gap-4">
+                <Button
+                  onClick={() => {
+                    setChartModalOpen(false);
+                    handleManualTrade('BUY', selectedCommodity.id);
+                  }}
+                  className="flex-1 bg-green-600 hover:bg-green-500"
+                >
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  KAUFEN
+                </Button>
+                <Button
+                  onClick={() => {
+                    setChartModalOpen(false);
+                    handleManualTrade('SELL', selectedCommodity.id);
+                  }}
+                  className="flex-1 bg-red-600 hover:bg-red-500"
+                >
+                  <TrendingDown className="w-4 h-4 mr-2" />
+                  VERKAUFEN
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
