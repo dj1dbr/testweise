@@ -506,6 +506,19 @@ async def process_market_data():
                 )
                 logger.info(f"Position auto-closed: {trade_info['reason']}")
         
+        # AI Position Manager - Überwacht ALLE Positionen (auch manuell eröffnete)
+        if settings and settings.get('use_ai_analysis'):
+            current_prices = {}
+            for commodity_id in enabled_commodities:
+                market_data = await db.market_data.find_one(
+                    {"commodity": commodity_id},
+                    sort=[("timestamp", -1)]
+                )
+                if market_data:
+                    current_prices[commodity_id] = market_data['price']
+            
+            await manage_open_positions(db, current_prices, settings)
+        
         logger.info("Market data processing complete for all commodities")
         
     except Exception as e:
