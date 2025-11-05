@@ -62,6 +62,21 @@ const Dashboard = () => {
     return () => clearInterval(liveInterval);
   }, [autoRefresh, settings?.mode]);
 
+  // Load historical data for selected commodity in modal
+  useEffect(() => {
+    if (chartModalOpen && selectedCommodity) {
+      const loadChartData = async () => {
+        try {
+          const response = await axios.get(`${API}/market/history?commodity=${selectedCommodity.id}&limit=100`);
+          setHistoricalData(response.data);
+        } catch (error) {
+          console.error('Error loading chart data:', error);
+        }
+      };
+      loadChartData();
+    }
+  }, [chartModalOpen, selectedCommodity]);
+
   const fetchAllData = async () => {
     setLoading(true);
     await Promise.all([
