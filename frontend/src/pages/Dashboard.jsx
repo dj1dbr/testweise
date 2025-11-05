@@ -551,6 +551,12 @@ const Dashboard = () => {
                     )}
                   </div>
                   <p className="text-xs text-slate-500">{commodity.category}</p>
+                  {settings?.mode === 'MT5' && !['GOLD', 'SILVER', 'PLATINUM', 'PALLADIUM'].includes(commodityId) && (
+                    <div className="mt-2 flex items-center gap-1 text-xs text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded px-2 py-1">
+                      <AlertCircle className="w-3 h-3" />
+                      <span>Nicht auf MT5 handelbar</span>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="mb-4">
