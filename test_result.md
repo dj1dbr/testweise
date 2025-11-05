@@ -111,18 +111,25 @@ user_problem_statement: |
 backend:
   - task: "MetaAPI Account Connection"
     implemented: true
-    working: false
-    file: "metaapi_connector.py"
-    stuck_count: 1
+    working: true
+    file: "metaapi_connector.py, .env"
+    stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
-      - working: false
+      - working: true
         agent: "main"
         comment: |
-          Account ID "multitrade-mt5" not found in any MetaAPI region (New York, London, Singapore tested).
-          Possible causes: (1) Incorrect account ID, (2) Account not deployed, (3) Token invalid/expired.
-          Need user to verify MetaAPI credentials from https://app.metaapi.cloud/api-access/api-urls
+          ✅ FIXED! Used MetaAPI Provisioning API to list accounts and found correct credentials:
+          - Account ID: d2605e89-7bc2-4144-9f7c-951edd596c39 (was: multitrade-mt5)
+          - Region: London (was: New York)
+          - Base URL: https://mt-client-api-v1.london.agiliumtrade.ai
+          - Broker: ICMarketsEU-Demo
+          - Balance: 2199.81 EUR
+          - Status: DEPLOYED and CONNECTED
+          
+          Updated .env file with correct account ID and metaapi_connector.py with London region URL.
+          Connection successful, balance retrievable.
   
   - task: "MT5 Symbol Mapping for Multiple Commodities"
     implemented: true
