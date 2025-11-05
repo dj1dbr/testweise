@@ -901,7 +901,7 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
             # MongoDB _id entfernen für JSON Response
             doc.pop('_id', None)
             
-            return {"success": True, "trade": doc, "mt5_ticket": mt5_ticket}
+            return {"success": True, "trade": doc, "ticket": platform_ticket, "platform": settings.get('mode')}
         else:
             raise HTTPException(status_code=500, detail="Trade konnte nicht ausgeführt werden")
             
