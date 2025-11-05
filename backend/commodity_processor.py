@@ -11,28 +11,144 @@ from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
-# Commodity definitions - ICMarketsEU-Demo broker (London region)
-# mt5_symbol values retrieved via MetaAPI /symbols endpoint
-# HINWEIS: Nur Edelmetalle funktionieren auf MT5! Andere nur für Paper Trading.
+# Commodity definitions - Multi-Platform Support
+# MT5: Nur Edelmetalle verfügbar auf ICMarketsEU-Demo
+# Bitpanda: Alle Rohstoffe verfügbar über Bitpanda Stocks/Commodities
 COMMODITIES = {
-    # Precious Metals (Spot prices) - FUNKTIONIEREN AUF MT5 ✅
-    "GOLD": {"name": "Gold", "symbol": "GC=F", "mt5_symbol": "XAUUSD", "category": "Edelmetalle", "unit": "USD/oz", "platform": "MT5"},
-    "SILVER": {"name": "Silber", "symbol": "SI=F", "mt5_symbol": "XAGUSD", "category": "Edelmetalle", "unit": "USD/oz", "platform": "MT5"},
-    "PLATINUM": {"name": "Platin", "symbol": "PL=F", "mt5_symbol": "XPTUSD", "category": "Edelmetalle", "unit": "USD/oz", "platform": "MT5"},
-    "PALLADIUM": {"name": "Palladium", "symbol": "PA=F", "mt5_symbol": "XPDUSD", "category": "Edelmetalle", "unit": "USD/oz", "platform": "MT5"},
+    # Precious Metals (Spot prices)
+    # MT5: ✅ Handelbar | Bitpanda: ✅ Handelbar
+    "GOLD": {
+        "name": "Gold", 
+        "symbol": "GC=F", 
+        "mt5_symbol": "XAUUSD", 
+        "bitpanda_symbol": "GOLD",
+        "category": "Edelmetalle", 
+        "unit": "USD/oz", 
+        "platforms": ["MT5", "BITPANDA"]
+    },
+    "SILVER": {
+        "name": "Silber", 
+        "symbol": "SI=F", 
+        "mt5_symbol": "XAGUSD", 
+        "bitpanda_symbol": "SILVER",
+        "category": "Edelmetalle", 
+        "unit": "USD/oz", 
+        "platforms": ["MT5", "BITPANDA"]
+    },
+    "PLATINUM": {
+        "name": "Platin", 
+        "symbol": "PL=F", 
+        "mt5_symbol": "XPTUSD", 
+        "bitpanda_symbol": "PLATINUM",
+        "category": "Edelmetalle", 
+        "unit": "USD/oz", 
+        "platforms": ["MT5", "BITPANDA"]
+    },
+    "PALLADIUM": {
+        "name": "Palladium", 
+        "symbol": "PA=F", 
+        "mt5_symbol": "XPDUSD", 
+        "bitpanda_symbol": "PALLADIUM",
+        "category": "Edelmetalle", 
+        "unit": "USD/oz", 
+        "platforms": ["MT5", "BITPANDA"]
+    },
     
-    # Energy (Futures) - NUR PAPER TRADING (auf MT5 nicht verfügbar) ⚠️
-    "WTI_CRUDE": {"name": "WTI Crude Oil", "symbol": "CL=F", "mt5_symbol": "WTI_F6", "category": "Energie", "unit": "USD/Barrel", "platform": "PAPER"},
-    "BRENT_CRUDE": {"name": "Brent Crude Oil", "symbol": "BZ=F", "mt5_symbol": "BRENT_F6", "category": "Energie", "unit": "USD/Barrel", "platform": "PAPER"},
+    # Energy Commodities
+    # MT5: ❌ Nicht verfügbar | Bitpanda: ✅ Handelbar
+    "WTI_CRUDE": {
+        "name": "WTI Crude Oil", 
+        "symbol": "CL=F", 
+        "mt5_symbol": "WTI_F6", 
+        "bitpanda_symbol": "OIL_WTI",
+        "category": "Energie", 
+        "unit": "USD/Barrel", 
+        "platforms": ["BITPANDA"]
+    },
+    "BRENT_CRUDE": {
+        "name": "Brent Crude Oil", 
+        "symbol": "BZ=F", 
+        "mt5_symbol": "BRENT_F6", 
+        "bitpanda_symbol": "OIL_BRENT",
+        "category": "Energie", 
+        "unit": "USD/Barrel", 
+        "platforms": ["BITPANDA"]
+    },
+    "NATURAL_GAS": {
+        "name": "Natural Gas", 
+        "symbol": "NG=F", 
+        "mt5_symbol": "NATURALGAS", 
+        "bitpanda_symbol": "NATURAL_GAS",
+        "category": "Energie", 
+        "unit": "USD/MMBtu", 
+        "platforms": ["BITPANDA"]
+    },
     
-    # Agricultural (Futures) - NUR PAPER TRADING (auf MT5 nicht verfügbar) ⚠️
-    "WHEAT": {"name": "Weizen", "symbol": "ZW=F", "mt5_symbol": "Wheat_H6", "category": "Agrar", "unit": "USD/Bushel", "platform": "PAPER"},
-    "CORN": {"name": "Mais", "symbol": "ZC=F", "mt5_symbol": "Corn_H6", "category": "Agrar", "unit": "USD/Bushel", "platform": "PAPER"},
-    "SOYBEANS": {"name": "Sojabohnen", "symbol": "ZS=F", "mt5_symbol": "Sbean_F6", "category": "Agrar", "unit": "USD/Bushel", "platform": "PAPER"},
-    "COFFEE": {"name": "Kaffee", "symbol": "KC=F", "mt5_symbol": "Coffee_H6", "category": "Agrar", "unit": "USD/lb", "platform": "PAPER"},
-    "SUGAR": {"name": "Zucker", "symbol": "SB=F", "mt5_symbol": "Sugar_H6", "category": "Agrar", "unit": "USD/lb", "platform": "PAPER"},
-    "COTTON": {"name": "Baumwolle", "symbol": "CT=F", "mt5_symbol": "Cotton_H6", "category": "Agrar", "unit": "USD/lb", "platform": "PAPER"},
-    "COCOA": {"name": "Kakao", "symbol": "CC=F", "mt5_symbol": "Cocoa_H6", "category": "Agrar", "unit": "USD/ton", "platform": "PAPER"}
+    # Agricultural Commodities
+    # MT5: ❌ Nicht verfügbar | Bitpanda: ✅ Handelbar
+    "WHEAT": {
+        "name": "Weizen", 
+        "symbol": "ZW=F", 
+        "mt5_symbol": "Wheat_H6", 
+        "bitpanda_symbol": "WHEAT",
+        "category": "Agrar", 
+        "unit": "USD/Bushel", 
+        "platforms": ["BITPANDA"]
+    },
+    "CORN": {
+        "name": "Mais", 
+        "symbol": "ZC=F", 
+        "mt5_symbol": "Corn_H6", 
+        "bitpanda_symbol": "CORN",
+        "category": "Agrar", 
+        "unit": "USD/Bushel", 
+        "platforms": ["BITPANDA"]
+    },
+    "SOYBEANS": {
+        "name": "Sojabohnen", 
+        "symbol": "ZS=F", 
+        "mt5_symbol": "Sbean_F6", 
+        "bitpanda_symbol": "SOYBEANS",
+        "category": "Agrar", 
+        "unit": "USD/Bushel", 
+        "platforms": ["BITPANDA"]
+    },
+    "COFFEE": {
+        "name": "Kaffee", 
+        "symbol": "KC=F", 
+        "mt5_symbol": "Coffee_H6", 
+        "bitpanda_symbol": "COFFEE",
+        "category": "Agrar", 
+        "unit": "USD/lb", 
+        "platforms": ["BITPANDA"]
+    },
+    "SUGAR": {
+        "name": "Zucker", 
+        "symbol": "SB=F", 
+        "mt5_symbol": "Sugar_H6", 
+        "bitpanda_symbol": "SUGAR",
+        "category": "Agrar", 
+        "unit": "USD/lb", 
+        "platforms": ["BITPANDA"]
+    },
+    "COTTON": {
+        "name": "Baumwolle", 
+        "symbol": "CT=F", 
+        "mt5_symbol": "Cotton_H6", 
+        "bitpanda_symbol": "COTTON",
+        "category": "Agrar", 
+        "unit": "USD/lb", 
+        "platforms": ["BITPANDA"]
+    },
+    "COCOA": {
+        "name": "Kakao", 
+        "symbol": "CC=F", 
+        "mt5_symbol": "Cocoa_H6", 
+        "bitpanda_symbol": "COCOA",
+        "category": "Agrar", 
+        "unit": "USD/ton", 
+        "platforms": ["BITPANDA"]
+    }
 }
 
 
