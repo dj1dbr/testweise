@@ -232,7 +232,7 @@ class Trade(BaseModel):
     price: float
     quantity: float = 1.0
     status: Literal["OPEN", "CLOSED"] = "OPEN"
-    mode: Literal["PAPER", "MT5"] = "PAPER"
+    mode: Literal["PAPER", "MT5", "BITPANDA"] = "PAPER"
     entry_price: float
     exit_price: Optional[float] = None
     profit_loss: Optional[float] = None
