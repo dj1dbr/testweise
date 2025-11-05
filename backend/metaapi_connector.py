@@ -134,6 +134,33 @@ class MetaAPIConnector:
             logger.error(f"Error getting MetaAPI positions: {e}")
             return []
     
+    async def get_symbols(self) -> List[Dict[str, Any]]:
+        """Get all available symbols from MetaAPI broker"""
+        try:
+            url = f"{self.base_url}/users/current/accounts/{self.account_id}/symbols"
+            
+            # Create SSL context that doesn't verify certificates
+            import ssl
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            
+            connector = aiohttp.TCPConnector(ssl=ssl_context)
+            
+            async with aiohttp.ClientSession(connector=connector) as session:
+                async with session.get(url, headers=self._get_headers(), timeout=aiohttp.ClientTimeout(total=30)) as response:
+                    if response.status == 200:
+                        symbols = await response.json()
+                        logger.info(f"✅ Retrieved {len(symbols)} symbols from MetaAPI")
+                        return symbols
+                    else:
+                        error_text = await response.text()
+                        logger.error(f"MetaAPI symbols error {response.status}: {error_text}")
+                        return []
+        except Exception as e:
+            logger.error(f"Error getting MetaAPI symbols: {e}")
+            return []
+    
     async def place_order(self, symbol: str, order_type: str, volume: float, 
                          price: Optional[float] = None,
                          sl: Optional[float] = None, 
