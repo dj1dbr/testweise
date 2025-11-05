@@ -22,7 +22,8 @@ async def update_settings():
     result = await db.trading_settings.update_one(
         {"id": "trading_settings"},
         {"$set": {
-            "enabled_commodities": ["GOLD", "SILVER", "PLATINUM", "PALLADIUM"]
+            "enabled_commodities": ["GOLD", "SILVER", "PLATINUM", "PALLADIUM", "WTI_CRUDE", "BRENT_CRUDE", "WHEAT", "CORN", "SOYBEANS", "COFFEE", "SUGAR", "COTTON", "COCOA"],
+            "mode": "MT5"
         }}
     )
     
