@@ -800,6 +800,15 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
                 commodity_info = COMMODITIES.get(commodity, {})
                 mt5_symbol = commodity_info.get('mt5_symbol', 'XAUUSD')
                 
+                # Warnung: Nur Edelmetalle funktionieren auf ICMarkets MT5
+                MT5_TRADEABLE = ['GOLD', 'SILVER', 'PLATINUM', 'PALLADIUM']
+                if commodity not in MT5_TRADEABLE:
+                    logger.warning(f"⚠️ {commodity} ist auf diesem MT5-Broker nicht handelbar! Nur Edelmetalle verfügbar.")
+                    raise HTTPException(
+                        status_code=400, 
+                        detail=f"{commodity_info.get('name', commodity)} ist auf Ihrem MT5-Broker nicht verfügbar. Nur Edelmetalle (Gold, Silber, Platin, Palladium) können gehandelt werden."
+                    )
+                
                 connector = await get_metaapi_connector()
                 result = await connector.place_order(
                     symbol=mt5_symbol,
@@ -817,6 +826,8 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
                     logger.error("❌ MT5 Order fehlgeschlagen!")
                     raise HTTPException(status_code=500, detail="MT5 Order konnte nicht platziert werden")
                     
+            except HTTPException:
+                raise
             except Exception as e:
                 logger.error(f"❌ Fehler beim Senden an MT5: {e}")
                 raise HTTPException(status_code=500, detail=f"MT5 Fehler: {str(e)}")
