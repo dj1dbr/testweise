@@ -24,17 +24,8 @@ COMMODITIES = {
     # Energy & Agricultural Futures NICHT auf diesem Broker verfügbar!
     # WTI_CRUDE, BRENT_CRUDE, WHEAT, CORN, SOYBEANS, COFFEE, etc.
     # können nicht gehandelt werden (broker-spezifische Einschränkungen)
-}
     
-    # Kryptowährungen (Bitpanda)
-    "BITCOIN": {"name": "Bitcoin", "symbol": "BTC-USD", "bitpanda_symbol": "BTC_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
-    "ETHEREUM": {"name": "Ethereum", "symbol": "ETH-USD", "bitpanda_symbol": "ETH_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
-    "RIPPLE": {"name": "Ripple", "symbol": "XRP-USD", "bitpanda_symbol": "XRP_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
-    "CARDANO": {"name": "Cardano", "symbol": "ADA-USD", "bitpanda_symbol": "ADA_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
-    "SOLANA": {"name": "Solana", "symbol": "SOL-USD", "bitpanda_symbol": "SOL_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
-    "POLKADOT": {"name": "Polkadot", "symbol": "DOT-USD", "bitpanda_symbol": "DOT_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
-    "LITECOIN": {"name": "Litecoin", "symbol": "LTC-USD", "bitpanda_symbol": "LTC_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
-    "CHAINLINK": {"name": "Chainlink", "symbol": "LINK-USD", "bitpanda_symbol": "LINK_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
+    # Kryptowährungen über Bitpanda derzeit deaktiviert
 }
 
 
