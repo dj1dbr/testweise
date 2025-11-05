@@ -186,17 +186,25 @@ def init_ai_chat(provider="emergent", api_key=None, model="gpt-5", ollama_base_u
         logger.error(f"Failed to initialize AI chat: {e}")
         return None
 
-# Commodity definitions - Nur Edelmetalle (funktionieren auf ICMarketsEU-Demo)
-# mt5_symbol values retrieved via MetaAPI /symbols endpoint (London region)
+# Commodity definitions - ICMarketsEU-Demo broker (London region)
+# HINWEIS: Nur Edelmetalle funktionieren auf MT5! Andere nur für Paper Trading.
 COMMODITIES = {
-    # Precious Metals (Spot prices) - NUR DIESE FUNKTIONIEREN!
+    # Precious Metals (Spot prices) - FUNKTIONIEREN AUF MT5 ✅
     "GOLD": {"name": "Gold", "symbol": "GC=F", "mt5_symbol": "XAUUSD", "category": "Edelmetalle"},
     "SILVER": {"name": "Silber", "symbol": "SI=F", "mt5_symbol": "XAGUSD", "category": "Edelmetalle"},
     "PLATINUM": {"name": "Platin", "symbol": "PL=F", "mt5_symbol": "XPTUSD", "category": "Edelmetalle"},
-    "PALLADIUM": {"name": "Palladium", "symbol": "PA=F", "mt5_symbol": "XPDUSD", "category": "Edelmetalle"}
+    "PALLADIUM": {"name": "Palladium", "symbol": "PA=F", "mt5_symbol": "XPDUSD", "category": "Edelmetalle"},
     
-    # Energie & Agrar Futures NICHT verfügbar auf diesem Broker
-    # WTI_CRUDE, BRENT_CRUDE, WHEAT, CORN, etc. können nicht gehandelt werden
+    # Energy & Agricultural - NUR PAPER TRADING (auf MT5 nicht verfügbar) ⚠️
+    "WTI_CRUDE": {"name": "WTI Crude Oil", "symbol": "CL=F", "mt5_symbol": "WTI_F6", "category": "Energie"},
+    "BRENT_CRUDE": {"name": "Brent Crude Oil", "symbol": "BZ=F", "mt5_symbol": "BRENT_F6", "category": "Energie"},
+    "WHEAT": {"name": "Weizen", "symbol": "ZW=F", "mt5_symbol": "Wheat_H6", "category": "Agrar"},
+    "CORN": {"name": "Mais", "symbol": "ZC=F", "mt5_symbol": "Corn_H6", "category": "Agrar"},
+    "SOYBEANS": {"name": "Sojabohnen", "symbol": "ZS=F", "mt5_symbol": "Sbean_F6", "category": "Agrar"},
+    "COFFEE": {"name": "Kaffee", "symbol": "KC=F", "mt5_symbol": "Coffee_H6", "category": "Agrar"},
+    "SUGAR": {"name": "Zucker", "symbol": "SB=F", "mt5_symbol": "Sugar_H6", "category": "Agrar"},
+    "COTTON": {"name": "Baumwolle", "symbol": "CT=F", "mt5_symbol": "Cotton_H6", "category": "Agrar"},
+    "COCOA": {"name": "Kakao", "symbol": "CC=F", "mt5_symbol": "Cocoa_H6", "category": "Agrar"}
 }
 
 # Models
