@@ -444,9 +444,7 @@ const Dashboard = () => {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <p className="text-sm text-slate-400">
-                  {settings?.mode === 'MT5' ? '🔷 MT5 Konto' : 
-                   settings?.mode === 'BITPANDA' ? '🟢 Bitpanda' : 
-                   '📊 Paper Trading'}
+                  {settings?.mode === 'MT5' ? '🔷 MT5 Konto' : '🟢 Bitpanda'}
                 </p>
                 {mt5Connected && (settings?.mode === 'MT5' || settings?.mode === 'BITPANDA') && (
                   <Badge variant="success" className="bg-emerald-500/20 text-emerald-400 border-emerald-500/50">
