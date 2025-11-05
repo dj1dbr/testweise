@@ -179,6 +179,25 @@ backend:
           - GOLD trades executing successfully with correct XAUUSD symbol
           - Symbol mapping fix is complete and functional
 
+  - task: "WTI_CRUDE Manual Trade Execution"
+    implemented: true
+    working: false
+    file: "metaapi_connector.py, server.py"
+    stuck_count: 1
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: |
+          ❌ WTI_CRUDE trades failing with "MT5 Order konnte nicht platziert werden"
+          - Symbol WTI_F6 exists and is correctly mapped
+          - Other commodities (GOLD, SILVER) execute successfully
+          - Tested multiple quantities (0.01, 0.001) - all failed
+          - Issue appears to be broker-specific trading restrictions for WTI_F6
+          - Not a symbol mapping issue - original ERR_MARKET_UNKNOWN_SYMBOL is fixed
+          - May require investigation of: market hours, margin requirements, or symbol-specific restrictions
+
 frontend:
   - task: "Dashboard UI for Multi-Commodity Trading"
     implemented: true
