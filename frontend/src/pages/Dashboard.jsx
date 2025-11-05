@@ -981,8 +981,17 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
                 id="stop_loss"
                 type="number"
                 step="0.1"
-                value={formData.stop_loss_percent || 2.0}
-                onChange={(e) => setFormData({ ...formData, stop_loss_percent: parseFloat(e.target.value) })}
+                min="0.1"
+                value={formData.stop_loss_percent ?? 2.0}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFormData({ ...formData, stop_loss_percent: val === '' ? '' : parseFloat(val) || 2.0 });
+                }}
+                onBlur={(e) => {
+                  if (e.target.value === '') {
+                    setFormData({ ...formData, stop_loss_percent: 2.0 });
+                  }
+                }}
                 className="bg-slate-800 border-slate-700"
                 data-testid="stop-loss-input"
               />
@@ -993,8 +1002,17 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
                 id="take_profit"
                 type="number"
                 step="0.1"
-                value={formData.take_profit_percent || 4.0}
-                onChange={(e) => setFormData({ ...formData, take_profit_percent: parseFloat(e.target.value) })}
+                min="0.1"
+                value={formData.take_profit_percent ?? 4.0}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFormData({ ...formData, take_profit_percent: val === '' ? '' : parseFloat(val) || 4.0 });
+                }}
+                onBlur={(e) => {
+                  if (e.target.value === '') {
+                    setFormData({ ...formData, take_profit_percent: 4.0 });
+                  }
+                }}
                 className="bg-slate-800 border-slate-700"
                 data-testid="take-profit-input"
               />
