@@ -267,7 +267,8 @@ class TradingSettings(BaseModel):
     max_trades_per_hour: int = 3
     position_size: float = 1.0
     max_portfolio_risk_percent: float = 20.0  # Max 20% of balance for all open positions
-    enabled_commodities: List[str] = ["WTI_CRUDE"]  # List of enabled commodity IDs
+    # Default to commodities available on ICMarketsEU-Demo broker
+    enabled_commodities: List[str] = ["GOLD", "SILVER", "WTI_CRUDE", "BRENT_CRUDE", "PLATINUM", "PALLADIUM", "WHEAT", "CORN", "SOYBEANS", "COFFEE", "SUGAR", "COTTON", "COCOA"]
     
     # MT5 Credentials
     mt5_login: Optional[str] = None
