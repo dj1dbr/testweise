@@ -491,6 +491,45 @@ const Dashboard = () => {
                   </>
                 )}
               </p>
+              
+              {/* Portfolio Risk Warning */}
+              {settings?.max_portfolio_risk_percent && (
+                <div className="mt-3 pt-3 border-t border-slate-700/50">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-400">Portfolio-Risiko:</span>
+                    <div className="flex items-center gap-2">
+                      <span className={
+                        (totalExposure / balance) * 100 > settings.max_portfolio_risk_percent 
+                          ? 'text-red-400 font-semibold' 
+                          : (totalExposure / balance) * 100 > settings.max_portfolio_risk_percent * 0.8
+                          ? 'text-amber-400 font-semibold'
+                          : 'text-green-400'
+                      }>
+                        {((totalExposure / balance) * 100).toFixed(1)}%
+                      </span>
+                      <span className="text-slate-500">/ {settings.max_portfolio_risk_percent}%</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full transition-all duration-500 ${
+                        (totalExposure / balance) * 100 > settings.max_portfolio_risk_percent 
+                          ? 'bg-red-500' 
+                          : (totalExposure / balance) * 100 > settings.max_portfolio_risk_percent * 0.8
+                          ? 'bg-amber-500'
+                          : 'bg-green-500'
+                      }`}
+                      style={{ width: `${Math.min(((totalExposure / balance) * 100 / settings.max_portfolio_risk_percent) * 100, 100)}%` }}
+                    />
+                  </div>
+                  {(totalExposure / balance) * 100 > settings.max_portfolio_risk_percent && (
+                    <div className="flex items-center gap-1 mt-2 text-xs text-red-400">
+                      <AlertCircle className="w-3 h-3" />
+                      <span>Portfolio-Limit überschritten! Bitte Positionen schließen.</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <DollarSign className="w-16 h-16 text-emerald-400/20" />
           </div>
