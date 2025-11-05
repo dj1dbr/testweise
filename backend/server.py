@@ -235,7 +235,7 @@ class Trade(BaseModel):
     price: float
     quantity: float = 1.0
     status: Literal["OPEN", "CLOSED"] = "OPEN"
-    mode: Literal["PAPER", "MT5", "BITPANDA"] = "PAPER"
+    mode: Literal["MT5", "BITPANDA"] = "MT5"
     entry_price: float
     exit_price: Optional[float] = None
     profit_loss: Optional[float] = None
@@ -248,7 +248,7 @@ class TradingSettings(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
     id: str = "trading_settings"
-    mode: Literal["PAPER", "MT5", "BITPANDA"] = "PAPER"
+    mode: Literal["MT5", "BITPANDA"] = "MT5"
     auto_trading: bool = False
     use_ai_analysis: bool = True  # Enable AI analysis
     ai_provider: Literal["emergent", "openai", "gemini", "anthropic", "ollama"] = "emergent"
