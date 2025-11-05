@@ -1211,6 +1211,38 @@ async def get_mt5_status():
             "error": str(e)
         }
 
+@api_router.get("/mt5/symbols")
+async def get_mt5_symbols():
+    """Get all available symbols from MetaAPI broker"""
+    try:
+        from metaapi_connector import get_metaapi_connector
+        
+        connector = await get_metaapi_connector()
+        symbols = await connector.get_symbols()
+        
+        # Filter for commodity-related symbols (Oil, Gold, Silver, etc.)
+        commodity_symbols = []
+        commodity_keywords = ['OIL', 'GOLD', 'XAU', 'XAG', 'SILVER', 'COPPER', 'PLAT', 'PALL', 
+                              'GAS', 'WHEAT', 'CORN', 'SOYBEAN', 'COFFEE', 'BRENT', 'WTI', 'CL']
+        
+        for symbol in symbols:
+            symbol_name = symbol.get('symbol', '').upper()
+            # Check if any commodity keyword is in the symbol name
+            if any(keyword in symbol_name for keyword in commodity_keywords):
+                commodity_symbols.append(symbol)
+        
+        logger.info(f"Found {len(commodity_symbols)} commodity symbols out of {len(symbols)} total")
+        
+        return {
+            "success": True,
+            "total_symbols": len(symbols),
+            "commodity_symbols": commodity_symbols,
+            "all_symbols": symbols  # Include all symbols for reference
+        }
+    except Exception as e:
+        logger.error(f"Error fetching MetaAPI symbols: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch symbols: {str(e)}")
+
 # Include the router in the main app
 app.include_router(api_router)
 
