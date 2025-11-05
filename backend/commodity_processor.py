@@ -12,21 +12,31 @@ from datetime import datetime, timezone
 logger = logging.getLogger(__name__)
 
 # Commodity definitions
+# mt5_symbol values are based on ICMarketsEU-Demo broker (London region)
+# These symbols were retrieved via MetaAPI /symbols endpoint
 COMMODITIES = {
-    "WTI_CRUDE": {"name": "WTI Crude Oil", "symbol": "CL=F", "mt5_symbol": "USOIL", "category": "Energie", "unit": "USD/Barrel", "platform": "MT5"},
-    "BRENT_CRUDE": {"name": "Brent Crude Oil", "symbol": "BZ=F", "mt5_symbol": "UKOIL", "category": "Energie", "unit": "USD/Barrel", "platform": "MT5"},
+    # Precious Metals (Spot prices)
     "GOLD": {"name": "Gold", "symbol": "GC=F", "mt5_symbol": "XAUUSD", "category": "Edelmetalle", "unit": "USD/oz", "platform": "MT5"},
     "SILVER": {"name": "Silber", "symbol": "SI=F", "mt5_symbol": "XAGUSD", "category": "Edelmetalle", "unit": "USD/oz", "platform": "MT5"},
     "PLATINUM": {"name": "Platin", "symbol": "PL=F", "mt5_symbol": "XPTUSD", "category": "Edelmetalle", "unit": "USD/oz", "platform": "MT5"},
     "PALLADIUM": {"name": "Palladium", "symbol": "PA=F", "mt5_symbol": "XPDUSD", "category": "Edelmetalle", "unit": "USD/oz", "platform": "MT5"},
-    "COPPER": {"name": "Kupfer", "symbol": "HG=F", "mt5_symbol": "COPPER", "category": "Industriemetalle", "unit": "USD/lb", "platform": "MT5"},
-    "ALUMINUM": {"name": "Aluminium", "symbol": "ALI=F", "mt5_symbol": "ALUMINUM", "category": "Industriemetalle", "unit": "USD/ton", "platform": "MT5"},
-    "NATURAL_GAS": {"name": "Natural Gas", "symbol": "NG=F", "mt5_symbol": "NATURALGAS", "category": "Energie", "unit": "USD/MMBtu", "platform": "MT5"},
-    "HEATING_OIL": {"name": "Heizöl", "symbol": "HO=F", "mt5_symbol": "HEATINGOIL", "category": "Energie", "unit": "USD/Gallon", "platform": "MT5"},
-    "WHEAT": {"name": "Weizen", "symbol": "ZW=F", "mt5_symbol": "WHEAT", "category": "Agrar", "unit": "USD/Bushel", "platform": "MT5"},
-    "CORN": {"name": "Mais", "symbol": "ZC=F", "mt5_symbol": "CORN", "category": "Agrar", "unit": "USD/Bushel", "platform": "MT5"},
-    "SOYBEANS": {"name": "Sojabohnen", "symbol": "ZS=F", "mt5_symbol": "SOYBEANS", "category": "Agrar", "unit": "USD/Bushel", "platform": "MT5"},
-    "COFFEE": {"name": "Kaffee", "symbol": "KC=F", "mt5_symbol": "COFFEE", "category": "Agrar", "unit": "USD/lb", "platform": "MT5"},
+    
+    # Energy (Futures)
+    "WTI_CRUDE": {"name": "WTI Crude Oil", "symbol": "CL=F", "mt5_symbol": "WTI_F6", "category": "Energie", "unit": "USD/Barrel", "platform": "MT5"},
+    "BRENT_CRUDE": {"name": "Brent Crude Oil", "symbol": "BZ=F", "mt5_symbol": "BRENT_F6", "category": "Energie", "unit": "USD/Barrel", "platform": "MT5"},
+    
+    # Agricultural (Futures)
+    "WHEAT": {"name": "Weizen", "symbol": "ZW=F", "mt5_symbol": "Wheat_H6", "category": "Agrar", "unit": "USD/Bushel", "platform": "MT5"},
+    "CORN": {"name": "Mais", "symbol": "ZC=F", "mt5_symbol": "Corn_H6", "category": "Agrar", "unit": "USD/Bushel", "platform": "MT5"},
+    "SOYBEANS": {"name": "Sojabohnen", "symbol": "ZS=F", "mt5_symbol": "Sbean_F6", "category": "Agrar", "unit": "USD/Bushel", "platform": "MT5"},
+    "COFFEE": {"name": "Kaffee", "symbol": "KC=F", "mt5_symbol": "Coffee_H6", "category": "Agrar", "unit": "USD/lb", "platform": "MT5"},
+    "SUGAR": {"name": "Zucker", "symbol": "SB=F", "mt5_symbol": "Sugar_H6", "category": "Agrar", "unit": "USD/lb", "platform": "MT5"},
+    "COTTON": {"name": "Baumwolle", "symbol": "CT=F", "mt5_symbol": "Cotton_H6", "category": "Agrar", "unit": "USD/lb", "platform": "MT5"},
+    "COCOA": {"name": "Kakao", "symbol": "CC=F", "mt5_symbol": "Cocoa_H6", "category": "Agrar", "unit": "USD/ton", "platform": "MT5"},
+    
+    # Commodities NOT available on ICMarketsEU-Demo:
+    # - Copper, Aluminum (not available as separate commodities)
+    # - Natural Gas, Heating Oil (not available)
     
     # Kryptowährungen (Bitpanda)
     "BITCOIN": {"name": "Bitcoin", "symbol": "BTC-USD", "bitpanda_symbol": "BTC_EUR", "category": "Kryptowährungen", "unit": "EUR", "platform": "BITPANDA"},
