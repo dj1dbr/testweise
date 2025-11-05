@@ -23,6 +23,8 @@ const Dashboard = () => {
   const [commodities, setCommodities] = useState({}); // Commodity definitions
   const [currentCommodityIndex, setCurrentCommodityIndex] = useState(0); // For carousel
   const [historicalData, setHistoricalData] = useState([]);
+  const [selectedCommodity, setSelectedCommodity] = useState(null); // For chart modal
+  const [chartModalOpen, setChartModalOpen] = useState(false);
   const [trades, setTrades] = useState([]);
   const [stats, setStats] = useState(null);
   const [settings, setSettings] = useState(null);
