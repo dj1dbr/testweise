@@ -20,6 +20,7 @@ from threading import Thread
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 from commodity_processor import COMMODITIES, fetch_commodity_data, calculate_indicators, generate_signal, calculate_position_size
 from trailing_stop import update_trailing_stops, check_stop_loss_triggers
+from ai_position_manager import manage_open_positions
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
