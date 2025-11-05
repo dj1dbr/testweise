@@ -793,8 +793,10 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
             stop_loss = price * (1 + settings.get('stop_loss_percent', 2.0) / 100)
             take_profit = price * (1 - settings.get('take_profit_percent', 4.0) / 100)
         
-        # WICHTIG: Bei MT5 Mode - Order an MetaAPI senden!
-        mt5_ticket = None
+        # WICHTIG: Order an Trading-Plattform senden!
+        platform_ticket = None
+        
+        # MT5 Mode
         if settings.get('mode') == 'MT5':
             try:
                 from metaapi_connector import get_metaapi_connector
@@ -803,13 +805,13 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
                 commodity_info = COMMODITIES.get(commodity, {})
                 mt5_symbol = commodity_info.get('mt5_symbol', 'XAUUSD')
                 
-                # Warnung: Nur Edelmetalle funktionieren auf ICMarkets MT5
-                MT5_TRADEABLE = ['GOLD', 'SILVER', 'PLATINUM', 'PALLADIUM']
-                if commodity not in MT5_TRADEABLE:
-                    logger.warning(f"⚠️ {commodity} ist auf diesem MT5-Broker nicht handelbar! Nur Edelmetalle verfügbar.")
+                # Prüfen ob Rohstoff auf MT5 verfügbar
+                platforms = commodity_info.get('platforms', [])
+                if 'MT5' not in platforms:
+                    logger.warning(f"⚠️ {commodity} ist auf MT5 nicht handelbar!")
                     raise HTTPException(
                         status_code=400, 
-                        detail=f"{commodity_info.get('name', commodity)} ist auf Ihrem MT5-Broker nicht verfügbar. Nur Edelmetalle (Gold, Silber, Platin, Palladium) können gehandelt werden."
+                        detail=f"{commodity_info.get('name', commodity)} ist auf MT5 nicht verfügbar. Nutzen Sie Bitpanda für diesen Rohstoff oder wählen Sie einen verfügbaren Rohstoff."
                     )
                 
                 connector = await get_metaapi_connector()
@@ -823,8 +825,8 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
                 )
                 
                 if result and result.get('success'):
-                    mt5_ticket = result.get('ticket')
-                    logger.info(f"✅ Order an MT5 gesendet: Ticket #{mt5_ticket}")
+                    platform_ticket = result.get('ticket')
+                    logger.info(f"✅ Order an MT5 gesendet: Ticket #{platform_ticket}")
                 else:
                     logger.error("❌ MT5 Order fehlgeschlagen!")
                     raise HTTPException(status_code=500, detail="MT5 Order konnte nicht platziert werden")
@@ -835,8 +837,49 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
                 logger.error(f"❌ Fehler beim Senden an MT5: {e}")
                 raise HTTPException(status_code=500, detail=f"MT5 Fehler: {str(e)}")
         
-        # Nur speichern wenn MT5 Order erfolgreich
-        if mt5_ticket:
+        # Bitpanda Mode
+        elif settings.get('mode') == 'BITPANDA':
+            try:
+                from bitpanda_connector import get_bitpanda_connector
+                from commodity_processor import COMMODITIES
+                
+                commodity_info = COMMODITIES.get(commodity, {})
+                bitpanda_symbol = commodity_info.get('bitpanda_symbol', 'GOLD')
+                
+                # Prüfen ob Rohstoff auf Bitpanda verfügbar
+                platforms = commodity_info.get('platforms', [])
+                if 'BITPANDA' not in platforms:
+                    logger.warning(f"⚠️ {commodity} ist auf Bitpanda nicht handelbar!")
+                    raise HTTPException(
+                        status_code=400, 
+                        detail=f"{commodity_info.get('name', commodity)} ist auf Bitpanda nicht verfügbar."
+                    )
+                
+                connector = await get_bitpanda_connector()
+                result = await connector.place_order(
+                    symbol=bitpanda_symbol,
+                    order_type=trade_type.upper(),
+                    volume=quantity,
+                    price=price,
+                    sl=stop_loss,
+                    tp=take_profit
+                )
+                
+                if result and result.get('success'):
+                    platform_ticket = result.get('order_id', result.get('ticket'))
+                    logger.info(f"✅ Order an Bitpanda gesendet: #{platform_ticket}")
+                else:
+                    logger.error("❌ Bitpanda Order fehlgeschlagen!")
+                    raise HTTPException(status_code=500, detail="Bitpanda Order konnte nicht platziert werden")
+                    
+            except HTTPException:
+                raise
+            except Exception as e:
+                logger.error(f"❌ Fehler beim Senden an Bitpanda: {e}")
+                raise HTTPException(status_code=500, detail=f"Bitpanda Fehler: {str(e)}")
+        
+        # Nur speichern wenn Order erfolgreich
+        if platform_ticket:
             trade = Trade(
                 commodity=commodity,
                 type=trade_type.upper(),
