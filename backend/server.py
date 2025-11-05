@@ -265,8 +265,8 @@ class TradingSettings(BaseModel):
     max_trades_per_hour: int = 3
     position_size: float = 1.0
     max_portfolio_risk_percent: float = 20.0  # Max 20% of balance for all open positions
-    # Nur Edelmetalle verfügbar auf ICMarketsEU-Demo broker
-    enabled_commodities: List[str] = ["GOLD", "SILVER", "PLATINUM", "PALLADIUM"]
+    # Alle Rohstoffe aktiviert (Hinweis: Nur Metalle funktionieren auf ICMarkets MT5)
+    enabled_commodities: List[str] = ["GOLD", "SILVER", "PLATINUM", "PALLADIUM", "WTI_CRUDE", "BRENT_CRUDE", "WHEAT", "CORN", "SOYBEANS", "COFFEE", "SUGAR", "COTTON", "COCOA"]
     
     # MT5 Credentials
     mt5_login: Optional[str] = None
