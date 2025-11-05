@@ -1220,13 +1220,15 @@ async def get_mt5_symbols():
         connector = await get_metaapi_connector()
         symbols = await connector.get_symbols()
         
+        # MetaAPI returns symbols as an array of strings
         # Filter for commodity-related symbols (Oil, Gold, Silver, etc.)
         commodity_symbols = []
         commodity_keywords = ['OIL', 'GOLD', 'XAU', 'XAG', 'SILVER', 'COPPER', 'PLAT', 'PALL', 
                               'GAS', 'WHEAT', 'CORN', 'SOYBEAN', 'COFFEE', 'BRENT', 'WTI', 'CL']
         
         for symbol in symbols:
-            symbol_name = symbol.get('symbol', '').upper()
+            # symbol is a string, not a dict
+            symbol_name = symbol.upper()
             # Check if any commodity keyword is in the symbol name
             if any(keyword in symbol_name for keyword in commodity_keywords):
                 commodity_symbols.append(symbol)
@@ -1236,8 +1238,8 @@ async def get_mt5_symbols():
         return {
             "success": True,
             "total_symbols": len(symbols),
-            "commodity_symbols": commodity_symbols,
-            "all_symbols": symbols  # Include all symbols for reference
+            "commodity_symbols": sorted(commodity_symbols),  # Sort for easier reading
+            "all_symbols": sorted(symbols)  # Include all symbols for reference, sorted
         }
     except Exception as e:
         logger.error(f"Error fetching MetaAPI symbols: {e}")
