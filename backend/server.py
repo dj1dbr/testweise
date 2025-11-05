@@ -747,7 +747,7 @@ async def get_market_history(limit: int = 100):
 
 @api_router.post("/trades/execute")
 async def execute_trade(trade_type: str, price: float, quantity: float = None, commodity: str = "WTI_CRUDE"):
-    """Manually execute a trade with automatic position sizing"""
+    """Manually execute a trade with automatic position sizing - SENDET AN MT5!"""
     try:
         settings = await db.trading_settings.find_one({"id": "trading_settings"})
         if not settings:
@@ -784,25 +784,63 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
             stop_loss = price * (1 + settings.get('stop_loss_percent', 2.0) / 100)
             take_profit = price * (1 - settings.get('take_profit_percent', 4.0) / 100)
         
-        trade = Trade(
-            commodity=commodity,
-            type=trade_type.upper(),
-            price=price,
-            quantity=quantity,
-            mode=settings.get('mode', 'PAPER'),
-            entry_price=price,
-            stop_loss=stop_loss,
-            take_profit=take_profit,
-            strategy_signal="Manual"
-        )
+        # WICHTIG: Bei MT5 Mode - Order an MetaAPI senden!
+        mt5_ticket = None
+        if settings.get('mode') == 'MT5':
+            try:
+                from metaapi_connector import get_metaapi_connector
+                from commodity_processor import COMMODITIES
+                
+                commodity_info = COMMODITIES.get(commodity, {})
+                mt5_symbol = commodity_info.get('mt5_symbol', 'XAUUSD')
+                
+                connector = await get_metaapi_connector()
+                result = await connector.place_order(
+                    symbol=mt5_symbol,
+                    order_type=trade_type.upper(),
+                    volume=quantity,
+                    price=price,
+                    sl=stop_loss,
+                    tp=take_profit
+                )
+                
+                if result and result.get('success'):
+                    mt5_ticket = result.get('ticket')
+                    logger.info(f"✅ Order an MT5 gesendet: Ticket #{mt5_ticket}")
+                else:
+                    logger.error("❌ MT5 Order fehlgeschlagen!")
+                    raise HTTPException(status_code=500, detail="MT5 Order konnte nicht platziert werden")
+                    
+            except Exception as e:
+                logger.error(f"❌ Fehler beim Senden an MT5: {e}")
+                raise HTTPException(status_code=500, detail=f"MT5 Fehler: {str(e)}")
         
-        doc = trade.model_dump()
-        doc['timestamp'] = doc['timestamp'].isoformat()
-        await db.trades.insert_one(doc)
-        
-        logger.info(f"✅ Manual trade executed: {trade_type} {quantity:.4f} {commodity} @ {price}")
-        
-        return {"success": True, "trade": doc}
+        # Nur speichern wenn Mode = PAPER oder MT5 Order erfolgreich
+        if settings.get('mode') == 'PAPER' or mt5_ticket:
+            trade = Trade(
+                commodity=commodity,
+                type=trade_type.upper(),
+                price=price,
+                quantity=quantity,
+                mode=settings.get('mode', 'PAPER'),
+                entry_price=price,
+                stop_loss=stop_loss,
+                take_profit=take_profit,
+                strategy_signal=f"Manual{' - MT5 #' + str(mt5_ticket) if mt5_ticket else ''}"
+            )
+            
+            doc = trade.model_dump()
+            doc['timestamp'] = doc['timestamp'].isoformat()
+            await db.trades.insert_one(doc)
+            
+            logger.info(f"✅ Trade gespeichert: {trade_type} {quantity:.4f} {commodity} @ {price}")
+            
+            return {"success": True, "trade": doc, "mt5_ticket": mt5_ticket}
+        else:
+            raise HTTPException(status_code=500, detail="Trade konnte nicht ausgeführt werden")
+            
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error executing manual trade: {e}")
         raise HTTPException(status_code=500, detail=str(e))
