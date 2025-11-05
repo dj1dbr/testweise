@@ -408,6 +408,9 @@ async def get_ai_analysis(market_data: dict, df: pd.DataFrame, commodity_id: str
     """Get AI analysis for trading decision"""
     global ai_chat
     
+    # AI-Analyse temporär deaktiviert wegen Budget-Limit
+    return None
+    
     if not ai_chat:
         logger.warning("AI chat not initialized, using standard technical analysis")
         return None
