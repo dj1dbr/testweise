@@ -142,19 +142,21 @@ class MetaAPIConnector:
         try:
             url = f"{self.base_url}/users/current/accounts/{self.account_id}/trade"
             
-            # Prepare order payload
+            # Prepare order payload - MARKET ORDER (kein Preis!)
             payload = {
                 "actionType": "ORDER_TYPE_BUY" if order_type.upper() == "BUY" else "ORDER_TYPE_SELL",
                 "symbol": symbol,
                 "volume": volume
             }
             
+            # Stop Loss und Take Profit hinzufügen
             if sl:
                 payload["stopLoss"] = sl
             if tp:
                 payload["takeProfit"] = tp
-            if price:
-                payload["openPrice"] = price
+            
+            # WICHTIG: openPrice NICHT bei Market Orders!
+            # Nur bei Limit/Pending Orders verwenden
             
             async with aiohttp.ClientSession() as session:
                 async with session.post(
