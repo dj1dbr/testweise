@@ -761,8 +761,9 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
         
         # Automatische Position Size Berechnung wenn nicht angegeben
         if quantity is None or quantity == 1.0:
-            # Hole aktuelle Balance
+            # Hole aktuelle Balance und Free Margin
             balance = 2199.81  # Default
+            free_margin = None
             if settings.get('mode') == 'MT5':
                 try:
                     from metaapi_connector import get_metaapi_connector
@@ -770,17 +771,18 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
                     account_info = await connector.get_account_info()
                     if account_info:
                         balance = account_info['balance']
+                        free_margin = account_info.get('free_margin')
                 except:
                     pass
             
             # Berechne Position Size (max 20% des verfügbaren Kapitals)
             from commodity_processor import calculate_position_size
-            quantity = await calculate_position_size(balance, price, db, settings.get('max_portfolio_risk_percent', 20.0))
+            quantity = await calculate_position_size(balance, price, db, settings.get('max_portfolio_risk_percent', 20.0), free_margin)
             
-            # Minimum 0.01, Maximum 1.0 für Sicherheit
-            quantity = max(0.01, min(quantity, 1.0))
+            # Minimum 0.001, Maximum 0.01 für Sicherheit (reduziert wegen Margin-Problemen)
+            quantity = max(0.001, min(quantity, 0.01))
             
-            logger.info(f"📊 Auto Position Size: {quantity:.4f} lots (Balance: {balance:.2f}, Price: {price:.2f})")
+            logger.info(f"📊 Auto Position Size: {quantity:.4f} lots (Balance: {balance:.2f}, Free Margin: {free_margin}, Price: {price:.2f})")
         
         # Stop Loss und Take Profit richtig berechnen für BUY und SELL
         if trade_type.upper() == 'BUY':
