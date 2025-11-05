@@ -779,8 +779,8 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
             from commodity_processor import calculate_position_size
             quantity = await calculate_position_size(balance, price, db, settings.get('max_portfolio_risk_percent', 20.0), free_margin)
             
-            # Minimum 0.001, Maximum 0.01 für Sicherheit (reduziert wegen Margin-Problemen)
-            quantity = max(0.001, min(quantity, 0.01))
+            # Minimum 0.01 (Broker-Minimum), Maximum 0.1 für Sicherheit
+            quantity = max(0.01, min(quantity, 0.1))
             
             logger.info(f"📊 Auto Position Size: {quantity:.4f} lots (Balance: {balance:.2f}, Free Margin: {free_margin}, Price: {price:.2f})")
         
