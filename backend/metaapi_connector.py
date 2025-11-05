@@ -16,8 +16,8 @@ class MetaAPIConnector:
     def __init__(self, account_id: str, token: str):
         self.account_id = account_id
         self.token = token
-        # Correct MetaAPI base URL
-        self.base_url = "https://mt-client-api-v1.new-york.agiliumtrade.ai"
+        # MetaAPI base URL - London region for ICMarketsEU-Demo
+        self.base_url = "https://mt-client-api-v1.london.agiliumtrade.ai"
         self.connected = False
         self.balance = 0.0
         self.equity = 0.0
