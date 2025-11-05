@@ -168,11 +168,21 @@ class MetaAPIConnector:
                     if response.status in [200, 201]:
                         result = await response.json()
                         
-                        logger.info(f"✅ MetaAPI Order placed: {order_type} {volume} {symbol}")
+                        # DEBUG: Log komplette Response
+                        logger.info(f"MetaAPI Response: {result}")
+                        
+                        # Extrahiere Ticket - versuche verschiedene Felder
+                        ticket = (result.get('orderId') or 
+                                 result.get('positionId') or 
+                                 result.get('stringCode') or
+                                 result.get('numericCode') or
+                                 'unknown')
+                        
+                        logger.info(f"✅ MetaAPI Order placed: {order_type} {volume} {symbol} - Ticket: {ticket}")
                         
                         return {
                             "success": True,
-                            "ticket": result.get('orderId', result.get('positionId', 'unknown')),
+                            "ticket": ticket,
                             "volume": volume,
                             "price": result.get('price', price or 0.0),
                             "type": order_type,
