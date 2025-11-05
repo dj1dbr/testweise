@@ -86,18 +86,45 @@ async def fetch_broker_symbols():
 def find_matching_symbol(commodity_id, patterns, broker_symbols):
     """Finde das passende Symbol beim Broker"""
     keywords = patterns['keywords']
+    current = patterns['current']
+    
+    # Prüfe zuerst, ob das aktuelle Symbol verfügbar ist
+    if current in broker_symbols:
+        return current
     
     # Suche nach exakten Matches oder Teilübereinstimmungen
     matches = []
     for symbol in broker_symbols:
         symbol_upper = symbol.upper()
+        
+        # Ignoriere Aktien-Symbole (.NYSE, .NAS, .ETR, .PAR, etc.)
+        if '.' in symbol:
+            continue
+        
+        # Ignoriere Forex-Paare (außer für Metalle)
+        if 'USD' in symbol_upper or 'EUR' in symbol_upper or 'GBP' in symbol_upper:
+            # Nur erlauben für Metalle (XAU, XAG, XPT, XPD)
+            if not any(metal in symbol_upper for metal in ['XAU', 'XAG', 'XPT', 'XPD']):
+                continue
+        
+        # Scoring-System für bessere Matches
+        score = 0
         for keyword in keywords:
-            if keyword in symbol_upper:
-                # Priorität: Kürzere Symbole sind wahrscheinlich die richtigen
-                matches.append((symbol, len(symbol)))
+            if keyword == symbol_upper:
+                score += 100  # Exakter Match
+            elif symbol_upper.startswith(keyword):
+                score += 50  # Beginnt mit Keyword
+            elif keyword in symbol_upper:
+                score += 10  # Enthält Keyword
+        
+        if score > 0:
+            # Bevorzuge kürzere Symbole
+            length_penalty = len(symbol) / 10
+            final_score = score - length_penalty
+            matches.append((symbol, final_score))
     
-    # Sortiere nach Länge (kürzere zuerst)
-    matches.sort(key=lambda x: x[1])
+    # Sortiere nach Score (höchster zuerst)
+    matches.sort(key=lambda x: x[1], reverse=True)
     
     if matches:
         return matches[0][0]  # Bestes Match
