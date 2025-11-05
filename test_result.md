@@ -219,10 +219,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "MetaAPI Account Connection"
-    - "Verify correct account ID, region, and token"
+    - "WTI_CRUDE Manual Trade Execution"
   stuck_tasks:
-    - "MetaAPI Account Connection - Account not found in any region"
+    - "WTI_CRUDE Manual Trade Execution - Broker restrictions"
   test_all: false
   test_priority: "high_first"
 
