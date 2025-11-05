@@ -1003,17 +1003,15 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
             <select
               id="mode"
               className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md text-white"
-              value={formData.mode || 'PAPER'}
+              value={formData.mode || 'MT5'}
               onChange={(e) => setFormData({ ...formData, mode: e.target.value })}
               data-testid="mode-select"
             >
-              <option value="PAPER">📊 Paper Trading (Simulation)</option>
-              <option value="MT5">🔷 MetaTrader 5 (Rohstoffe)</option>
+              <option value="MT5">🔷 MetaTrader 5 (Edelmetalle)</option>
               <option value="BITPANDA">🟢 Bitpanda (Krypto & Rohstoffe)</option>
             </select>
             <p className="text-xs text-slate-500">
-              {formData.mode === 'PAPER' && 'Simuliertes Trading ohne echtes Geld'}
-              {formData.mode === 'MT5' && 'Echtes Trading über MetaTrader 5 - Traditionelle Rohstoffe'}
+              {formData.mode === 'MT5' && 'Echtes Trading über MetaTrader 5 - Nur Edelmetalle verfügbar (Gold, Silber, Platin, Palladium)'}
               {formData.mode === 'BITPANDA' && 'Echtes Trading über Bitpanda - Kryptowährungen & Rohstoffe'}
             </p>
           </div>
