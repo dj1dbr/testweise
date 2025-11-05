@@ -885,11 +885,11 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
                 type=trade_type.upper(),
                 price=price,
                 quantity=quantity,
-                mode=settings.get('mode', 'PAPER'),
+                mode=settings.get('mode', 'MT5'),
                 entry_price=price,
                 stop_loss=stop_loss,
                 take_profit=take_profit,
-                strategy_signal=f"Manual{' - MT5 #' + str(mt5_ticket) if mt5_ticket else ''}"
+                strategy_signal=f"Manual - {settings.get('mode')} #{platform_ticket}"
             )
             
             doc = trade.model_dump()
