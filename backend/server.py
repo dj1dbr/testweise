@@ -746,12 +746,35 @@ async def get_market_history(limit: int = 100):
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/trades/execute")
-async def execute_trade(trade_type: str, price: float, quantity: float = 1.0, commodity: str = "WTI_CRUDE"):
-    """Manually execute a trade"""
+async def execute_trade(trade_type: str, price: float, quantity: float = None, commodity: str = "WTI_CRUDE"):
+    """Manually execute a trade with automatic position sizing"""
     try:
         settings = await db.trading_settings.find_one({"id": "trading_settings"})
         if not settings:
             settings = TradingSettings().model_dump()
+        
+        # Automatische Position Size Berechnung wenn nicht angegeben
+        if quantity is None or quantity == 1.0:
+            # Hole aktuelle Balance
+            balance = 2199.81  # Default
+            if settings.get('mode') == 'MT5':
+                try:
+                    from metaapi_connector import get_metaapi_connector
+                    connector = await get_metaapi_connector()
+                    account_info = await connector.get_account_info()
+                    if account_info:
+                        balance = account_info['balance']
+                except:
+                    pass
+            
+            # Berechne Position Size (max 20% des verfügbaren Kapitals)
+            from commodity_processor import calculate_position_size
+            quantity = await calculate_position_size(balance, price, db, settings.get('max_portfolio_risk_percent', 20.0))
+            
+            # Minimum 0.01, Maximum 1.0 für Sicherheit
+            quantity = max(0.01, min(quantity, 1.0))
+            
+            logger.info(f"📊 Auto Position Size: {quantity:.4f} lots (Balance: {balance:.2f}, Price: {price:.2f})")
         
         # Stop Loss und Take Profit richtig berechnen für BUY und SELL
         if trade_type.upper() == 'BUY':
@@ -777,7 +800,7 @@ async def execute_trade(trade_type: str, price: float, quantity: float = 1.0, co
         doc['timestamp'] = doc['timestamp'].isoformat()
         await db.trades.insert_one(doc)
         
-        logger.info(f"✅ Manual trade executed: {trade_type} {quantity} {commodity} @ {price}")
+        logger.info(f"✅ Manual trade executed: {trade_type} {quantity:.4f} {commodity} @ {price}")
         
         return {"success": True, "trade": doc}
     except Exception as e:
