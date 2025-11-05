@@ -835,6 +835,9 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
             
             logger.info(f"✅ Trade gespeichert: {trade_type} {quantity:.4f} {commodity} @ {price}")
             
+            # MongoDB _id entfernen für JSON Response
+            doc.pop('_id', None)
+            
             return {"success": True, "trade": doc, "mt5_ticket": mt5_ticket}
         else:
             raise HTTPException(status_code=500, detail="Trade konnte nicht ausgeführt werden")
