@@ -312,14 +312,10 @@ class RohstoffTraderTester:
     
     async def test_manual_trade_wti_crude(self):
         """Test manual trade execution for WTI_CRUDE (CRITICAL TEST)"""
-        trade_data = {
-            "trade_type": "BUY",
-            "price": 60.5,
-            "commodity": "WTI_CRUDE",
-            "quantity": 0.01
-        }
+        # Use query parameters instead of JSON body
+        endpoint = "/api/trades/execute?trade_type=BUY&price=60.5&commodity=WTI_CRUDE&quantity=0.01"
         
-        success, data = await self.make_request("POST", "/api/trades/execute", trade_data)
+        success, data = await self.make_request("POST", endpoint)
         
         if success:
             trade_info = data.get("trade", {})
