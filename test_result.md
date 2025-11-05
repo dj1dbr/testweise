@@ -126,18 +126,33 @@ backend:
   
   - task: "MT5 Symbol Mapping for Multiple Commodities"
     implemented: true
-    working: false
+    working: true
     file: "commodity_processor.py, metaapi_connector.py, server.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-      - working: false
+      - working: true
         agent: "main"
         comment: |
-          Cannot test symbol mapping until MetaAPI connection is fixed.
-          Added get_symbols() method to fetch available broker symbols, but cannot retrieve symbols due to account connection failure.
-          Created /api/mt5/symbols endpoint to display available symbols once connection is working.
+          ✅ FIXED! Retrieved all 2021 symbols from ICMarketsEU-Demo broker via MetaAPI.
+          Updated symbol mappings:
+          - WTI: USOIL -> WTI_F6 ✓
+          - Brent: UKOIL -> BRENT_F6 ✓
+          - Gold: XAUUSD ✓ (unchanged)
+          - Silver: XAGUSD ✓ (unchanged)
+          - Platinum: XPTUSD ✓ (unchanged)
+          - Palladium: XPDUSD ✓ (unchanged)
+          - Wheat: WHEAT -> Wheat_H6 ✓
+          - Corn: CORN -> Corn_H6 ✓
+          - Soybeans: SOYBEANS -> Sbean_F6 ✓
+          - Coffee: COFFEE -> Coffee_H6 ✓
+          Added: Sugar_H6, Cotton_H6, Cocoa_H6
+          
+          Removed unavailable commodities: Copper, Aluminum, Natural Gas, Heating Oil
+          
+          Created /api/mt5/symbols endpoint to display all available broker symbols.
+          Ready for testing manual trades with corrected symbols.
 
 frontend:
   - task: "Dashboard UI for Multi-Commodity Trading"
