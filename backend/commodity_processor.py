@@ -250,13 +250,13 @@ def generate_signal(latest_data):
         return "HOLD", "NEUTRAL"
 
 
-async def calculate_position_size(balance: float, price: float, db, max_risk_percent: float = 20.0, free_margin: float = None) -> float:
-    """Calculate position size ensuring max portfolio risk and considering free margin"""
+async def calculate_position_size(balance: float, price: float, db, max_risk_percent: float = 20.0, free_margin: float = None, platform: str = "MT5") -> float:
+    """Calculate position size ensuring max portfolio risk per platform and considering free margin"""
     try:
-        # Get all open positions from database
-        open_trades = await db.trades.find({"status": "OPEN"}).to_list(100)
+        # Get all open positions from database FOR THIS PLATFORM ONLY
+        open_trades = await db.trades.find({"status": "OPEN", "mode": platform}).to_list(100)
         
-        # Calculate total exposure from open positions
+        # Calculate total exposure from open positions ON THIS PLATFORM
         total_exposure = sum([trade.get('entry_price', 0) * trade.get('quantity', 0) for trade in open_trades])
         
         # Calculate available capital (max_risk_percent of balance minus current exposure)
@@ -277,8 +277,8 @@ async def calculate_position_size(balance: float, price: float, db, max_risk_per
             lot_size = max(0.01, min(lot_size, 0.1))
         else:
             lot_size = 0.01  # Minimum Lot Size (Broker-Standard)
-            
-        logger.info(f"Position size: {lot_size} lots (Balance: {balance}, Price: {price}, Free Margin: {free_margin}, Exposure: {total_exposure:.2f}/{max_portfolio_value:.2f})")
+        
+        logger.info(f"[{platform}] Position size: {lot_size} lots (Balance: {balance:.2f}, Free Margin: {free_margin}, Price: {price:.2f}, Exposure: {total_exposure:.2f}/{max_portfolio_value:.2f})")
         
         return lot_size
     except Exception as e:
