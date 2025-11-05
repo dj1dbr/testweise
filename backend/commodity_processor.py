@@ -162,19 +162,19 @@ async def calculate_position_size(balance: float, price: float, db, max_risk_per
         available_capital = max(0, max_portfolio_value - total_exposure)
         
         # WICHTIG: Wenn free_margin übergeben wurde, limitiere auf verfügbare Margin
-        if free_margin is not None and free_margin < 100:
-            # Bei wenig freier Margin (< 100 EUR), nutze nur 50% davon für neue Order
-            max_order_value = free_margin * 0.5
+        if free_margin is not None and free_margin < 500:
+            # Bei wenig freier Margin (< 500 EUR), nutze nur 20% davon für neue Order
+            max_order_value = free_margin * 0.2
             available_capital = min(available_capital, max_order_value)
             logger.warning(f"⚠️ Geringe freie Margin ({free_margin:.2f} EUR) - Order auf {max_order_value:.2f} EUR limitiert")
         
         # Calculate lot size
         if available_capital > 0 and price > 0:
-            lot_size = round(available_capital / price, 4)  # 4 Dezimalstellen für kleinere Lots
-            # Minimum 0.001, maximum 0.01 für Sicherheit
-            lot_size = max(0.001, min(lot_size, 0.01))
+            lot_size = round(available_capital / price, 2)  # 2 Dezimalstellen
+            # Minimum 0.01 (Broker-Minimum), maximum 0.1 für Sicherheit
+            lot_size = max(0.01, min(lot_size, 0.1))
         else:
-            lot_size = 0.001  # Minimum Lot Size
+            lot_size = 0.01  # Minimum Lot Size (Broker-Standard)
             
         logger.info(f"Position size: {lot_size} lots (Balance: {balance}, Price: {price}, Free Margin: {free_margin}, Exposure: {total_exposure:.2f}/{max_portfolio_value:.2f})")
         
