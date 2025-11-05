@@ -832,8 +832,8 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
                 logger.error(f"❌ Fehler beim Senden an MT5: {e}")
                 raise HTTPException(status_code=500, detail=f"MT5 Fehler: {str(e)}")
         
-        # Nur speichern wenn Mode = PAPER oder MT5 Order erfolgreich
-        if settings.get('mode') == 'PAPER' or mt5_ticket:
+        # Nur speichern wenn MT5 Order erfolgreich
+        if mt5_ticket:
             trade = Trade(
                 commodity=commodity,
                 type=trade_type.upper(),
