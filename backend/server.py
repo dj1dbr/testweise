@@ -186,27 +186,17 @@ def init_ai_chat(provider="emergent", api_key=None, model="gpt-5", ollama_base_u
         logger.error(f"Failed to initialize AI chat: {e}")
         return None
 
-# Commodity definitions - Updated to match ICMarketsEU-Demo broker symbols
+# Commodity definitions - Nur Edelmetalle (funktionieren auf ICMarketsEU-Demo)
 # mt5_symbol values retrieved via MetaAPI /symbols endpoint (London region)
 COMMODITIES = {
-    # Precious Metals (Spot prices)
+    # Precious Metals (Spot prices) - NUR DIESE FUNKTIONIEREN!
     "GOLD": {"name": "Gold", "symbol": "GC=F", "mt5_symbol": "XAUUSD", "category": "Edelmetalle"},
     "SILVER": {"name": "Silber", "symbol": "SI=F", "mt5_symbol": "XAGUSD", "category": "Edelmetalle"},
     "PLATINUM": {"name": "Platin", "symbol": "PL=F", "mt5_symbol": "XPTUSD", "category": "Edelmetalle"},
-    "PALLADIUM": {"name": "Palladium", "symbol": "PA=F", "mt5_symbol": "XPDUSD", "category": "Edelmetalle"},
+    "PALLADIUM": {"name": "Palladium", "symbol": "PA=F", "mt5_symbol": "XPDUSD", "category": "Edelmetalle"}
     
-    # Energy (Futures)
-    "WTI_CRUDE": {"name": "WTI Crude Oil", "symbol": "CL=F", "mt5_symbol": "WTI_F6", "category": "Energie"},
-    "BRENT_CRUDE": {"name": "Brent Crude Oil", "symbol": "BZ=F", "mt5_symbol": "BRENT_F6", "category": "Energie"},
-    
-    # Agricultural (Futures)
-    "WHEAT": {"name": "Weizen", "symbol": "ZW=F", "mt5_symbol": "Wheat_H6", "category": "Agrar"},
-    "CORN": {"name": "Mais", "symbol": "ZC=F", "mt5_symbol": "Corn_H6", "category": "Agrar"},
-    "SOYBEANS": {"name": "Sojabohnen", "symbol": "ZS=F", "mt5_symbol": "Sbean_F6", "category": "Agrar"},
-    "COFFEE": {"name": "Kaffee", "symbol": "KC=F", "mt5_symbol": "Coffee_H6", "category": "Agrar"},
-    "SUGAR": {"name": "Zucker", "symbol": "SB=F", "mt5_symbol": "Sugar_H6", "category": "Agrar"},
-    "COTTON": {"name": "Baumwolle", "symbol": "CT=F", "mt5_symbol": "Cotton_H6", "category": "Agrar"},
-    "COCOA": {"name": "Kakao", "symbol": "CC=F", "mt5_symbol": "Cocoa_H6", "category": "Agrar"}
+    # Energie & Agrar Futures NICHT verfügbar auf diesem Broker
+    # WTI_CRUDE, BRENT_CRUDE, WHEAT, CORN, etc. können nicht gehandelt werden
 }
 
 # Models
