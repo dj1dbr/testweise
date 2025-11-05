@@ -776,14 +776,22 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
                 except:
                     pass
             
-            # Berechne Position Size (max 20% des verfügbaren Kapitals)
+            # Berechne Position Size (max 20% des verfügbaren Kapitals) PRO PLATTFORM
             from commodity_processor import calculate_position_size
-            quantity = await calculate_position_size(balance, price, db, settings.get('max_portfolio_risk_percent', 20.0), free_margin)
+            current_platform = settings.get('mode', 'MT5')
+            quantity = await calculate_position_size(
+                balance=balance, 
+                price=price, 
+                db=db, 
+                max_risk_percent=settings.get('max_portfolio_risk_percent', 20.0), 
+                free_margin=free_margin,
+                platform=current_platform
+            )
             
             # Minimum 0.01 (Broker-Minimum), Maximum 0.1 für Sicherheit
             quantity = max(0.01, min(quantity, 0.1))
             
-            logger.info(f"📊 Auto Position Size: {quantity:.4f} lots (Balance: {balance:.2f}, Free Margin: {free_margin}, Price: {price:.2f})")
+            logger.info(f"📊 [{current_platform}] Auto Position Size: {quantity:.4f} lots (Balance: {balance:.2f}, Free Margin: {free_margin}, Price: {price:.2f})")
         
         # Stop Loss und Take Profit richtig berechnen für BUY und SELL
         if trade_type.upper() == 'BUY':
