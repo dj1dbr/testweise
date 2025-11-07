@@ -417,16 +417,17 @@ const Dashboard = () => {
     return <Minus className="w-5 h-5" />;
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <RefreshCw className="w-12 h-12 animate-spin mx-auto mb-4 text-cyan-400" />
-          <p className="text-lg">Lade Marktdaten...</p>
-        </div>
-      </div>
-    );
-  }
+  // Removed loading screen - show UI immediately with skeleton states
+  // if (loading) {
+  //   return (
+  //     <div className="flex items-center justify-center min-h-screen">
+  //       <div className="text-center">
+  //         <RefreshCw className="w-12 h-12 animate-spin mx-auto mb-4 text-cyan-400" />
+  //         <p className="text-lg">Lade Marktdaten...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen p-4 md:p-8">
