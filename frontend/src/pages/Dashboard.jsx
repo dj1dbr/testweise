@@ -380,6 +380,36 @@ const Dashboard = () => {
     }
   };
 
+  const handleCloseTrade = async (trade) => {
+    if (!window.confirm(`Position "${trade.commodity} ${trade.type}" wirklich schließen?`)) {
+      return;
+    }
+    
+    try {
+      // Close MT5 position
+      if (trade.mt5_ticket && (trade.platform === 'MT5_LIBERTEX' || trade.platform === 'MT5_ICMARKETS')) {
+        const platform = trade.platform || 'MT5_ICMARKETS';
+        const response = await axios.post(`${API}/trades/close/${trade.mt5_ticket}`, { platform });
+        if (response.data.success) {
+          toast.success('✅ Position geschlossen!');
+          fetchTrades();
+          fetchStats();
+          fetchAccountData();
+        }
+      } else {
+        // Close DB trade
+        const response = await axios.post(`${API}/trades/close/${trade.id}`);
+        if (response.data.success) {
+          toast.success('✅ Trade geschlossen!');
+          fetchTrades();
+          fetchStats();
+        }
+      }
+    } catch (error) {
+      toast.error('Fehler beim Schließen: ' + (error.response?.data?.detail || error.message));
+    }
+  };
+
   const handleDeleteTrade = async (tradeId, tradeName) => {
     if (!window.confirm(`Trade "${tradeName}" wirklich löschen?`)) {
       return;
