@@ -1352,6 +1352,18 @@ async def close_mt5_position(ticket: str):
         logger.error(f"Error closing MetaAPI position: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+
+@api_router.post("/sync/positions")
+async def sync_positions_endpoint():
+    """Sync positions from MT5/Bitpanda to database"""
+    try:
+        await sync_mt5_positions()
+        return {"success": True, "message": "Positions synchronized"}
+    except Exception as e:
+        logger.error(f"Error syncing positions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/mt5/status")
 async def get_mt5_status():
     """Check MetaAPI connection status"""
