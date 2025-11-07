@@ -1213,6 +1213,41 @@ async def get_mt5_positions():
         logger.error(f"Error getting MetaAPI positions: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.delete("/trades/{trade_id}")
+async def delete_trade(trade_id: str):
+    """Delete a specific trade and recalculate stats"""
+    try:
+        result = await db.trades.delete_one({"id": trade_id})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Trade nicht gefunden")
+        
+        # Recalculate stats
+        open_count = await db.trades.count_documents({"status": "OPEN"})
+        closed_count = await db.trades.count_documents({"status": "CLOSED"})
+        closed_trades = await db.trades.find({"status": "CLOSED"}).to_list(1000)
+        total_pl = sum([t.get('profit_loss', 0) for t in closed_trades])
+        
+        await db.stats.update_one(
+            {},
+            {"$set": {
+                "open_positions": open_count,
+                "closed_positions": closed_count,
+                "total_profit_loss": total_pl,
+                "total_trades": open_count + closed_count
+            }},
+            upsert=True
+        )
+        
+        logger.info(f"✅ Trade {trade_id} gelöscht, Stats aktualisiert")
+        return {"success": True, "message": "Trade gelöscht"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting trade: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.post("/mt5/order")
 async def place_mt5_order(
     symbol: str,
