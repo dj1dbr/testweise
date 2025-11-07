@@ -601,26 +601,19 @@ const Dashboard = () => {
                   <p className="text-xs text-slate-500">{commodity.unit}</p>
                 </div>
                 
-                <div className="mb-4">
-                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800/50 border ${market.signal === 'BUY' ? 'border-emerald-500/50' : market.signal === 'SELL' ? 'border-rose-500/50' : 'border-slate-600/50'}`}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/50 border ${market.signal === 'BUY' ? 'border-emerald-500/50' : market.signal === 'SELL' ? 'border-rose-500/50' : 'border-slate-600/50'}`}>
                     <span className={getSignalColor(market.signal)}>
                       {getSignalIcon(market.signal)}
                     </span>
-                    <span className={`text-lg font-bold ${getSignalColor(market.signal)}`}>
+                    <span className={`text-sm font-bold ${getSignalColor(market.signal)}`}>
                       {market.signal || 'HOLD'}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-2">
-                    Trend: <span className={market.trend === 'UP' ? 'text-emerald-400' : market.trend === 'DOWN' ? 'text-rose-400' : 'text-slate-400'}>{market.trend || 'NEUTRAL'}</span>
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="bg-slate-800/50 p-2 rounded">
-                    <span className="text-slate-400">RSI:</span> <span className="text-slate-200 font-medium">{market.rsi?.toFixed(1) || 'N/A'}</span>
-                  </div>
-                  <div className="bg-slate-800/50 p-2 rounded">
-                    <span className="text-slate-400">MACD:</span> <span className="text-slate-200 font-medium">{market.macd?.toFixed(2) || 'N/A'}</span>
+                  <div className="text-xs text-slate-400">
+                    {market.trend === 'UP' && <TrendingUp className="w-4 h-4 text-emerald-400 inline" />}
+                    {market.trend === 'DOWN' && <TrendingDown className="w-4 h-4 text-rose-400 inline" />}
+                    {market.trend === 'NEUTRAL' && <Minus className="w-4 h-4 text-slate-400 inline" />}
                   </div>
                 </div>
                 
