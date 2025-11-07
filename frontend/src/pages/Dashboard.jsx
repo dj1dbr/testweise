@@ -1702,10 +1702,15 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
                 value={formData.stop_loss_percent ?? 2.0}
                 onChange={(e) => {
                   const val = e.target.value;
-                  setFormData({ ...formData, stop_loss_percent: val === '' ? '' : parseFloat(val) || 2.0 });
+                  if (val === '') {
+                    setFormData({ ...formData, stop_loss_percent: '' });
+                  } else {
+                    const parsed = parseFloat(val);
+                    setFormData({ ...formData, stop_loss_percent: isNaN(parsed) ? 2.0 : parsed });
+                  }
                 }}
                 onBlur={(e) => {
-                  if (e.target.value === '') {
+                  if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
                     setFormData({ ...formData, stop_loss_percent: 2.0 });
                   }
                 }}
