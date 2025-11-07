@@ -617,7 +617,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 
-                <div className="mt-4 flex gap-2">
+                <div className="mt-3 flex gap-2">
                   <Button
                     onClick={() => handleManualTrade('BUY', commodityId)}
                     size="sm"
