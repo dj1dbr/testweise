@@ -1399,29 +1399,7 @@ const Dashboard = () => {
                 </div>
               </Card>
 
-              {/* Trading Actions */}
-              <div className="flex gap-4">
-                <Button
-                  onClick={() => {
-                    setChartModalOpen(false);
-                    handleManualTrade('BUY', selectedCommodity.id);
-                  }}
-                  className="flex-1 bg-green-600 hover:bg-green-500"
-                >
-                  <TrendingUp className="w-4 h-4 mr-2" />
-                  KAUFEN
-                </Button>
-                <Button
-                  onClick={() => {
-                    setChartModalOpen(false);
-                    handleManualTrade('SELL', selectedCommodity.id);
-                  }}
-                  className="flex-1 bg-red-600 hover:bg-red-500"
-                >
-                  <TrendingDown className="w-4 h-4 mr-2" />
-                  VERKAUFEN
-                </Button>
-              </div>
+              {/* Trading Actions entfernt - Buttons sind jetzt ganz oben */}
             </div>
           )}
         </DialogContent>
