@@ -11,89 +11,98 @@ from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
-# Commodity definitions - Multi-Platform Support
-# MT5: Nur Edelmetalle verfügbar auf ICMarketsEU-Demo
-# Bitpanda: Alle Rohstoffe verfügbar über Bitpanda Stocks/Commodities
+# Commodity definitions - Multi-Platform Support mit separaten MT5 Brokern
+# MT5 Libertex: Erweiterte Auswahl
+# MT5 ICMarkets: Nur Edelmetalle + WTI_F6, BRENT_F6
+# Bitpanda: Alle Rohstoffe verfügbar
 COMMODITIES = {
     # Precious Metals (Spot prices)
-    # Libertex MT5: ✅ Handelbar | Bitpanda: ✅ Handelbar
+    # Libertex: ✅ | ICMarkets: ✅ | Bitpanda: ✅
     "GOLD": {
         "name": "Gold", 
         "symbol": "GC=F", 
-        "mt5_symbol": "XAUUSD", 
+        "mt5_libertex_symbol": "XAUUSD",
+        "mt5_icmarkets_symbol": "XAUUSD", 
         "bitpanda_symbol": "GOLD",
         "category": "Edelmetalle", 
         "unit": "USD/oz", 
-        "platforms": ["MT5", "BITPANDA"]
+        "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]
     },
     "SILVER": {
         "name": "Silber", 
         "symbol": "SI=F", 
-        "mt5_symbol": "XAGUSD", 
+        "mt5_libertex_symbol": "XAGUSD",
+        "mt5_icmarkets_symbol": "XAGUSD", 
         "bitpanda_symbol": "SILVER",
         "category": "Edelmetalle", 
         "unit": "USD/oz", 
-        "platforms": ["MT5", "BITPANDA"]
+        "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]
     },
     "PLATINUM": {
         "name": "Platin", 
         "symbol": "PL=F", 
-        "mt5_symbol": "PL", 
+        "mt5_libertex_symbol": "PL",
+        "mt5_icmarkets_symbol": "XPTUSD", 
         "bitpanda_symbol": "PLATINUM",
         "category": "Edelmetalle", 
         "unit": "USD/oz", 
-        "platforms": ["MT5", "BITPANDA"]
+        "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]
     },
     "PALLADIUM": {
         "name": "Palladium", 
         "symbol": "PA=F", 
-        "mt5_symbol": "PA", 
+        "mt5_libertex_symbol": "PA",
+        "mt5_icmarkets_symbol": "XPDUSD", 
         "bitpanda_symbol": "PALLADIUM",
         "category": "Edelmetalle", 
         "unit": "USD/oz", 
-        "platforms": ["MT5", "BITPANDA"]
+        "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]
     },
     
     # Energy Commodities
-    # Libertex MT5: ✅ WTI | Bitpanda: ✅ Alle
+    # Libertex: ✅ WTI | ICMarkets: ✅ WTI_F6, BRENT_F6 | Bitpanda: ✅ Alle
     "WTI_CRUDE": {
         "name": "WTI Crude Oil", 
         "symbol": "CL=F", 
-        "mt5_symbol": "CL", 
+        "mt5_libertex_symbol": "CL",
+        "mt5_icmarkets_symbol": "WTI_F6", 
         "bitpanda_symbol": "OIL_WTI",
         "category": "Energie", 
         "unit": "USD/Barrel", 
-        "platforms": ["MT5", "BITPANDA"]
+        "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]
     },
     "BRENT_CRUDE": {
         "name": "Brent Crude Oil", 
         "symbol": "BZ=F", 
-        "mt5_symbol": "BRENT_F6", 
+        "mt5_libertex_symbol": "BRENT",
+        "mt5_icmarkets_symbol": "BRENT_F6", 
         "bitpanda_symbol": "OIL_BRENT",
         "category": "Energie", 
         "unit": "USD/Barrel", 
-        "platforms": ["BITPANDA"]
+        "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]
     },
     "NATURAL_GAS": {
         "name": "Natural Gas", 
         "symbol": "NG=F", 
-        "mt5_symbol": "NATURALGAS", 
+        "mt5_libertex_symbol": "NATURALGAS",
+        "mt5_icmarkets_symbol": None, 
         "bitpanda_symbol": "NATURAL_GAS",
         "category": "Energie", 
         "unit": "USD/MMBtu", 
-        "platforms": ["BITPANDA"]
+        "platforms": ["MT5_LIBERTEX", "BITPANDA"]
     },
     
     # Agricultural Commodities
-    # Libertex MT5: ✅ Handelbar | Bitpanda: ✅ Handelbar
+    # Libertex: ✅ | ICMarkets: teilweise | Bitpanda: ✅
     "WHEAT": {
         "name": "Weizen", 
         "symbol": "ZW=F", 
-        "mt5_symbol": "WHEAT", 
+        "mt5_libertex_symbol": "WHEAT",
+        "mt5_icmarkets_symbol": "Wheat_H6", 
         "bitpanda_symbol": "WHEAT",
         "category": "Agrar", 
         "unit": "USD/Bushel", 
-        "platforms": ["MT5", "BITPANDA"]
+        "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]
     },
     "CORN": {
         "name": "Mais", 
