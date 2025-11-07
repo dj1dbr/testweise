@@ -1429,6 +1429,101 @@ async def get_mt5_symbols():
         logger.error(f"Error fetching MetaAPI symbols: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch symbols: {str(e)}")
 
+# Multi-Platform Endpoints
+@api_router.get("/platforms/status")
+async def get_platforms_status():
+    """Get status of all trading platforms"""
+    try:
+        from multi_platform_connector import multi_platform
+        
+        status = multi_platform.get_platform_status()
+        active_platforms = multi_platform.get_active_platforms()
+        
+        return {
+            "success": True,
+            "active_platforms": active_platforms,
+            "platforms": status
+        }
+    except Exception as e:
+        logger.error(f"Error getting platforms status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/platforms/{platform_name}/connect")
+async def connect_to_platform(platform_name: str):
+    """Connect to a specific platform"""
+    try:
+        from multi_platform_connector import multi_platform
+        
+        success = await multi_platform.connect_platform(platform_name)
+        
+        if success:
+            return {
+                "success": True,
+                "message": f"Connected to {platform_name}",
+                "platform": platform_name
+            }
+        else:
+            raise HTTPException(status_code=503, detail=f"Failed to connect to {platform_name}")
+    except Exception as e:
+        logger.error(f"Error connecting to {platform_name}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/platforms/{platform_name}/disconnect")
+async def disconnect_from_platform(platform_name: str):
+    """Disconnect from a specific platform"""
+    try:
+        from multi_platform_connector import multi_platform
+        
+        success = await multi_platform.disconnect_platform(platform_name)
+        
+        if success:
+            return {
+                "success": True,
+                "message": f"Disconnected from {platform_name}"
+            }
+        else:
+            raise HTTPException(status_code=400, detail=f"Failed to disconnect from {platform_name}")
+    except Exception as e:
+        logger.error(f"Error disconnecting from {platform_name}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/platforms/{platform_name}/account")
+async def get_platform_account(platform_name: str):
+    """Get account information for a specific platform"""
+    try:
+        from multi_platform_connector import multi_platform
+        
+        account_info = await multi_platform.get_account_info(platform_name)
+        
+        if account_info:
+            return {
+                "success": True,
+                "platform": platform_name,
+                "account": account_info
+            }
+        else:
+            raise HTTPException(status_code=503, detail=f"Failed to get account info for {platform_name}")
+    except Exception as e:
+        logger.error(f"Error getting account for {platform_name}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/platforms/{platform_name}/positions")
+async def get_platform_positions(platform_name: str):
+    """Get open positions for a specific platform"""
+    try:
+        from multi_platform_connector import multi_platform
+        
+        positions = await multi_platform.get_open_positions(platform_name)
+        
+        return {
+            "success": True,
+            "platform": platform_name,
+            "positions": positions
+        }
+    except Exception as e:
+        logger.error(f"Error getting positions for {platform_name}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Include the router in the main app
 app.include_router(api_router)
 
