@@ -204,7 +204,7 @@ backend:
     implemented: true
     working: false
     file: "metaapi_connector.py, server.py"
-    stuck_count: 1
+    stuck_count: 2
     priority: "medium"
     needs_retesting: false
     status_history:
@@ -218,6 +218,17 @@ backend:
           - Issue appears to be broker-specific trading restrictions for WTI_F6
           - Not a symbol mapping issue - original ERR_MARKET_UNKNOWN_SYMBOL is fixed
           - May require investigation of: market hours, margin requirements, or symbol-specific restrictions
+      - working: false
+        agent: "testing"
+        comment: |
+          ❌ CRITICAL BUG FOUND in trade execution logic (server.py line 884):
+          - Code checks if 'MT5' in platforms list
+          - But commodities define platforms as ['MT5_LIBERTEX', 'MT5_ICMARKETS', 'BITPANDA']
+          - This causes ALL commodities to fail with "ist auf MT5 nicht verfügbar"
+          - Error message: "WTI Crude Oil ist auf MT5 nicht verfügbar. Nutzen Sie Bitpanda..."
+          - Same issue affects GOLD, SILVER, and all other commodities
+          - FIX NEEDED: Update platform check logic to handle MT5_LIBERTEX and MT5_ICMARKETS
+          - This is blocking ALL manual trade execution via MT5
 
 frontend:
   - task: "Dashboard UI for Multi-Commodity Trading"
