@@ -253,7 +253,7 @@ class TradingSettings(BaseModel):
     
     id: str = "trading_settings"
     # Multi-Platform Support: List of active platforms
-    active_platforms: List[Literal["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]] = []  # Default: keine Platform aktiv
+    active_platforms: List[Literal["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]] = ["MT5_LIBERTEX", "MT5_ICMARKETS"]  # Default: Beide MT5 aktiv
     mode: Optional[str] = None  # Deprecated, kept for backward compatibility
     auto_trading: bool = False
     use_ai_analysis: bool = True  # Enable AI analysis
