@@ -66,42 +66,22 @@ async def create_account():
                     print(f"   {account['_id']}")
                     print(f"3. Account wird automatisch in .env gespeichert...")
                     
-                    # Speichere Account ID
+                    # Speichere Account ID in .env
                     with open('/app/backend/.env', 'r') as f:
                         env_content = f.read()
                     
-                    # Ersetze alte Account ID
-                    if 'METAAPI_ACCOUNT_ID=' in env_content:
-                        lines = env_content.split('\n')
-                        new_lines = []
-                        for line in lines:
-                            if line.startswith('METAAPI_ACCOUNT_ID='):
-                                new_lines.append(f"METAAPI_ACCOUNT_ID={account['_id']}")
-                            else:
-                                new_lines.append(line)
-                        env_content = '\n'.join(new_lines)
-                    else:
-                        env_content += f"\nMETAAPI_ACCOUNT_ID={account['_id']}\n"
+                    lines = env_content.split('\n')
+                    new_lines = []
+                    for line in lines:
+                        if line.startswith('METAAPI_ACCOUNT_ID='):
+                            new_lines.append(f"METAAPI_ACCOUNT_ID={account_id}")
+                        else:
+                            new_lines.append(line)
                     
                     with open('/app/backend/.env', 'w') as f:
-                        f.write(env_content)
+                        f.write('\n'.join(new_lines))
                     
-                    print("\n✅ .env Datei aktualisiert!")
-                    
-                    # Warte auf Deployment
-                    print("\n⏳ Warte auf Account-Deployment...")
-                    await asyncio.sleep(5)
-                    
-                    # Prüfe Status
-                    account_url = f"https://mt-provisioning-api-v1.agiliumtrade.agiliumtrade.ai/users/current/accounts/{account['_id']}"
-                    async with session.get(account_url, headers=headers) as status_response:
-                        if status_response.status == 200:
-                            account_status = await status_response.json()
-                            print(f"Status: {account_status.get('state', 'UNKNOWN')}")
-                            print(f"Connection Status: {account_status.get('connectionStatus', 'UNKNOWN')}")
-                            
-                            if account_status.get('region'):
-                                print(f"\n🌍 Region erkannt: {account_status['region']}")
+                    print("\n✅ .env Datei aktualisiert mit Account ID: " + account_id)
                     
                     return account
                     
