@@ -75,6 +75,23 @@ const Dashboard = () => {
     return () => clearInterval(liveInterval);
   }, [autoRefresh, settings?.active_platforms]);
 
+  // Load account data when settings change or component mounts
+  useEffect(() => {
+    if (settings?.active_platforms && settings.active_platforms.length > 0) {
+      console.log('Loading account data for platforms:', settings.active_platforms);
+      
+      if (settings.active_platforms.includes('MT5_LIBERTEX')) {
+        fetchMT5LibertexAccount();
+      }
+      if (settings.active_platforms.includes('MT5_ICMARKETS')) {
+        fetchMT5ICMarketsAccount();
+      }
+      if (settings.active_platforms.includes('BITPANDA')) {
+        fetchBitpandaAccount();
+      }
+    }
+  }, [settings?.active_platforms]);
+
   // Load historical data for selected commodity in modal
   useEffect(() => {
     if (chartModalOpen && selectedCommodity) {
