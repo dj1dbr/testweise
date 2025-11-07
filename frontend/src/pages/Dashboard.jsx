@@ -1238,8 +1238,16 @@ const Dashboard = () => {
                 </div>
                 <div className="bg-slate-800/50 p-4 rounded-lg">
                   <p className="text-xs text-slate-400 mb-1">24h Änderung</p>
-                  <p className={`text-2xl font-bold ${selectedCommodity.marketData?.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {selectedCommodity.marketData?.change24h >= 0 ? '+' : ''}{selectedCommodity.marketData?.change24h?.toFixed(2) || 'N/A'}%
+                  <p className={`text-2xl font-bold ${
+                    historicalData.length >= 2 && historicalData[0]?.close && historicalData[historicalData.length - 1]?.close
+                      ? ((historicalData[historicalData.length - 1].close - historicalData[0].close) / historicalData[0].close * 100) >= 0 
+                        ? 'text-green-400' 
+                        : 'text-red-400'
+                      : 'text-slate-400'
+                  }`}>
+                    {historicalData.length >= 2 && historicalData[0]?.close && historicalData[historicalData.length - 1]?.close
+                      ? `${((historicalData[historicalData.length - 1].close - historicalData[0].close) / historicalData[0].close * 100) >= 0 ? '+' : ''}${((historicalData[historicalData.length - 1].close - historicalData[0].close) / historicalData[0].close * 100).toFixed(2)}%`
+                      : 'N/A'}
                   </p>
                 </div>
                 <div className="bg-slate-800/50 p-4 rounded-lg">
