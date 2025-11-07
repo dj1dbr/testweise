@@ -190,6 +190,56 @@ def fetch_commodity_data(commodity_id: str):
         return None
 
 
+def fetch_historical_ohlcv(commodity_id: str, timeframe: str = "1d", period: str = "1mo"):
+    """
+    Fetch historical OHLCV data with timeframe selection
+    
+    Args:
+        commodity_id: Commodity identifier (e.g., 'GOLD', 'WTI_CRUDE')
+        timeframe: Interval - '1m', '5m', '15m', '30m', '1h', '4h', '1d', '1wk', '1mo'
+        period: Data period - '1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', 'max'
+    
+    Returns:
+        pandas DataFrame with OHLCV data and indicators
+    """
+    try:
+        if commodity_id not in COMMODITIES:
+            logger.error(f"Unknown commodity: {commodity_id}")
+            return None
+            
+        commodity = COMMODITIES[commodity_id]
+        ticker = yf.Ticker(commodity["symbol"])
+        
+        # Timeframe mapping
+        interval_map = {
+            '1m': '1m', '5m': '5m', '15m': '15m', '30m': '30m',
+            '1h': '1h', '4h': '4h', '1d': '1d', '1wk': '1wk', '1mo': '1mo'
+        }
+        
+        # Period validation
+        valid_periods = ['1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', 'max']
+        if period not in valid_periods:
+            period = '1mo'
+        
+        interval = interval_map.get(timeframe, '1d')
+        
+        # Get historical data with specified timeframe
+        logger.info(f"Fetching {commodity['name']} data: period={period}, interval={interval}")
+        hist = ticker.history(period=period, interval=interval)
+        
+        if hist.empty:
+            logger.warning(f"No data received for {commodity['name']}")
+            return None
+        
+        # Add indicators
+        hist = calculate_indicators(hist)
+        
+        return hist
+    except Exception as e:
+        logger.error(f"Error fetching historical data for {commodity_id}: {e}")
+        return None
+
+
 def calculate_indicators(df):
     """Calculate technical indicators"""
     try:
