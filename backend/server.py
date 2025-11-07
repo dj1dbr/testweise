@@ -538,6 +538,61 @@ async def process_market_data():
 
 async def process_commodity_market_data(commodity_id: str, settings):
     """Process market data for a specific commodity"""
+
+
+async def sync_mt5_positions():
+    """Background task to sync closed positions from MT5 to app database"""
+    try:
+        settings = await db.trading_settings.find_one({"id": "trading_settings"})
+        if not settings or settings.get('mode') != 'MT5':
+            return
+        
+        from metaapi_connector import get_metaapi_connector
+        
+        # Get MT5 positions
+        connector = await get_metaapi_connector()
+        mt5_positions = await connector.get_positions()
+        mt5_tickets = {str(pos['ticket']) for pos in mt5_positions}
+        
+        # Get open trades from database (MT5 only)
+        open_trades = await db.trades.find({"status": "OPEN", "mode": "MT5"}).to_list(100)
+        
+        synced_count = 0
+        for trade in open_trades:
+            # Check if trade has MT5 ticket in strategy_signal
+            if 'MT5 #' in trade.get('strategy_signal', ''):
+                mt5_ticket = trade['strategy_signal'].split('MT5 #')[1].strip()
+                
+                # If ticket not in open positions, it was closed on MT5
+                if mt5_ticket not in mt5_tickets and mt5_ticket != 'TRADE_RETCODE_INVALID_STOPS':
+                    # Close in database
+                    current_price = trade.get('entry_price', 0)
+                    pl = 0
+                    
+                    if trade['type'] == 'BUY':
+                        pl = (current_price - trade['entry_price']) * trade['quantity']
+                    else:
+                        pl = (trade['entry_price'] - current_price) * trade['quantity']
+                    
+                    await db.trades.update_one(
+                        {"id": trade['id']},
+                        {"$set": {
+                            "status": "CLOSED",
+                            "exit_price": current_price,
+                            "profit_loss": pl,
+                            "closed_at": datetime.now(timezone.utc).isoformat()
+                        }}
+                    )
+                    
+                    synced_count += 1
+                    logger.info(f"✅ Synced closed position: {trade['commodity']} (Ticket: {mt5_ticket})")
+        
+        if synced_count > 0:
+            logger.info(f"🔄 Platform-Sync: {synced_count} Positionen geschlossen")
+            
+    except Exception as e:
+        logger.error(f"Error in platform sync: {e}")
+
     try:
         logger.info(f"Fetching {commodity_id} market data...")
         df = fetch_commodity_data(commodity_id)
