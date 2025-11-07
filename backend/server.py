@@ -804,7 +804,7 @@ async def get_current_market():
 
 @api_router.get("/market/history")
 async def get_market_history(limit: int = 100):
-    """Get historical market data"""
+    """Get historical market data (snapshot history from DB)"""
     try:
         data = await db.market_data.find({}, {"_id": 0}).sort("timestamp", -1).limit(limit).to_list(limit)
         
@@ -816,6 +816,85 @@ async def get_market_history(limit: int = 100):
         return {"data": list(reversed(data))}
     except Exception as e:
         logger.error(f"Error fetching market history: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/market/ohlcv/{commodity}")
+async def get_ohlcv_data(
+    commodity: str,
+    timeframe: str = "1d",
+    period: str = "1mo"
+):
+    """
+    Get OHLCV candlestick data with technical indicators
+    
+    Parameters:
+    - commodity: Commodity ID (GOLD, WTI_CRUDE, etc.)
+    - timeframe: Chart interval (1m, 5m, 15m, 30m, 1h, 4h, 1d, 1wk, 1mo)
+    - period: Data period (1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, max)
+    
+    Example: /api/market/ohlcv/GOLD?timeframe=1h&period=1mo
+    """
+    try:
+        from commodity_processor import fetch_historical_ohlcv
+        
+        # Validate timeframe
+        valid_timeframes = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1wk', '1mo']
+        if timeframe not in valid_timeframes:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid timeframe. Must be one of: {', '.join(valid_timeframes)}"
+            )
+        
+        # Validate period  
+        valid_periods = ['1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', 'max']
+        if period not in valid_periods:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid period. Must be one of: {', '.join(valid_periods)}"
+            )
+        
+        # Fetch data
+        df = fetch_historical_ohlcv(commodity, timeframe=timeframe, period=period)
+        
+        if df is None or df.empty:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No data available for {commodity}"
+            )
+        
+        # Convert DataFrame to list of dicts
+        df_reset = df.reset_index()
+        data = []
+        
+        for _, row in df_reset.iterrows():
+            data.append({
+                'timestamp': row['Datetime'].isoformat() if 'Datetime' in df_reset.columns else row['Date'].isoformat(),
+                'open': float(row['Open']),
+                'high': float(row['High']),
+                'low': float(row['Low']),
+                'close': float(row['Close']),
+                'volume': int(row['Volume']),
+                'sma_20': float(row['SMA_20']) if 'SMA_20' in row and not pd.isna(row['SMA_20']) else None,
+                'ema_20': float(row['EMA_20']) if 'EMA_20' in row and not pd.isna(row['EMA_20']) else None,
+                'rsi': float(row['RSI']) if 'RSI' in row and not pd.isna(row['RSI']) else None,
+                'macd': float(row['MACD']) if 'MACD' in row and not pd.isna(row['MACD']) else None,
+                'macd_signal': float(row['MACD_Signal']) if 'MACD_Signal' in row and not pd.isna(row['MACD_Signal']) else None,
+                'macd_histogram': float(row['MACD_Histogram']) if 'MACD_Histogram' in row and not pd.isna(row['MACD_Histogram']) else None,
+            })
+        
+        return {
+            'success': True,
+            'commodity': commodity,
+            'timeframe': timeframe,
+            'period': period,
+            'data_points': len(data),
+            'data': data
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching OHLCV data: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/trades/execute")
