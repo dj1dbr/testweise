@@ -60,11 +60,11 @@ COMMODITIES = {
     },
     
     # Energy Commodities
-    # Libertex: ✅ WTI | ICMarkets: ✅ WTI_F6, BRENT_F6 | Bitpanda: ✅ Alle
+    # Libertex: ✅ CL, USOILCash, NGASCash | ICMarkets: ✅ WTI_F6, BRENT_F6 | Bitpanda: ✅ Alle
     "WTI_CRUDE": {
         "name": "WTI Crude Oil", 
         "symbol": "CL=F", 
-        "mt5_libertex_symbol": "CL",
+        "mt5_libertex_symbol": "USOILCash",  # Libertex uses USOILCash
         "mt5_icmarkets_symbol": "WTI_F6", 
         "bitpanda_symbol": "OIL_WTI",
         "category": "Energie", 
@@ -74,7 +74,7 @@ COMMODITIES = {
     "BRENT_CRUDE": {
         "name": "Brent Crude Oil", 
         "symbol": "BZ=F", 
-        "mt5_libertex_symbol": "BRENT",
+        "mt5_libertex_symbol": "CL",  # Libertex CL for Brent
         "mt5_icmarkets_symbol": "BRENT_F6", 
         "bitpanda_symbol": "OIL_BRENT",
         "category": "Energie", 
@@ -84,7 +84,7 @@ COMMODITIES = {
     "NATURAL_GAS": {
         "name": "Natural Gas", 
         "symbol": "NG=F", 
-        "mt5_libertex_symbol": "NATURALGAS",
+        "mt5_libertex_symbol": "NGASCash",  # Libertex uses NGASCash
         "mt5_icmarkets_symbol": None, 
         "bitpanda_symbol": "NATURAL_GAS",
         "category": "Energie", 
