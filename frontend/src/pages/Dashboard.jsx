@@ -1325,13 +1325,14 @@ const Dashboard = () => {
                     </select>
                   </div>
                 </div>
-                {historicalData.length > 0 ? (
+                {chartModalData.length > 0 ? (
                   <div className="h-96">
-                    <PriceChart data={historicalData} commodityName={selectedCommodity.name} isOHLCV={true} />
+                    <PriceChart data={chartModalData} commodityName={selectedCommodity.name} isOHLCV={true} />
                   </div>
                 ) : (
                   <div className="h-96 flex items-center justify-center text-slate-400">
-                    Lade Chart-Daten...
+                    <RefreshCw className="w-8 h-8 animate-spin mb-2" />
+                    <p>Lade Chart-Daten für {selectedCommodity.name}...</p>
                   </div>
                 )}
               </Card>
