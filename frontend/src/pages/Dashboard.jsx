@@ -365,8 +365,7 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error('Error fetching Bitpanda account:', error);
-      setMt5Connected(false);
-      toast.error('Bitpanda Verbindung fehlgeschlagen - Prüfen Sie API Key');
+      setBitpandaConnected(false);
     }
   };
 
