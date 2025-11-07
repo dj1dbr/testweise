@@ -100,7 +100,7 @@ const Dashboard = () => {
     }, 5000);
     
     try {
-      // First fetch settings, then everything else
+      // First fetch settings and wait for it
       await fetchSettings().catch(err => console.error('Settings fetch error:', err));
       
       // Run all fetches with individual error handling
@@ -112,15 +112,18 @@ const Dashboard = () => {
         fetchTrades().catch(err => console.error('Trades fetch error:', err)),
         fetchStats().catch(err => console.error('Stats fetch error:', err))
       ]);
-      
-      // Fetch account data after settings are loaded - non-blocking
-      fetchAccountData().catch(err => console.error('Account data fetch error:', err));
     } catch (error) {
       console.error('Error in fetchAllData:', error);
     } finally {
       // Clear the timeout and stop loading
       clearTimeout(maxLoadingTimeout);
       setLoading(false);
+      
+      // Fetch account data after everything is loaded and settings are available
+      // This runs after loading screen is removed for better UX
+      setTimeout(() => {
+        fetchAccountData().catch(err => console.error('Account data fetch error:', err));
+      }, 500);
     }
   };
 
