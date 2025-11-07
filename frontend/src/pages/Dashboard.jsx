@@ -100,17 +100,22 @@ const Dashboard = () => {
     if (chartModalOpen && selectedCommodity) {
       const loadChartData = async () => {
         try {
+          console.log('Loading chart data for:', selectedCommodity.id, chartTimeframe, chartPeriod);
           const response = await axios.get(
             `${API}/market/ohlcv/${selectedCommodity.id}?timeframe=${chartTimeframe}&period=${chartPeriod}`
           );
+          console.log('Chart data received:', response.data);
           if (response.data.success) {
-            setHistoricalData(response.data.data || []);
+            setChartModalData(response.data.data || []);
           }
         } catch (error) {
           console.error('Error loading chart data:', error);
         }
       };
       loadChartData();
+    } else {
+      // Clear chart data when modal closes
+      setChartModalData([]);
     }
   }, [chartModalOpen, selectedCommodity, chartTimeframe, chartPeriod]);
 
