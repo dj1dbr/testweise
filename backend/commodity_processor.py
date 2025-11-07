@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 # Bitpanda: Alle Rohstoffe verfügbar über Bitpanda Stocks/Commodities
 COMMODITIES = {
     # Precious Metals (Spot prices)
-    # MT5: ✅ Handelbar | Bitpanda: ✅ Handelbar
+    # Libertex MT5: ✅ Handelbar | Bitpanda: ✅ Handelbar
     "GOLD": {
         "name": "Gold", 
         "symbol": "GC=F", 
@@ -38,7 +38,7 @@ COMMODITIES = {
     "PLATINUM": {
         "name": "Platin", 
         "symbol": "PL=F", 
-        "mt5_symbol": "XPTUSD", 
+        "mt5_symbol": "PL", 
         "bitpanda_symbol": "PLATINUM",
         "category": "Edelmetalle", 
         "unit": "USD/oz", 
@@ -47,7 +47,7 @@ COMMODITIES = {
     "PALLADIUM": {
         "name": "Palladium", 
         "symbol": "PA=F", 
-        "mt5_symbol": "XPDUSD", 
+        "mt5_symbol": "PA", 
         "bitpanda_symbol": "PALLADIUM",
         "category": "Edelmetalle", 
         "unit": "USD/oz", 
@@ -55,15 +55,15 @@ COMMODITIES = {
     },
     
     # Energy Commodities
-    # MT5: ❌ Nicht verfügbar | Bitpanda: ✅ Handelbar
+    # Libertex MT5: ✅ WTI | Bitpanda: ✅ Alle
     "WTI_CRUDE": {
         "name": "WTI Crude Oil", 
         "symbol": "CL=F", 
-        "mt5_symbol": "WTI_F6", 
+        "mt5_symbol": "CL", 
         "bitpanda_symbol": "OIL_WTI",
         "category": "Energie", 
         "unit": "USD/Barrel", 
-        "platforms": ["BITPANDA"]
+        "platforms": ["MT5", "BITPANDA"]
     },
     "BRENT_CRUDE": {
         "name": "Brent Crude Oil", 
@@ -85,56 +85,56 @@ COMMODITIES = {
     },
     
     # Agricultural Commodities
-    # MT5: ❌ Nicht verfügbar | Bitpanda: ✅ Handelbar
+    # Libertex MT5: ✅ Handelbar | Bitpanda: ✅ Handelbar
     "WHEAT": {
         "name": "Weizen", 
         "symbol": "ZW=F", 
-        "mt5_symbol": "Wheat_H6", 
+        "mt5_symbol": "WHEAT", 
         "bitpanda_symbol": "WHEAT",
         "category": "Agrar", 
         "unit": "USD/Bushel", 
-        "platforms": ["BITPANDA"]
+        "platforms": ["MT5", "BITPANDA"]
     },
     "CORN": {
         "name": "Mais", 
         "symbol": "ZC=F", 
-        "mt5_symbol": "Corn_H6", 
+        "mt5_symbol": "CORN", 
         "bitpanda_symbol": "CORN",
         "category": "Agrar", 
         "unit": "USD/Bushel", 
-        "platforms": ["BITPANDA"]
+        "platforms": ["MT5", "BITPANDA"]
     },
     "SOYBEANS": {
         "name": "Sojabohnen", 
         "symbol": "ZS=F", 
-        "mt5_symbol": "Sbean_F6", 
+        "mt5_symbol": "SOYBEAN", 
         "bitpanda_symbol": "SOYBEANS",
         "category": "Agrar", 
         "unit": "USD/Bushel", 
-        "platforms": ["BITPANDA"]
+        "platforms": ["MT5", "BITPANDA"]
     },
     "COFFEE": {
         "name": "Kaffee", 
         "symbol": "KC=F", 
-        "mt5_symbol": "Coffee_H6", 
+        "mt5_symbol": "COFFEE", 
         "bitpanda_symbol": "COFFEE",
         "category": "Agrar", 
         "unit": "USD/lb", 
-        "platforms": ["BITPANDA"]
+        "platforms": ["MT5", "BITPANDA"]
     },
     "SUGAR": {
         "name": "Zucker", 
         "symbol": "SB=F", 
-        "mt5_symbol": "Sugar_H6", 
+        "mt5_symbol": "SUGAR", 
         "bitpanda_symbol": "SUGAR",
         "category": "Agrar", 
         "unit": "USD/lb", 
-        "platforms": ["BITPANDA"]
+        "platforms": ["MT5", "BITPANDA"]
     },
     "COTTON": {
         "name": "Baumwolle", 
         "symbol": "CT=F", 
-        "mt5_symbol": "Cotton_H6", 
+        "mt5_symbol": "COTTON", 
         "bitpanda_symbol": "COTTON",
         "category": "Agrar", 
         "unit": "USD/lb", 
@@ -143,11 +143,11 @@ COMMODITIES = {
     "COCOA": {
         "name": "Kakao", 
         "symbol": "CC=F", 
-        "mt5_symbol": "Cocoa_H6", 
+        "mt5_symbol": "COCOA", 
         "bitpanda_symbol": "COCOA",
         "category": "Agrar", 
         "unit": "USD/ton", 
-        "platforms": ["BITPANDA"]
+        "platforms": ["MT5", "BITPANDA"]
     }
 }
 
