@@ -553,8 +553,8 @@ const Dashboard = () => {
             if (!commodity) return null;
             
             return (
-              <Card key={commodityId} className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-slate-700/50 backdrop-blur-sm p-6 shadow-2xl" data-testid={`commodity-card-${commodityId}`}>
-                <div className="mb-4">
+              <Card key={commodityId} className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-slate-700/50 backdrop-blur-sm p-4 shadow-2xl" data-testid={`commodity-card-${commodityId}`}>
+                <div className="mb-3">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <Activity className="w-5 h-5 text-cyan-400" />
