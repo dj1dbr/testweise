@@ -80,7 +80,7 @@ const PriceChart = ({ data, commodityName = 'Commodity', isOHLCV = false }) => {
           stroke="#2dd4bf" 
           strokeWidth={3}
           fill="url(#priceGradient)" 
-          name="WTI Preis"
+          name={`${commodityName} Preis`}
         />
         <Line 
           type="monotone" 
