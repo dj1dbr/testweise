@@ -877,11 +877,25 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
                 from commodity_processor import COMMODITIES
                 
                 commodity_info = COMMODITIES.get(commodity, {})
-                mt5_symbol = commodity_info.get('mt5_symbol', 'XAUUSD')
+                
+                # Determine which MT5 platform is active and select correct symbol
+                active_platforms = settings.active_platforms if settings else []
+                mt5_symbol = None
+                
+                # Check which MT5 platform to use
+                if 'MT5_LIBERTEX' in active_platforms:
+                    mt5_symbol = commodity_info.get('mt5_libertex_symbol')
+                elif 'MT5_ICMARKETS' in active_platforms:
+                    mt5_symbol = commodity_info.get('mt5_icmarkets_symbol')
+                else:
+                    # Fallback to default platform or legacy symbol
+                    mt5_symbol = commodity_info.get('mt5_libertex_symbol') or commodity_info.get('mt5_icmarkets_symbol') or commodity_info.get('mt5_symbol', 'XAUUSD')
                 
                 # Prüfen ob Rohstoff auf MT5 verfügbar
                 platforms = commodity_info.get('platforms', [])
-                if 'MT5' not in platforms:
+                mt5_available = any(p in platforms for p in ['MT5_LIBERTEX', 'MT5_ICMARKETS', 'MT5'])
+                
+                if not mt5_available or not mt5_symbol:
                     logger.warning(f"⚠️ {commodity} ist auf MT5 nicht handelbar!")
                     raise HTTPException(
                         status_code=400, 
