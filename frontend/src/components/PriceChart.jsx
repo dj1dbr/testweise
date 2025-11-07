@@ -70,10 +70,7 @@ const PriceChart = ({ data, commodityName = 'Commodity', isOHLCV = false }) => {
           }}
           labelStyle={{ color: '#94a3b8' }}
         />
-        <Legend 
-          wrapperStyle={{ color: '#94a3b8' }}
-          iconType="line"
-        />
+        {/* Legend entfernt - nur Preis wird angezeigt */}
         <Area 
           type="monotone" 
           dataKey="price" 
@@ -82,22 +79,7 @@ const PriceChart = ({ data, commodityName = 'Commodity', isOHLCV = false }) => {
           fill="url(#priceGradient)" 
           name={`${commodityName} Preis`}
         />
-        <Line 
-          type="monotone" 
-          dataKey="sma" 
-          stroke="#f59e0b" 
-          strokeWidth={2}
-          dot={false}
-          name="SMA (20)"
-        />
-        <Line 
-          type="monotone" 
-          dataKey="ema" 
-          stroke="#8b5cf6" 
-          strokeWidth={2}
-          dot={false}
-          name="EMA (20)"
-        />
+        {/* SMA und EMA Linien entfernt - nur Preis wird angezeigt */}
       </AreaChart>
     </ResponsiveContainer>
   );
