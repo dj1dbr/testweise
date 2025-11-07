@@ -1019,7 +1019,57 @@ const Dashboard = () => {
           {/* Tab 3: Charts */}
           <TabsContent value="charts">
             <Card className="bg-slate-900/80 border-slate-700/50 p-6 backdrop-blur-sm">
-              <h3 className="text-xl font-semibold mb-4 text-cyan-400">Markt Charts</h3>
+              <h3 className="text-xl font-semibold mb-4 text-cyan-400">Markt Charts mit Timeframe-Auswahl</h3>
+              
+              {/* Chart Timeframe Controls */}
+              <div className="mb-6 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Timeframe Selection */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold text-slate-300">Zeitrahmen (Interval)</Label>
+                    <select
+                      className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-md text-white text-sm"
+                      value={chartTimeframe}
+                      onChange={(e) => setChartTimeframe(e.target.value)}
+                    >
+                      <option value="1m">1 Minute</option>
+                      <option value="5m">5 Minuten</option>
+                      <option value="15m">15 Minuten</option>
+                      <option value="30m">30 Minuten</option>
+                      <option value="1h">1 Stunde</option>
+                      <option value="4h">4 Stunden</option>
+                      <option value="1d">1 Tag</option>
+                      <option value="1wk">1 Woche</option>
+                      <option value="1mo">1 Monat</option>
+                    </select>
+                  </div>
+                  
+                  {/* Period Selection */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold text-slate-300">Zeitraum (Periode)</Label>
+                    <select
+                      className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-md text-white text-sm"
+                      value={chartPeriod}
+                      onChange={(e) => setChartPeriod(e.target.value)}
+                    >
+                      <option value="1d">1 Tag</option>
+                      <option value="5d">5 Tage</option>
+                      <option value="1mo">1 Monat</option>
+                      <option value="3mo">3 Monate</option>
+                      <option value="6mo">6 Monate</option>
+                      <option value="1y">1 Jahr</option>
+                      <option value="2y">2 Jahre</option>
+                      <option value="5y">5 Jahre</option>
+                      <option value="max">Maximum</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="mt-3 text-xs text-slate-400">
+                  Aktuelle Auswahl: <span className="text-cyan-400 font-semibold">{chartTimeframe}</span> Interval über <span className="text-cyan-400 font-semibold">{chartPeriod}</span> Zeitraum
+                </div>
+              </div>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {Object.entries(allMarkets).slice(0, 4).map(([commodityId, market]) => {
                   const commodity = commodities[commodityId];
