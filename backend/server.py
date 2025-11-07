@@ -1134,16 +1134,47 @@ async def get_trades(status: Optional[str] = None):
 
 @api_router.get("/trades/stats", response_model=TradeStats)
 async def get_trade_stats():
-    """Get trading statistics"""
+    """Get trading statistics - includes DB trades and MT5 positions"""
     try:
-        all_trades = await db.trades.find({}, {"_id": 0}).to_list(10000)
+        # Get DB trades
+        db_trades = await db.trades.find({}, {"_id": 0}).to_list(10000)
         
-        total_trades = len(all_trades)
-        open_positions = len([t for t in all_trades if t['status'] == 'OPEN'])
-        closed_positions = len([t for t in all_trades if t['status'] == 'CLOSED'])
+        # Get MT5 positions from all active platforms
+        settings = await db.trading_settings.find_one({"id": "trading_settings"})
+        active_platforms = settings.get('active_platforms', []) if settings else []
         
-        closed_trades = [t for t in all_trades if t['status'] == 'CLOSED' and t.get('profit_loss') is not None]
-        total_profit_loss = sum([t['profit_loss'] for t in closed_trades])
+        mt5_positions = []
+        total_mt5_pl = 0.0
+        
+        # Fetch from MT5 Libertex
+        if 'MT5_LIBERTEX' in active_platforms:
+            try:
+                from multi_platform_connector import multi_platform
+                positions = await multi_platform.get_open_positions('MT5_LIBERTEX')
+                mt5_positions.extend(positions)
+                total_mt5_pl += sum([p.get('profit', 0) for p in positions])
+            except Exception as e:
+                logger.warning(f"Could not fetch MT5 Libertex positions: {e}")
+        
+        # Fetch from MT5 ICMarkets
+        if 'MT5_ICMARKETS' in active_platforms:
+            try:
+                from multi_platform_connector import multi_platform
+                positions = await multi_platform.get_open_positions('MT5_ICMARKETS')
+                mt5_positions.extend(positions)
+                total_mt5_pl += sum([p.get('profit', 0) for p in positions])
+            except Exception as e:
+                logger.warning(f"Could not fetch MT5 ICMarkets positions: {e}")
+        
+        # Combine counts
+        total_trades = len(db_trades) + len(mt5_positions)
+        open_positions = len([t for t in db_trades if t['status'] == 'OPEN']) + len(mt5_positions)
+        closed_positions = len([t for t in db_trades if t['status'] == 'CLOSED'])
+        
+        # Calculate P&L
+        closed_trades = [t for t in db_trades if t['status'] == 'CLOSED' and t.get('profit_loss') is not None]
+        db_profit_loss = sum([t['profit_loss'] for t in closed_trades])
+        total_profit_loss = db_profit_loss + total_mt5_pl
         
         winning_trades = len([t for t in closed_trades if t['profit_loss'] > 0])
         losing_trades = len([t for t in closed_trades if t['profit_loss'] <= 0])
