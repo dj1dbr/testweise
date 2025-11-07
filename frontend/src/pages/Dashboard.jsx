@@ -965,7 +965,12 @@ const Dashboard = () => {
                         
                         return (
                           <tr key={trade.id} className="border-b border-slate-800 hover:bg-slate-800/30">
-                            <td className="px-4 py-3 text-slate-200">{commodity?.name || trade.commodity}</td>
+                            <td className="px-4 py-3 text-slate-200">
+                              {commodity?.name || trade.commodity}
+                              {trade.mt5_ticket && (
+                                <span className="ml-2 text-xs text-slate-500">#{trade.mt5_ticket}</span>
+                              )}
+                            </td>
                             <td className="px-4 py-3">
                               <Badge className={trade.type === 'BUY' ? 'bg-green-600' : 'bg-red-600'}>
                                 {trade.type}
