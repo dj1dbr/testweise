@@ -107,56 +107,62 @@ COMMODITIES = {
     "CORN": {
         "name": "Mais", 
         "symbol": "ZC=F", 
-        "mt5_symbol": "CORN", 
+        "mt5_libertex_symbol": "CORN",
+        "mt5_icmarkets_symbol": "Corn_H6", 
         "bitpanda_symbol": "CORN",
         "category": "Agrar", 
         "unit": "USD/Bushel", 
-        "platforms": ["MT5", "BITPANDA"]
+        "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]
     },
     "SOYBEANS": {
         "name": "Sojabohnen", 
         "symbol": "ZS=F", 
-        "mt5_symbol": "SOYBEAN", 
+        "mt5_libertex_symbol": "SOYBEAN",
+        "mt5_icmarkets_symbol": "Sbean_F6", 
         "bitpanda_symbol": "SOYBEANS",
         "category": "Agrar", 
         "unit": "USD/Bushel", 
-        "platforms": ["MT5", "BITPANDA"]
+        "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]
     },
     "COFFEE": {
         "name": "Kaffee", 
         "symbol": "KC=F", 
-        "mt5_symbol": "COFFEE", 
+        "mt5_libertex_symbol": "COFFEE",
+        "mt5_icmarkets_symbol": "Coffee_H6", 
         "bitpanda_symbol": "COFFEE",
         "category": "Agrar", 
         "unit": "USD/lb", 
-        "platforms": ["MT5", "BITPANDA"]
+        "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]
     },
     "SUGAR": {
         "name": "Zucker", 
         "symbol": "SB=F", 
-        "mt5_symbol": "SUGAR", 
+        "mt5_libertex_symbol": "SUGAR",
+        "mt5_icmarkets_symbol": "Sugar_H6", 
         "bitpanda_symbol": "SUGAR",
         "category": "Agrar", 
         "unit": "USD/lb", 
-        "platforms": ["MT5", "BITPANDA"]
+        "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]
     },
     "COTTON": {
         "name": "Baumwolle", 
         "symbol": "CT=F", 
-        "mt5_symbol": "COTTON", 
+        "mt5_libertex_symbol": "COTTON",
+        "mt5_icmarkets_symbol": "Cotton_H6", 
         "bitpanda_symbol": "COTTON",
         "category": "Agrar", 
         "unit": "USD/lb", 
-        "platforms": ["BITPANDA"]
+        "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]
     },
     "COCOA": {
         "name": "Kakao", 
         "symbol": "CC=F", 
-        "mt5_symbol": "COCOA", 
+        "mt5_libertex_symbol": "COCOA",
+        "mt5_icmarkets_symbol": "Cocoa_H6", 
         "bitpanda_symbol": "COCOA",
         "category": "Agrar", 
         "unit": "USD/ton", 
-        "platforms": ["MT5", "BITPANDA"]
+        "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]
     }
 }
 
