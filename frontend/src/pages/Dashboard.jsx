@@ -691,7 +691,74 @@ const Dashboard = () => {
           <TabsContent value="trades">
             <Card className="bg-slate-900/80 border-slate-700/50 p-6 backdrop-blur-sm">
               <h3 className="text-xl font-semibold mb-4 text-cyan-400">Trade Historie</h3>
-              <TradesTable trades={trades} onCloseTrade={handleCloseTrade} onDeleteTrade={handleDeleteTrade} />
+              {trades.length === 0 ? (
+                <div className="text-center py-12 text-slate-400">
+                  <p>Noch keine Trades vorhanden</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-800/50 border-b border-slate-700">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-slate-300">Rohstoff</th>
+                        <th className="px-4 py-3 text-left text-slate-300">Typ</th>
+                        <th className="px-4 py-3 text-right text-slate-300">Einstieg</th>
+                        <th className="px-4 py-3 text-right text-slate-300">Aktuell</th>
+                        <th className="px-4 py-3 text-right text-slate-300">Menge</th>
+                        <th className="px-4 py-3 text-right text-slate-300">P&L</th>
+                        <th className="px-4 py-3 text-center text-slate-300">Plattform</th>
+                        <th className="px-4 py-3 text-center text-slate-300">Status</th>
+                        <th className="px-4 py-3 text-center text-slate-300">Aktion</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {trades.map((trade) => {
+                        const commodity = commodities[trade.commodity];
+                        const currentPrice = allMarkets[trade.commodity]?.price || trade.entry_price;
+                        const pl = trade.status === 'OPEN' 
+                          ? (trade.type === 'BUY' ? currentPrice - trade.entry_price : trade.entry_price - currentPrice) * trade.quantity
+                          : trade.profit_loss || 0;
+                        
+                        return (
+                          <tr key={trade.id} className="border-b border-slate-800 hover:bg-slate-800/30">
+                            <td className="px-4 py-3 text-slate-200">{commodity?.name || trade.commodity}</td>
+                            <td className="px-4 py-3">
+                              <Badge className={trade.type === 'BUY' ? 'bg-green-600' : 'bg-red-600'}>
+                                {trade.type}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-3 text-right text-slate-200">${trade.entry_price?.toFixed(2)}</td>
+                            <td className="px-4 py-3 text-right text-slate-200">${currentPrice?.toFixed(2)}</td>
+                            <td className="px-4 py-3 text-right text-slate-200">{trade.quantity}</td>
+                            <td className={`px-4 py-3 text-right font-semibold ${pl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              {pl >= 0 ? '+' : ''}{pl.toFixed(2)} €
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <Badge className={trade.mode === 'MT5' ? 'bg-blue-600' : 'bg-green-600'}>
+                                {trade.mode}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <Badge className={trade.status === 'OPEN' ? 'bg-yellow-600' : 'bg-gray-600'}>
+                                {trade.status}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <button
+                                onClick={() => handleDeleteTrade(trade.id, `${commodity?.name || trade.commodity} ${trade.type}`)}
+                                className="text-red-400 hover:text-red-300 text-xs"
+                                title="Trade löschen"
+                              >
+                                🗑️ Löschen
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </Card>
           </TabsContent>
 
