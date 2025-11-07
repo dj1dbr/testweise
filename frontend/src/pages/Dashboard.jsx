@@ -583,8 +583,17 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Commodity Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="cards" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsTrigger value="cards">📊 Rohstoffe</TabsTrigger>
+            <TabsTrigger value="trades">📈 Trades ({trades.length})</TabsTrigger>
+            <TabsTrigger value="charts">📉 Charts</TabsTrigger>
+          </TabsList>
+
+          {/* Tab 1: Commodity Cards */}
+          <TabsContent value="cards">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
           {Object.entries(allMarkets).map(([commodityId, market]) => {
             const commodity = commodities[commodityId];
             if (!commodity) return null;
