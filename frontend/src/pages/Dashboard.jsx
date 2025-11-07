@@ -29,8 +29,12 @@ const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [settings, setSettings] = useState(null);
   const [balance, setBalance] = useState(10000); // Simulated balance
-  const [mt5Account, setMt5Account] = useState(null); // Real MT5 account data
+  const [mt5Account, setMt5Account] = useState(null); // Real MT5 account data (ICMarkets)
   const [mt5Connected, setMt5Connected] = useState(false);
+  const [mt5LibertexAccount, setMt5LibertexAccount] = useState(null); // Libertex account
+  const [mt5LibertexConnected, setMt5LibertexConnected] = useState(false);
+  const [bitpandaAccount, setBitpandaAccount] = useState(null); // Bitpanda account
+  const [bitpandaConnected, setBitpandaConnected] = useState(false);
   const [totalExposure, setTotalExposure] = useState(0); // Total exposure for 20% limit
   const [gpt5Active, setGpt5Active] = useState(false);
   const [loading, setLoading] = useState(true);
