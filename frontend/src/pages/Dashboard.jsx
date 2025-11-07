@@ -455,8 +455,118 @@ const Dashboard = () => {
           </Card>
         )}
 
-        {/* Balance Card */}
-        <Card className="bg-gradient-to-r from-emerald-900/30 to-cyan-900/30 border-emerald-500/30 p-6 mb-6" data-testid="balance-card">
+        {/* Platform Balance Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          {/* MT5 Balance Card */}
+          <Card className="bg-gradient-to-br from-blue-900/20 to-slate-900/90 border-blue-700/50 backdrop-blur-sm p-4 shadow-2xl">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={settings?.mode === 'MT5'}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      handleUpdateSettings({ ...settings, mode: 'MT5' });
+                    }
+                  }}
+                  className="w-4 h-4 rounded border-gray-300"
+                />
+                <h3 className="text-lg font-bold text-blue-400">🔷 MT5 Konto</h3>
+                {mt5Connected && settings?.mode === 'MT5' && (
+                  <Badge className="bg-emerald-600 text-white text-xs">Aktiv</Badge>
+                )}
+              </div>
+              <DollarSign className="w-10 h-10 text-blue-400/20" />
+            </div>
+            <div className="space-y-2">
+              <div>
+                <p className="text-xs text-slate-400">Balance</p>
+                <p className="text-2xl font-bold text-white">
+                  {mt5Connected ? `€${mt5Account?.balance?.toFixed(2) || '0.00'}` : '€0.00'}
+                </p>
+              </div>
+              {mt5Connected && (
+                <>
+                  <div className="text-xs text-slate-400">
+                    Equity: €{mt5Account?.equity?.toFixed(2)} | Freie Margin: €{mt5Account?.free_margin?.toFixed(2)}
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span className="text-slate-400">Portfolio-Risiko (MT5):</span>
+                      <span className={
+                        (totalExposure / (mt5Account?.balance || 1)) * 100 > (settings?.max_portfolio_risk_percent || 20)
+                          ? 'text-red-400 font-semibold'
+                          : 'text-green-400'
+                      }>
+                        {((totalExposure / (mt5Account?.balance || 1)) * 100).toFixed(1)}% / {settings?.max_portfolio_risk_percent || 20}%
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full transition-all ${
+                          (totalExposure / (mt5Account?.balance || 1)) * 100 > (settings?.max_portfolio_risk_percent || 20)
+                            ? 'bg-red-500'
+                            : 'bg-green-500'
+                        }`}
+                        style={{ width: `${Math.min(((totalExposure / (mt5Account?.balance || 1)) * 100 / (settings?.max_portfolio_risk_percent || 20)) * 100, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="text-xs text-slate-400">
+                    Offene Positionen: €{totalExposure.toFixed(2)}
+                  </div>
+                </>
+              )}
+            </div>
+          </Card>
+
+          {/* Bitpanda Balance Card */}
+          <Card className="bg-gradient-to-br from-green-900/20 to-slate-900/90 border-green-700/50 backdrop-blur-sm p-4 shadow-2xl">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={settings?.mode === 'BITPANDA'}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      handleUpdateSettings({ ...settings, mode: 'BITPANDA' });
+                    }
+                  }}
+                  className="w-4 h-4 rounded border-gray-300"
+                />
+                <h3 className="text-lg font-bold text-green-400">🟢 Bitpanda</h3>
+                {settings?.mode === 'BITPANDA' && (
+                  <Badge className="bg-emerald-600 text-white text-xs">Aktiv</Badge>
+                )}
+              </div>
+              <DollarSign className="w-10 h-10 text-green-400/20" />
+            </div>
+            <div className="space-y-2">
+              <div>
+                <p className="text-xs text-slate-400">Balance</p>
+                <p className="text-2xl font-bold text-white">€0.00</p>
+              </div>
+              <div className="text-xs text-slate-400">
+                Nur lokal auf Mac verfügbar
+              </div>
+              <div>
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-slate-400">Portfolio-Risiko (Bitpanda):</span>
+                  <span className="text-slate-500">0.0% / 20%</span>
+                </div>
+                <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-green-500" style={{ width: '0%' }} />
+                </div>
+              </div>
+              <div className="text-xs text-slate-400">
+                Offene Positionen: €0.00
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Old balance card removed */}
+        <div className="hidden">
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
