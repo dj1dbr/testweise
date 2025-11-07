@@ -1265,10 +1265,37 @@ const Dashboard = () => {
 
               {/* Large Chart */}
               <Card className="bg-slate-800/50 border-slate-700 p-6">
-                <h3 className="text-lg font-semibold mb-4 text-cyan-400">Preisverlauf (100 Tage)</h3>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-cyan-400">
+                    {selectedCommodity.name} - {chartTimeframe} Interval / {chartPeriod} Zeitraum
+                  </h3>
+                  <div className="flex gap-2">
+                    <select
+                      value={chartTimeframe}
+                      onChange={(e) => setChartTimeframe(e.target.value)}
+                      className="px-2 py-1 bg-slate-900 border border-slate-600 rounded text-xs text-white"
+                    >
+                      <option value="15m">15min</option>
+                      <option value="1h">1h</option>
+                      <option value="4h">4h</option>
+                      <option value="1d">1d</option>
+                      <option value="1wk">1wk</option>
+                    </select>
+                    <select
+                      value={chartPeriod}
+                      onChange={(e) => setChartPeriod(e.target.value)}
+                      className="px-2 py-1 bg-slate-900 border border-slate-600 rounded text-xs text-white"
+                    >
+                      <option value="1mo">1 Monat</option>
+                      <option value="3mo">3 Monate</option>
+                      <option value="6mo">6 Monate</option>
+                      <option value="1y">1 Jahr</option>
+                    </select>
+                  </div>
+                </div>
                 {historicalData.length > 0 ? (
                   <div className="h-96">
-                    <PriceChart data={historicalData} commodityName={selectedCommodity.name} />
+                    <PriceChart data={historicalData} commodityName={selectedCommodity.name} isOHLCV={true} />
                   </div>
                 ) : (
                   <div className="h-96 flex items-center justify-center text-slate-400">
