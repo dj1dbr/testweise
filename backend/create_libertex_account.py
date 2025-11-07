@@ -51,11 +51,14 @@ async def create_account():
                 response_text = await response.text()
                 
                 if response.status in [200, 201]:
+                    print(f"Raw response: {response_text[:500]}")
                     account = json.loads(response_text)
                     
                     print("\n✅ ACCOUNT ERFOLGREICH ERSTELLT!")
                     print("="*80)
-                    print(f"Account ID: {account['_id']}")
+                    print(f"Full account data: {json.dumps(account, indent=2)[:500]}")
+                    account_id = account.get('_id') or account.get('id')
+                    print(f"Account ID: {account_id}")
                     print(f"Name: {account['name']}")
                     print(f"Login: {account['login']}")
                     print(f"Server: {account['server']}")
