@@ -89,38 +89,47 @@ const Dashboard = () => {
 
   const fetchAllData = async () => {
     setLoading(true);
-    await Promise.all([
-      fetchCommodities(),
-      fetchAllMarkets(),
-      refreshMarketData(), // Use refresh instead of just fetching cached data
-      fetchHistoricalData(),
-      fetchTrades(),
-      fetchStats(),
-      fetchSettings(),
-      fetchAccountData() // Unified account data fetching
-    ]);
-    setLoading(false);
+    try {
+      // First fetch settings, then everything else
+      await fetchSettings();
+      
+      await Promise.all([
+        fetchCommodities(),
+        fetchAllMarkets(),
+        refreshMarketData(), // Use refresh instead of just fetching cached data
+        fetchHistoricalData(),
+        fetchTrades(),
+        fetchStats()
+      ]);
+      
+      // Fetch account data after settings are loaded
+      await fetchAccountData();
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchAccountData = async () => {
     // Fetch account data for all active platforms
-    if (settings?.active_platforms) {
-      const promises = [];
-      if (settings.active_platforms.includes('MT5_LIBERTEX')) {
-        promises.push(fetchMT5LibertexAccount());
+    try {
+      if (settings?.active_platforms && settings.active_platforms.length > 0) {
+        const promises = [];
+        if (settings.active_platforms.includes('MT5_LIBERTEX')) {
+          promises.push(fetchMT5LibertexAccount().catch(err => console.error('MT5 Libertex error:', err)));
+        }
+        if (settings.active_platforms.includes('MT5_ICMARKETS')) {
+          promises.push(fetchMT5ICMarketsAccount().catch(err => console.error('MT5 ICMarkets error:', err)));
+        }
+        if (settings.active_platforms.includes('BITPANDA')) {
+          promises.push(fetchBitpandaAccount().catch(err => console.error('Bitpanda error:', err)));
+        }
+        await Promise.all(promises);
       }
-      if (settings.active_platforms.includes('MT5_ICMARKETS')) {
-        promises.push(fetchMT5ICMarketsAccount());
-      }
-      if (settings.active_platforms.includes('BITPANDA')) {
-        promises.push(fetchBitpandaAccount());
-      }
-      await Promise.all(promises);
+    } catch (error) {
+      console.error('Error fetching account data:', error);
     }
-    
-    // Always fetch stats for paper trading fallback
-    await fetchStats();
-    updateBalance();
   };
 
   const fetchCommodities = async () => {
