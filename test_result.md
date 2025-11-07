@@ -306,3 +306,43 @@ agent_communication:
       CRITICAL FINDING: The original "ERR_MARKET_UNKNOWN_SYMBOL" error is FIXED ✅
       Symbol mapping corrections are working. WTI_F6 symbol exists and is recognized.
       Current WTI issue appears to be broker-specific trading restrictions, not symbol mapping.
+  
+  - agent: "testing"
+    message: |
+      MULTI-PLATFORM BACKEND TESTING COMPLETED ✅
+      
+      Test Results Summary (12/17 tests passed - 70.6% success rate):
+      
+      ✅ ALL REQUESTED MULTI-PLATFORM ENDPOINTS WORKING (5/5 - 100%):
+      1. GET /api/platforms/status: Returns 3 platforms ✅
+      2. GET /api/platforms/MT5_LIBERTEX/account: Balance=50000 EUR, Leverage=1000 ✅
+      3. GET /api/platforms/MT5_ICMARKETS/account: Balance=2204.69 EUR, Leverage=30 ✅
+      4. GET /api/settings: active_platforms=[], default_platform=MT5_LIBERTEX ✅
+      5. GET /api/commodities: WTI_CRUDE symbols correct (Libertex=USOILCash, ICMarkets=WTI_F6) ✅
+      
+      ✅ ADDITIONAL WORKING ENDPOINTS:
+      - API Root: Responding correctly
+      - MT5 Account Info: Balance=50000 EUR (Libertex account)
+      - MT5 Connection Status: Connected, Account ID correct
+      - MT5 Positions: Retrieved successfully (0 open positions)
+      - Settings Update: MT5 mode update working
+      - Market Data: Real-time prices available for WTI_CRUDE and GOLD
+      - Trades List: Retrieved successfully
+      
+      ❌ CRITICAL BUG DISCOVERED - BLOCKING ALL MANUAL TRADES:
+      - Location: server.py line 884
+      - Issue: Code checks if 'MT5' in platforms list
+      - Problem: Commodities define platforms as ['MT5_LIBERTEX', 'MT5_ICMARKETS', 'BITPANDA']
+      - Result: ALL commodities fail with "ist auf MT5 nicht verfügbar"
+      - Affected: WTI_CRUDE, GOLD, SILVER, and all other commodities
+      - Impact: Manual trade execution completely broken
+      
+      ❌ MINOR ISSUES (Non-blocking):
+      - Legacy /api/mt5/symbols returns Libertex symbols (294), not ICMarkets (expected behavior)
+      - Settings enabled_commodities list incomplete (only 4 commodities instead of full list)
+      - Legacy commodities test checking wrong field name (mt5_symbol vs mt5_libertex_symbol)
+      
+      RECOMMENDATION FOR MAIN AGENT:
+      Fix the platform check logic in server.py line 884 to properly handle MT5_LIBERTEX and MT5_ICMARKETS.
+      Change from: if 'MT5' not in platforms
+      To: if not any(p in platforms for p in ['MT5_LIBERTEX', 'MT5_ICMARKETS', 'MT5'])
