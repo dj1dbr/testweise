@@ -188,25 +188,25 @@ def init_ai_chat(provider="emergent", api_key=None, model="gpt-5", ollama_base_u
 
 # Commodity definitions - Multi-Platform Support (Libertex MT5 + Bitpanda)
 COMMODITIES = {
-    # Precious Metals - Libertex MT5: ✅ | Bitpanda: ✅
-    "GOLD": {"name": "Gold", "symbol": "GC=F", "mt5_symbol": "XAUUSD", "bitpanda_symbol": "GOLD", "category": "Edelmetalle", "platforms": ["MT5", "BITPANDA"]},
-    "SILVER": {"name": "Silber", "symbol": "SI=F", "mt5_symbol": "XAGUSD", "bitpanda_symbol": "SILVER", "category": "Edelmetalle", "platforms": ["MT5", "BITPANDA"]},
-    "PLATINUM": {"name": "Platin", "symbol": "PL=F", "mt5_symbol": "PL", "bitpanda_symbol": "PLATINUM", "category": "Edelmetalle", "platforms": ["MT5", "BITPANDA"]},
-    "PALLADIUM": {"name": "Palladium", "symbol": "PA=F", "mt5_symbol": "PA", "bitpanda_symbol": "PALLADIUM", "category": "Edelmetalle", "platforms": ["MT5", "BITPANDA"]},
+    # Precious Metals - Libertex: ✅ | ICMarkets: ✅ | Bitpanda: ✅
+    "GOLD": {"name": "Gold", "symbol": "GC=F", "mt5_libertex_symbol": "XAUUSD", "mt5_icmarkets_symbol": "XAUUSD", "bitpanda_symbol": "GOLD", "category": "Edelmetalle", "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]},
+    "SILVER": {"name": "Silber", "symbol": "SI=F", "mt5_libertex_symbol": "XAGUSD", "mt5_icmarkets_symbol": "XAGUSD", "bitpanda_symbol": "SILVER", "category": "Edelmetalle", "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]},
+    "PLATINUM": {"name": "Platin", "symbol": "PL=F", "mt5_libertex_symbol": "PL", "mt5_icmarkets_symbol": "XPTUSD", "bitpanda_symbol": "PLATINUM", "category": "Edelmetalle", "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]},
+    "PALLADIUM": {"name": "Palladium", "symbol": "PA=F", "mt5_libertex_symbol": "PA", "mt5_icmarkets_symbol": "XPDUSD", "bitpanda_symbol": "PALLADIUM", "category": "Edelmetalle", "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]},
     
-    # Energy - Libertex MT5: ✅ WTI | Bitpanda: ✅ Alle
-    "WTI_CRUDE": {"name": "WTI Crude Oil", "symbol": "CL=F", "mt5_symbol": "CL", "bitpanda_symbol": "OIL_WTI", "category": "Energie", "platforms": ["MT5", "BITPANDA"]},
-    "BRENT_CRUDE": {"name": "Brent Crude Oil", "symbol": "BZ=F", "mt5_symbol": "BRENT_F6", "bitpanda_symbol": "OIL_BRENT", "category": "Energie", "platforms": ["BITPANDA"]},
-    "NATURAL_GAS": {"name": "Natural Gas", "symbol": "NG=F", "mt5_symbol": "NATURALGAS", "bitpanda_symbol": "NATURAL_GAS", "category": "Energie", "platforms": ["BITPANDA"]},
+    # Energy - Libertex: ✅ WTI | ICMarkets: ✅ WTI_F6, BRENT_F6 | Bitpanda: ✅ Alle
+    "WTI_CRUDE": {"name": "WTI Crude Oil", "symbol": "CL=F", "mt5_libertex_symbol": "CL", "mt5_icmarkets_symbol": "WTI_F6", "bitpanda_symbol": "OIL_WTI", "category": "Energie", "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]},
+    "BRENT_CRUDE": {"name": "Brent Crude Oil", "symbol": "BZ=F", "mt5_libertex_symbol": "BRENT", "mt5_icmarkets_symbol": "BRENT_F6", "bitpanda_symbol": "OIL_BRENT", "category": "Energie", "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]},
+    "NATURAL_GAS": {"name": "Natural Gas", "symbol": "NG=F", "mt5_libertex_symbol": "NATURALGAS", "mt5_icmarkets_symbol": None, "bitpanda_symbol": "NATURAL_GAS", "category": "Energie", "platforms": ["MT5_LIBERTEX", "BITPANDA"]},
     
-    # Agricultural - Libertex MT5: ✅ | Bitpanda: ✅
-    "WHEAT": {"name": "Weizen", "symbol": "ZW=F", "mt5_symbol": "WHEAT", "bitpanda_symbol": "WHEAT", "category": "Agrar", "platforms": ["MT5", "BITPANDA"]},
-    "CORN": {"name": "Mais", "symbol": "ZC=F", "mt5_symbol": "CORN", "bitpanda_symbol": "CORN", "category": "Agrar", "platforms": ["MT5", "BITPANDA"]},
-    "SOYBEANS": {"name": "Sojabohnen", "symbol": "ZS=F", "mt5_symbol": "SOYBEAN", "bitpanda_symbol": "SOYBEANS", "category": "Agrar", "platforms": ["MT5", "BITPANDA"]},
-    "COFFEE": {"name": "Kaffee", "symbol": "KC=F", "mt5_symbol": "COFFEE", "bitpanda_symbol": "COFFEE", "category": "Agrar", "platforms": ["MT5", "BITPANDA"]},
-    "SUGAR": {"name": "Zucker", "symbol": "SB=F", "mt5_symbol": "SUGAR", "bitpanda_symbol": "SUGAR", "category": "Agrar", "platforms": ["MT5", "BITPANDA"]},
-    "COTTON": {"name": "Baumwolle", "symbol": "CT=F", "mt5_symbol": "COTTON", "bitpanda_symbol": "COTTON", "category": "Agrar", "platforms": ["BITPANDA"]},
-    "COCOA": {"name": "Kakao", "symbol": "CC=F", "mt5_symbol": "COCOA", "bitpanda_symbol": "COCOA", "category": "Agrar", "platforms": ["MT5", "BITPANDA"]},
+    # Agricultural - Libertex: ✅ | ICMarkets: teilweise | Bitpanda: ✅
+    "WHEAT": {"name": "Weizen", "symbol": "ZW=F", "mt5_libertex_symbol": "WHEAT", "mt5_icmarkets_symbol": "Wheat_H6", "bitpanda_symbol": "WHEAT", "category": "Agrar", "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]},
+    "CORN": {"name": "Mais", "symbol": "ZC=F", "mt5_libertex_symbol": "CORN", "mt5_icmarkets_symbol": "Corn_H6", "bitpanda_symbol": "CORN", "category": "Agrar", "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]},
+    "SOYBEANS": {"name": "Sojabohnen", "symbol": "ZS=F", "mt5_libertex_symbol": "SOYBEAN", "mt5_icmarkets_symbol": "Sbean_F6", "bitpanda_symbol": "SOYBEANS", "category": "Agrar", "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]},
+    "COFFEE": {"name": "Kaffee", "symbol": "KC=F", "mt5_libertex_symbol": "COFFEE", "mt5_icmarkets_symbol": "Coffee_H6", "bitpanda_symbol": "COFFEE", "category": "Agrar", "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]},
+    "SUGAR": {"name": "Zucker", "symbol": "SB=F", "mt5_libertex_symbol": "SUGAR", "mt5_icmarkets_symbol": "Sugar_H6", "bitpanda_symbol": "SUGAR", "category": "Agrar", "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]},
+    "COTTON": {"name": "Baumwolle", "symbol": "CT=F", "mt5_libertex_symbol": "COTTON", "mt5_icmarkets_symbol": "Cotton_H6", "bitpanda_symbol": "COTTON", "category": "Agrar", "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]},
+    "COCOA": {"name": "Kakao", "symbol": "CC=F", "mt5_libertex_symbol": "COCOA", "mt5_icmarkets_symbol": "Cocoa_H6", "bitpanda_symbol": "COCOA", "category": "Agrar", "platforms": ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]},
 }
 
 # Models
