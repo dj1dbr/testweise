@@ -1419,6 +1419,62 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
           )}
         </div>
 
+        {/* Platform Credentials */}
+        <div className="space-y-4 pb-4 border-b border-slate-700">
+          <h4 className="font-semibold text-lg">Plattform-Zugangsdaten</h4>
+          
+          {/* MT5 Libertex */}
+          <div className="space-y-2 p-3 bg-blue-900/10 rounded-lg border border-blue-700/30">
+            <Label className="text-blue-400 font-semibold">🔷 MT5 Libertex</Label>
+            <div className="space-y-2">
+              <Label htmlFor="mt5_libertex_account_id" className="text-sm">Account ID (MetaAPI)</Label>
+              <Input
+                id="mt5_libertex_account_id"
+                type="text"
+                value={formData.mt5_libertex_account_id || ''}
+                onChange={(e) => setFormData({ ...formData, mt5_libertex_account_id: e.target.value })}
+                className="bg-slate-800 border-slate-700 font-mono text-xs"
+                placeholder="142e1085-f20b-437e-93c7-b87a0e639a30"
+              />
+              <p className="text-xs text-slate-500">MetaAPI Account UUID für Libertex MT5</p>
+            </div>
+          </div>
+
+          {/* MT5 ICMarkets */}
+          <div className="space-y-2 p-3 bg-purple-900/10 rounded-lg border border-purple-700/30">
+            <Label className="text-purple-400 font-semibold">🟣 MT5 ICMarkets</Label>
+            <div className="space-y-2">
+              <Label htmlFor="mt5_icmarkets_account_id" className="text-sm">Account ID (MetaAPI)</Label>
+              <Input
+                id="mt5_icmarkets_account_id"
+                type="text"
+                value={formData.mt5_icmarkets_account_id || ''}
+                onChange={(e) => setFormData({ ...formData, mt5_icmarkets_account_id: e.target.value })}
+                className="bg-slate-800 border-slate-700 font-mono text-xs"
+                placeholder="d2605e89-7bc2-4144-9f7c-951edd596c39"
+              />
+              <p className="text-xs text-slate-500">MetaAPI Account UUID für ICMarkets MT5</p>
+            </div>
+          </div>
+
+          {/* Bitpanda */}
+          <div className="space-y-2 p-3 bg-green-900/10 rounded-lg border border-green-700/30">
+            <Label className="text-green-400 font-semibold">🟢 Bitpanda</Label>
+            <div className="space-y-2">
+              <Label htmlFor="bitpanda_api_key" className="text-sm">API Key</Label>
+              <Input
+                id="bitpanda_api_key"
+                type="password"
+                value={formData.bitpanda_api_key || ''}
+                onChange={(e) => setFormData({ ...formData, bitpanda_api_key: e.target.value })}
+                className="bg-slate-800 border-slate-700 font-mono text-xs"
+                placeholder="Bitpanda API Key"
+              />
+              <p className="text-xs text-slate-500">API-Schlüssel von Bitpanda Pro</p>
+            </div>
+          </div>
+        </div>
+
         {/* Trading Settings */}
         <div className="space-y-4 pb-4 border-b border-slate-700">
           <h4 className="font-semibold text-lg">Trading Einstellungen</h4>
