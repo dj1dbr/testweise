@@ -1263,14 +1263,14 @@ const Dashboard = () => {
                 <div className="bg-slate-800/50 p-4 rounded-lg">
                   <p className="text-xs text-slate-400 mb-1">24h Änderung</p>
                   <p className={`text-2xl font-bold ${
-                    historicalData.length >= 2 && historicalData[0]?.close && historicalData[historicalData.length - 1]?.close
-                      ? ((historicalData[historicalData.length - 1].close - historicalData[0].close) / historicalData[0].close * 100) >= 0 
+                    chartModalData.length >= 2 && chartModalData[0]?.close && chartModalData[chartModalData.length - 1]?.close
+                      ? ((chartModalData[chartModalData.length - 1].close - chartModalData[0].close) / chartModalData[0].close * 100) >= 0 
                         ? 'text-green-400' 
                         : 'text-red-400'
                       : 'text-slate-400'
                   }`}>
-                    {historicalData.length >= 2 && historicalData[0]?.close && historicalData[historicalData.length - 1]?.close
-                      ? `${((historicalData[historicalData.length - 1].close - historicalData[0].close) / historicalData[0].close * 100) >= 0 ? '+' : ''}${((historicalData[historicalData.length - 1].close - historicalData[0].close) / historicalData[0].close * 100).toFixed(2)}%`
+                    {chartModalData.length >= 2 && chartModalData[0]?.close && chartModalData[chartModalData.length - 1]?.close
+                      ? `${((chartModalData[chartModalData.length - 1].close - chartModalData[0].close) / chartModalData[0].close * 100) >= 0 ? '+' : ''}${((chartModalData[chartModalData.length - 1].close - chartModalData[0].close) / chartModalData[0].close * 100).toFixed(2)}%`
                       : 'N/A'}
                   </p>
                 </div>
