@@ -684,7 +684,53 @@ const Dashboard = () => {
               </Card>
             );
           })}
-        </div>
+            </div>
+          </TabsContent>
+
+          {/* Tab 2: Trades */}
+          <TabsContent value="trades">
+            <Card className="bg-slate-900/80 border-slate-700/50 p-6 backdrop-blur-sm">
+              <h3 className="text-xl font-semibold mb-4 text-cyan-400">Trade Historie</h3>
+              <TradesTable trades={trades} onCloseTrade={handleCloseTrade} onDeleteTrade={handleDeleteTrade} />
+            </Card>
+          </TabsContent>
+
+          {/* Tab 3: Charts */}
+          <TabsContent value="charts">
+            <Card className="bg-slate-900/80 border-slate-700/50 p-6 backdrop-blur-sm">
+              <h3 className="text-xl font-semibold mb-4 text-cyan-400">Markt Charts</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {Object.entries(allMarkets).slice(0, 4).map(([commodityId, market]) => {
+                  const commodity = commodities[commodityId];
+                  if (!commodity) return null;
+                  
+                  return (
+                    <Card key={commodityId} className="bg-slate-800/50 border-slate-700 p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-slate-200">{commodity.name}</h4>
+                        <button
+                          onClick={() => {
+                            setSelectedCommodity({id: commodityId, ...commodity, marketData: market});
+                            setChartModalOpen(true);
+                          }}
+                          className="text-cyan-400 hover:text-cyan-300"
+                        >
+                          <LineChart className="w-5 h-5" />
+                        </button>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-cyan-400">
+                          ${market.price?.toFixed(2) || '0.00'}
+                        </p>
+                        <p className="text-sm text-slate-400">{commodity.unit}</p>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </Card>
+          </TabsContent>
+        </Tabs>
         
         {/* Portfolio Exposure Warning */}
         {totalExposure > (balance * 0.2) && (
