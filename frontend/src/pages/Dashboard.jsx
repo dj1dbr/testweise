@@ -441,18 +441,7 @@ const Dashboard = () => {
     setCurrentCommodityIndex((prev) => (prev - 1 + enabledCommodities.length) % enabledCommodities.length);
   };
 
-  const handleCloseTrade = async (tradeId) => {
-    if (!marketData) return;
-    
-    try {
-      await axios.post(`${API}/trades/close/${tradeId}?exit_price=${marketData.price}`);
-      toast.success('Position geschlossen');
-      fetchTrades();
-      fetchStats();
-    } catch (error) {
-      toast.error('Fehler beim Schließen der Position');
-    }
-  };
+  // handleCloseTrade is defined above with MT5 support
 
   const handleUpdateSettings = async (newSettings) => {
     try {
