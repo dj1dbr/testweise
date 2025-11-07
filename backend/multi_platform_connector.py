@@ -22,8 +22,8 @@ class MultiPlatformConnector:
         self.platforms['MT5_LIBERTEX'] = {
             'type': 'MT5',
             'name': 'MT5 Libertex',
-            'account_id': os.environ.get('METAAPI_ACCOUNT_ID', 'rohstoff-trader'),
-            'region': 'london',  # or 'new-york', 'singapore'
+            'account_id': os.environ.get('METAAPI_ACCOUNT_ID', '142e1085-f20b-437e-93c7-b87a0e639a30'),
+            'region': 'london',
             'connector': None,
             'active': False,
             'balance': 0.0
