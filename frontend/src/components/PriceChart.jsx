@@ -1,6 +1,14 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
 
 const PriceChart = ({ data, commodityName = 'Commodity', isOHLCV = false }) => {
+  // Debug: Log data to console
+  console.log(`PriceChart für ${commodityName}:`, {
+    dataPoints: data?.length,
+    isOHLCV,
+    firstItem: data?.[0],
+    lastItem: data?.[data.length - 1]
+  });
+
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-[400px] text-slate-500">
