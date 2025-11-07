@@ -534,7 +534,7 @@ const Dashboard = () => {
                   className="w-4 h-4 rounded border-gray-300"
                 />
                 <h3 className="text-sm font-bold text-blue-400">🔷 MT5 Libertex</h3>
-                {settings?.active_platforms?.includes('MT5_LIBERTEX') && (
+                {mt5LibertexConnected && settings?.active_platforms?.includes('MT5_LIBERTEX') && (
                   <Badge className="bg-emerald-600 text-white text-xs">Aktiv</Badge>
                 )}
               </div>
@@ -543,23 +543,34 @@ const Dashboard = () => {
             <div className="space-y-2">
               <div>
                 <p className="text-xs text-slate-400">Balance</p>
-                <p className="text-xl font-bold text-white">€0.00</p>
+                <p className="text-xl font-bold text-white">
+                  {mt5LibertexConnected ? `€${mt5LibertexAccount?.balance?.toFixed(2) || '0.00'}` : '€0.00'}
+                </p>
               </div>
-              <div className="text-xs text-slate-400">
-                Region: London | Status: Wird geladen...
-              </div>
-              <div>
-                <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="text-slate-400">Portfolio-Risiko:</span>
-                  <span className="text-green-400">0.0% / 20%</span>
+              {mt5LibertexConnected && (
+                <>
+                  <div className="text-xs text-slate-400">
+                    Equity: €{mt5LibertexAccount?.equity?.toFixed(2)} | Margin: €{mt5LibertexAccount?.free_margin?.toFixed(2)}
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span className="text-slate-400">Portfolio-Risiko:</span>
+                      <span className="text-green-400">0.0% / 20%</span>
+                    </div>
+                    <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                      <div className="h-full bg-green-500" style={{ width: '0%' }} />
+                    </div>
+                  </div>
+                  <div className="text-xs text-slate-400">
+                    Offene Positionen: €0.00
+                  </div>
+                </>
+              )}
+              {!mt5LibertexConnected && (
+                <div className="text-xs text-slate-400">
+                  Region: London | Status: {settings?.active_platforms?.includes('MT5_LIBERTEX') ? 'Verbindung wird hergestellt...' : 'Inaktiv'}
                 </div>
-                <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-green-500" style={{ width: '0%' }} />
-                </div>
-              </div>
-              <div className="text-xs text-slate-400">
-                Offene Positionen: €0.00
-              </div>
+              )}
             </div>
           </Card>
 
