@@ -92,6 +92,13 @@ const Dashboard = () => {
 
   const fetchAllData = async () => {
     setLoading(true);
+    
+    // Set a maximum timeout for loading - force stop after 5 seconds
+    const maxLoadingTimeout = setTimeout(() => {
+      console.warn('Loading timeout reached, forcing UI to display');
+      setLoading(false);
+    }, 5000);
+    
     try {
       // First fetch settings, then everything else
       await fetchSettings().catch(err => console.error('Settings fetch error:', err));
@@ -111,7 +118,8 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error in fetchAllData:', error);
     } finally {
-      // Always stop loading, even if some calls fail
+      // Clear the timeout and stop loading
+      clearTimeout(maxLoadingTimeout);
       setLoading(false);
     }
   };
