@@ -401,33 +401,189 @@ class RohstoffTraderTester:
         else:
             self.log_test_result("Trades List", False, f"Failed to get trades: {data}")
     
+    async def test_platforms_status(self):
+        """Test multi-platform status endpoint"""
+        success, data = await self.make_request("GET", "/api/platforms/status")
+        
+        if success:
+            platforms = data.get("platforms", {})
+            active_platforms = data.get("active_platforms", [])
+            
+            # Check if we have 3 platforms
+            expected_platforms = ["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]
+            found_platforms = [p for p in expected_platforms if p in platforms]
+            
+            if len(platforms) == 3 and len(found_platforms) == 3:
+                self.log_test_result(
+                    "Platforms Status", 
+                    True, 
+                    f"Found all 3 platforms: {found_platforms}, Active: {active_platforms}",
+                    {"platforms": platforms, "active": active_platforms}
+                )
+            else:
+                self.log_test_result(
+                    "Platforms Status", 
+                    False, 
+                    f"Expected 3 platforms, found {len(platforms)}: {list(platforms.keys())}",
+                    data
+                )
+        else:
+            self.log_test_result("Platforms Status", False, f"Failed to get platforms status: {data}")
+    
+    async def test_mt5_libertex_account(self):
+        """Test MT5 Libertex account endpoint"""
+        success, data = await self.make_request("GET", "/api/platforms/MT5_LIBERTEX/account")
+        
+        if success:
+            account = data.get("account", {})
+            balance = account.get("balance", 0)
+            leverage = account.get("leverage", 0)
+            currency = account.get("currency", "")
+            
+            # Expected: Balance 50000 EUR, Leverage 1000
+            if balance > 0 and leverage > 0 and currency == "EUR":
+                self.log_test_result(
+                    "MT5 Libertex Account", 
+                    True, 
+                    f"Balance: {balance} {currency}, Leverage: {leverage}",
+                    {"balance": balance, "leverage": leverage, "currency": currency}
+                )
+            else:
+                self.log_test_result(
+                    "MT5 Libertex Account", 
+                    False, 
+                    f"Unexpected values - Balance: {balance}, Leverage: {leverage}, Currency: {currency}",
+                    data
+                )
+        else:
+            error_msg = data.get("detail", str(data))
+            self.log_test_result("MT5 Libertex Account", False, f"Failed to get account: {error_msg}", data)
+    
+    async def test_mt5_icmarkets_account(self):
+        """Test MT5 ICMarkets account endpoint"""
+        success, data = await self.make_request("GET", "/api/platforms/MT5_ICMARKETS/account")
+        
+        if success:
+            account = data.get("account", {})
+            balance = account.get("balance", 0)
+            leverage = account.get("leverage", 0)
+            currency = account.get("currency", "")
+            
+            # Expected: Balance ~2204 EUR, Leverage 30
+            if balance > 0 and leverage > 0 and currency == "EUR":
+                self.log_test_result(
+                    "MT5 ICMarkets Account", 
+                    True, 
+                    f"Balance: {balance} {currency}, Leverage: {leverage}",
+                    {"balance": balance, "leverage": leverage, "currency": currency}
+                )
+            else:
+                self.log_test_result(
+                    "MT5 ICMarkets Account", 
+                    False, 
+                    f"Unexpected values - Balance: {balance}, Leverage: {leverage}, Currency: {currency}",
+                    data
+                )
+        else:
+            error_msg = data.get("detail", str(data))
+            self.log_test_result("MT5 ICMarkets Account", False, f"Failed to get account: {error_msg}", data)
+    
+    async def test_settings_platforms(self):
+        """Test settings endpoint for platform configuration"""
+        success, data = await self.make_request("GET", "/api/settings")
+        
+        if success:
+            active_platforms = data.get("active_platforms", None)
+            default_platform = data.get("default_platform", None)
+            
+            # Check if active_platforms is an array and default_platform is defined
+            if active_platforms is not None and default_platform is not None:
+                self.log_test_result(
+                    "Settings Platform Config", 
+                    True, 
+                    f"Active platforms: {active_platforms}, Default: {default_platform}",
+                    {"active_platforms": active_platforms, "default_platform": default_platform}
+                )
+            else:
+                self.log_test_result(
+                    "Settings Platform Config", 
+                    False, 
+                    f"Missing platform config - Active: {active_platforms}, Default: {default_platform}",
+                    data
+                )
+        else:
+            self.log_test_result("Settings Platform Config", False, f"Failed to get settings: {data}")
+    
+    async def test_commodities_multi_platform_symbols(self):
+        """Test commodities endpoint for multi-platform symbol mappings"""
+        success, data = await self.make_request("GET", "/api/commodities")
+        
+        if success:
+            commodities = data.get("commodities", {})
+            
+            # Check WTI_CRUDE specifically
+            wti = commodities.get("WTI_CRUDE", {})
+            libertex_symbol = wti.get("mt5_libertex_symbol")
+            icmarkets_symbol = wti.get("mt5_icmarkets_symbol")
+            
+            # Expected: USOILCash (Libertex), WTI_F6 (ICMarkets)
+            if libertex_symbol == "USOILCash" and icmarkets_symbol == "WTI_F6":
+                self.log_test_result(
+                    "Commodities Multi-Platform Symbols", 
+                    True, 
+                    f"WTI_CRUDE: Libertex={libertex_symbol}, ICMarkets={icmarkets_symbol}",
+                    {"wti_libertex": libertex_symbol, "wti_icmarkets": icmarkets_symbol}
+                )
+            else:
+                self.log_test_result(
+                    "Commodities Multi-Platform Symbols", 
+                    False, 
+                    f"Incorrect symbols - Libertex: {libertex_symbol} (expected USOILCash), ICMarkets: {icmarkets_symbol} (expected WTI_F6)",
+                    {"wti": wti}
+                )
+        else:
+            self.log_test_result("Commodities Multi-Platform Symbols", False, f"Failed to get commodities: {data}")
+    
     async def run_all_tests(self):
         """Run all backend tests in sequence"""
-        logger.info("🚀 Starting Rohstoff Trader Backend API Tests")
+        logger.info("🚀 Starting Rohstoff Trader Backend API Tests - Multi-Platform Edition")
         logger.info(f"Testing against: {self.base_url}")
         
         # Basic connectivity tests
         await self.test_api_root()
         
-        # MT5 Connection Tests (CRITICAL)
+        # Multi-Platform Tests (NEW - PRIORITY)
+        logger.info("\n=== MULTI-PLATFORM TESTS ===")
+        await self.test_platforms_status()
+        await self.test_mt5_libertex_account()
+        await self.test_mt5_icmarkets_account()
+        await self.test_settings_platforms()
+        await self.test_commodities_multi_platform_symbols()
+        
+        # Legacy MT5 Connection Tests
+        logger.info("\n=== LEGACY MT5 TESTS ===")
         await self.test_mt5_account_info()
         await self.test_mt5_status()
         await self.test_mt5_symbols()
         await self.test_mt5_positions()
         
         # Settings Tests
+        logger.info("\n=== SETTINGS TESTS ===")
         await self.test_settings_get()
         await self.test_settings_update_mt5_mode()
         
         # Market Data Tests
+        logger.info("\n=== MARKET DATA TESTS ===")
         await self.test_commodities_list()
         await self.test_market_data_all()
         
         # Manual Trade Execution Tests (MOST IMPORTANT)
+        logger.info("\n=== TRADE EXECUTION TESTS ===")
         await self.test_manual_trade_wti_crude()
         await self.test_manual_trade_gold()
         
         # Additional tests
+        logger.info("\n=== ADDITIONAL TESTS ===")
         await self.test_trades_list()
         
         # Summary
