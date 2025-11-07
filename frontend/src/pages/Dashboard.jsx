@@ -475,42 +475,88 @@ const Dashboard = () => {
 
         {/* Platform Balance Cards - 3 Platforms */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {/* MT5 Balance Card */}
+          {/* MT5 Libertex Balance Card */}
           <Card className="bg-gradient-to-br from-blue-900/20 to-slate-900/90 border-blue-700/50 backdrop-blur-sm p-4 shadow-2xl">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={settings?.mode === 'MT5'}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      handleUpdateSettings({ ...settings, mode: 'MT5' });
-                    }
+                  checked={settings?.active_platforms?.includes('MT5_LIBERTEX')}
+                  onChange={async (e) => {
+                    const newPlatforms = e.target.checked
+                      ? [...(settings?.active_platforms || []), 'MT5_LIBERTEX']
+                      : (settings?.active_platforms || []).filter(p => p !== 'MT5_LIBERTEX');
+                    await handleUpdateSettings({ ...settings, active_platforms: newPlatforms });
                   }}
                   className="w-4 h-4 rounded border-gray-300"
                 />
-                <h3 className="text-lg font-bold text-blue-400">🔷 MT5 Konto</h3>
-                {mt5Connected && settings?.mode === 'MT5' && (
+                <h3 className="text-sm font-bold text-blue-400">🔷 MT5 Libertex</h3>
+                {settings?.active_platforms?.includes('MT5_LIBERTEX') && (
                   <Badge className="bg-emerald-600 text-white text-xs">Aktiv</Badge>
                 )}
               </div>
-              <DollarSign className="w-10 h-10 text-blue-400/20" />
+              <DollarSign className="w-8 h-8 text-blue-400/20" />
             </div>
             <div className="space-y-2">
               <div>
                 <p className="text-xs text-slate-400">Balance</p>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-xl font-bold text-white">€0.00</p>
+              </div>
+              <div className="text-xs text-slate-400">
+                Region: London | Status: Wird geladen...
+              </div>
+              <div>
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-slate-400">Portfolio-Risiko:</span>
+                  <span className="text-green-400">0.0% / 20%</span>
+                </div>
+                <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-green-500" style={{ width: '0%' }} />
+                </div>
+              </div>
+              <div className="text-xs text-slate-400">
+                Offene Positionen: €0.00
+              </div>
+            </div>
+          </Card>
+
+          {/* MT5 ICMarkets Balance Card */}
+          <Card className="bg-gradient-to-br from-purple-900/20 to-slate-900/90 border-purple-700/50 backdrop-blur-sm p-4 shadow-2xl">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={settings?.active_platforms?.includes('MT5_ICMARKETS')}
+                  onChange={async (e) => {
+                    const newPlatforms = e.target.checked
+                      ? [...(settings?.active_platforms || []), 'MT5_ICMARKETS']
+                      : (settings?.active_platforms || []).filter(p => p !== 'MT5_ICMARKETS');
+                    await handleUpdateSettings({ ...settings, active_platforms: newPlatforms });
+                  }}
+                  className="w-4 h-4 rounded border-gray-300"
+                />
+                <h3 className="text-sm font-bold text-purple-400">🟣 MT5 ICMarkets</h3>
+                {settings?.active_platforms?.includes('MT5_ICMARKETS') && (
+                  <Badge className="bg-emerald-600 text-white text-xs">Aktiv</Badge>
+                )}
+              </div>
+              <DollarSign className="w-8 h-8 text-purple-400/20" />
+            </div>
+            <div className="space-y-2">
+              <div>
+                <p className="text-xs text-slate-400">Balance</p>
+                <p className="text-xl font-bold text-white">
                   {mt5Connected ? `€${mt5Account?.balance?.toFixed(2) || '0.00'}` : '€0.00'}
                 </p>
               </div>
               {mt5Connected && (
                 <>
                   <div className="text-xs text-slate-400">
-                    Equity: €{mt5Account?.equity?.toFixed(2)} | Freie Margin: €{mt5Account?.free_margin?.toFixed(2)}
+                    Equity: €{mt5Account?.equity?.toFixed(2)} | Margin: €{mt5Account?.free_margin?.toFixed(2)}
                   </div>
                   <div>
                     <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="text-slate-400">Portfolio-Risiko (MT5):</span>
+                      <span className="text-slate-400">Portfolio-Risiko:</span>
                       <span className={
                         (totalExposure / (mt5Account?.balance || 1)) * 100 > (settings?.max_portfolio_risk_percent || 20)
                           ? 'text-red-400 font-semibold'
@@ -534,6 +580,11 @@ const Dashboard = () => {
                     Offene Positionen: €{totalExposure.toFixed(2)}
                   </div>
                 </>
+              )}
+              {!mt5Connected && (
+                <div className="text-xs text-slate-400">
+                  Region: London | Status: Verbunden
+                </div>
               )}
             </div>
           </Card>
