@@ -1,6 +1,6 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
 
-const PriceChart = ({ data, marketData }) => {
+const PriceChart = ({ data, commodityName = 'Commodity', isOHLCV = false }) => {
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-[400px] text-slate-500">
@@ -9,12 +9,35 @@ const PriceChart = ({ data, marketData }) => {
     );
   }
 
-  const chartData = data.map(item => ({
-    time: new Date(item.timestamp).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
-    price: item.price,
-    sma: item.sma_20,
-    ema: item.ema_20
-  }));
+  // Format time based on data length (detect if intraday or daily)
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp);
+    if (data.length > 100) {
+      // Long period - show date
+      return date.toLocaleDateString('de-DE', { day: '2-digit', month: 'short' });
+    } else if (data.length > 20) {
+      // Medium period - show date and time
+      return date.toLocaleDateString('de-DE', { day: '2-digit', month: 'short', hour: '2-digit' });
+    } else {
+      // Short period - show time only
+      return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    }
+  };
+
+  const chartData = data.map(item => {
+    // Handle both old format (item.price) and new OHLCV format (item.close)
+    const price = isOHLCV ? item.close : (item.price || item.close);
+    
+    return {
+      time: formatTime(item.timestamp),
+      price: price,
+      high: item.high,
+      low: item.low,
+      open: item.open,
+      sma: item.sma_20,
+      ema: item.ema_20
+    };
+  });
 
   return (
     <ResponsiveContainer width="100%" height={400}>
