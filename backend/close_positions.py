@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BACKEND_URL = "https://multitrade-mt5.preview.emergentagent.com"
+BACKEND_URL = "https://rohstoff-trader.preview.emergentagent.com"
 
 async def list_positions():
     """Liste alle offenen Positionen auf"""

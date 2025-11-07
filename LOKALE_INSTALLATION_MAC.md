@@ -91,7 +91,7 @@ MONGO_URL=mongodb://localhost:27017
 DB_NAME=rohstoff_trader
 
 # MetaAPI (Ihre bestehenden Zugangsdaten)
-METAAPI_ACCOUNT_ID=d2605e89-7bc2-4144-9f7c-951edd596c39
+METAAPI_ACCOUNT_ID=rohstoff-trader
 METAAPI_TOKEN=IHR_TOKEN_HIER
 
 # Bitpanda (Ihre bestehenden Zugangsdaten)

@@ -52,13 +52,13 @@ sudo supervisorctl restart backend
 
 ```bash
 # Test: Symbolzuordnung prüfen
-curl https://multitrade-mt5.preview.emergentagent.com/api/mt5/symbols
+curl https://rohstoff-trader.preview.emergentagent.com/api/mt5/symbols
 
 # Test: Account-Verbindung
-curl https://multitrade-mt5.preview.emergentagent.com/api/mt5/account
+curl https://rohstoff-trader.preview.emergentagent.com/api/mt5/account
 
 # Test: Manuelle Order (z.B. Gold)
-curl -X POST "https://multitrade-mt5.preview.emergentagent.com/api/trades/execute?trade_type=BUY&price=3978&commodity=GOLD"
+curl -X POST "https://rohstoff-trader.preview.emergentagent.com/api/trades/execute?trade_type=BUY&price=3978&commodity=GOLD"
 ```
 
 ## Beispiel: Broker-spezifische Symbole

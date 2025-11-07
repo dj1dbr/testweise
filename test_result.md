@@ -135,7 +135,7 @@ backend:
         comment: |
           ✅ VERIFIED! MetaAPI connection fully functional:
           - Account info retrieval: Balance=2199.81 EUR, Broker=IC Markets (EU) Ltd
-          - Connection status: Connected=True, Account=d2605e89-7bc2-4144-9f7c-951edd596c39
+          - Connection status: Connected=True, Account=rohstoff-trader
           - Positions retrieval: 3 open positions successfully retrieved
           - All MetaAPI endpoints responding correctly
           - Manual trades executing (GOLD successful with MT5 ticket 1303088224)
