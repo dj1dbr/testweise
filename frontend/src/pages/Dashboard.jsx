@@ -672,7 +672,7 @@ const Dashboard = () => {
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={settings?.active_platforms?.includes('BITPANDA')}
+                  checked={settings?.active_platforms?.includes('BITPANDA') || false}
                   onChange={async (e) => {
                     const newPlatforms = e.target.checked
                       ? [...(settings?.active_platforms || []), 'BITPANDA']
