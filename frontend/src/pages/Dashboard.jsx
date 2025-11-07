@@ -547,7 +547,7 @@ const Dashboard = () => {
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={settings?.active_platforms?.includes('MT5_LIBERTEX')}
+                  checked={settings?.active_platforms?.includes('MT5_LIBERTEX') || false}
                   onChange={async (e) => {
                     const newPlatforms = e.target.checked
                       ? [...(settings?.active_platforms || []), 'MT5_LIBERTEX']
