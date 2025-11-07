@@ -223,10 +223,73 @@ const Dashboard = () => {
 
   const fetchTrades = async () => {
     try {
+      // Fetch database trades
       const response = await axios.get(`${API}/trades/list`);
-      setTrades(response.data.trades || []);
+      const dbTrades = response.data.trades || [];
+      
+      // Fetch MT5 positions from active platforms
+      const mt5Positions = [];
+      
+      if (settings?.active_platforms?.includes('MT5_LIBERTEX')) {
+        try {
+          const libertexRes = await axios.get(`${API}/platforms/MT5_LIBERTEX/positions`);
+          if (libertexRes.data.success && libertexRes.data.positions) {
+            libertexRes.data.positions.forEach(pos => {
+              mt5Positions.push({
+                id: `MT5_LIBERTEX_${pos.ticket}`,
+                timestamp: pos.time,
+                commodity: pos.symbol,
+                type: pos.type === 'POSITION_TYPE_BUY' ? 'BUY' : 'SELL',
+                price: pos.price_current,
+                quantity: pos.volume,
+                status: 'OPEN',
+                platform: 'MT5_LIBERTEX',
+                entry_price: pos.price_open,
+                profit_loss: pos.profit,
+                stop_loss: pos.sl,
+                take_profit: pos.tp,
+                mt5_ticket: pos.ticket
+              });
+            });
+          }
+        } catch (err) {
+          console.error('Error fetching MT5 Libertex positions:', err);
+        }
+      }
+      
+      if (settings?.active_platforms?.includes('MT5_ICMARKETS')) {
+        try {
+          const icmarketsRes = await axios.get(`${API}/platforms/MT5_ICMARKETS/positions`);
+          if (icmarketsRes.data.success && icmarketsRes.data.positions) {
+            icmarketsRes.data.positions.forEach(pos => {
+              mt5Positions.push({
+                id: `MT5_ICMARKETS_${pos.ticket}`,
+                timestamp: pos.time,
+                commodity: pos.symbol,
+                type: pos.type === 'POSITION_TYPE_BUY' ? 'BUY' : 'SELL',
+                price: pos.price_current,
+                quantity: pos.volume,
+                status: 'OPEN',
+                platform: 'MT5_ICMARKETS',
+                entry_price: pos.price_open,
+                profit_loss: pos.profit,
+                stop_loss: pos.sl,
+                take_profit: pos.tp,
+                mt5_ticket: pos.ticket
+              });
+            });
+          }
+        } catch (err) {
+          console.error('Error fetching MT5 ICMarkets positions:', err);
+        }
+      }
+      
+      // Combine database trades with MT5 positions
+      const allTrades = [...dbTrades, ...mt5Positions];
+      setTrades(allTrades);
+      
       // Calculate exposure after loading trades
-      const openTrades = (response.data.trades || []).filter(t => t.status === 'OPEN');
+      const openTrades = allTrades.filter(t => t.status === 'OPEN');
       const exposure = openTrades.reduce((sum, trade) => {
         return sum + (trade.entry_price * trade.quantity);
       }, 0);
