@@ -257,6 +257,24 @@ const Dashboard = () => {
     }
   };
 
+  const handleDeleteTrade = async (tradeId, tradeName) => {
+    if (!window.confirm(`Trade "${tradeName}" wirklich löschen?`)) {
+      return;
+    }
+    
+    try {
+      const response = await axios.delete(`${API}/trades/${tradeId}`);
+      if (response.data.success) {
+        toast.success('✅ Trade gelöscht!');
+        fetchTrades();
+        fetchStats();
+      }
+    } catch (error) {
+      console.error('Error deleting trade:', error);
+      toast.error(`❌ Fehler: ${error.response?.data?.detail || error.message}`);
+    }
+  };
+
   // Carousel navigation
   const enabledCommodities = Object.keys(allMarkets);
   const currentCommodityId = enabledCommodities[currentCommodityIndex];
