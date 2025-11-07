@@ -930,10 +930,37 @@ const Dashboard = () => {
                     </thead>
                     <tbody>
                       {trades.map((trade) => {
-                        const commodity = commodities[trade.commodity];
-                        const currentPrice = allMarkets[trade.commodity]?.price || trade.entry_price;
+                        // Map MT5 symbols to commodity IDs
+                        const symbolToCommodity = {
+                          'XAUUSD': 'GOLD',
+                          'XAGUSD': 'SILVER',
+                          'XPTUSD': 'PLATINUM',
+                          'XPDUSD': 'PALLADIUM',
+                          'PL': 'PLATINUM',
+                          'PA': 'PALLADIUM',
+                          'USOILCash': 'WTI_CRUDE',
+                          'CL': 'BRENT_CRUDE',
+                          'NGASCash': 'NATURAL_GAS',
+                          'WHEAT': 'WHEAT',
+                          'CORN': 'CORN',
+                          'SOYBEAN': 'SOYBEANS',
+                          'COFFEE': 'COFFEE',
+                          'SUGAR': 'SUGAR',
+                          'COTTON': 'COTTON',
+                          'COCOA': 'COCOA'
+                        };
+                        
+                        const commodityId = symbolToCommodity[trade.commodity] || trade.commodity;
+                        const commodity = commodities[commodityId];
+                        
+                        // For MT5 trades, use the current price from trade data if available, otherwise from market
+                        const currentPrice = trade.price || allMarkets[commodityId]?.price || trade.entry_price;
+                        
+                        // Calculate P&L
                         const pl = trade.status === 'OPEN' 
-                          ? (trade.type === 'BUY' ? currentPrice - trade.entry_price : trade.entry_price - currentPrice) * trade.quantity
+                          ? (trade.profit_loss !== undefined && trade.profit_loss !== null)
+                            ? trade.profit_loss  // Use MT5's calculated P&L if available
+                            : (trade.type === 'BUY' ? currentPrice - trade.entry_price : trade.entry_price - currentPrice) * trade.quantity
                           : trade.profit_loss || 0;
                         
                         return (
