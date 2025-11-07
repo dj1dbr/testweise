@@ -1234,6 +1234,24 @@ const Dashboard = () => {
           
           {selectedCommodity && (
             <div className="space-y-6 mt-4">
+              {/* Trade Buttons - ganz oben */}
+              <div className="flex gap-4 justify-center pb-4 border-b border-slate-700">
+                <Button
+                  onClick={() => setTradeType('BUY')}
+                  className="flex-1 max-w-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3"
+                >
+                  <TrendingUp className="w-5 h-5 mr-2" />
+                  KAUFEN
+                </Button>
+                <Button
+                  onClick={() => setTradeType('SELL')}
+                  className="flex-1 max-w-xs bg-rose-600 hover:bg-rose-500 text-white font-bold py-3"
+                >
+                  <TrendingDown className="w-5 h-5 mr-2" />
+                  VERKAUFEN
+                </Button>
+              </div>
+
               {/* Price Info */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-slate-800/50 p-4 rounded-lg">
