@@ -268,6 +268,7 @@ class TradingSettings(BaseModel):
     max_trades_per_hour: int = 3
     position_size: float = 1.0
     max_portfolio_risk_percent: float = 20.0  # Max 20% of balance for all open positions
+    default_platform: Literal["MT5", "BITPANDA"] = "MT5"  # Standard-Plattform für neue Trades
     # Alle Rohstoffe aktiviert (MT5: nur Metalle | Bitpanda: alle)
     enabled_commodities: List[str] = ["GOLD", "SILVER", "PLATINUM", "PALLADIUM", "WTI_CRUDE", "BRENT_CRUDE", "NATURAL_GAS", "WHEAT", "CORN", "SOYBEANS", "COFFEE", "SUGAR", "COTTON", "COCOA"]
     
