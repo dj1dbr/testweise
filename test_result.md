@@ -384,3 +384,30 @@ agent_communication:
       Fix the platform check logic in server.py line 884 to properly handle MT5_LIBERTEX and MT5_ICMARKETS.
       Change from: if 'MT5' not in platforms
       To: if not any(p in platforms for p in ['MT5_LIBERTEX', 'MT5_ICMARKETS', 'MT5'])
+  
+  - agent: "main"
+    message: |
+      FRONTEND UI FIXES COMPLETED ✅
+      
+      Fixed two critical user-reported issues:
+      
+      1. ✅ Chart Timeframe Options Expansion
+         - Added "2 Wochen" (2 weeks) option to chart period selector
+         - Updated "5 Tage" to "1 Woche" for better clarity
+         - Chart period dropdown now has complete progression: 1 Tag → 1 Woche → 2 Wochen → 1 Monat → ...
+         - Tested and verified via screenshot
+      
+      2. ✅ Stop Loss/Take Profit Input Bug Fix
+         - Fixed input parsing logic that prevented decimal values like "0.5" from being entered
+         - Problem: Using || operator with parseFloat caused "0" to be treated as falsy and replaced
+         - Solution: Changed to explicit isNaN() check
+         - Tested "0.5" in Stop Loss field - works ✅
+         - Tested "0.75" in Take Profit field - works ✅
+      
+      Changes made in Dashboard.jsx:
+      - Lines 1095-1096: Chart period options updated
+      - Lines 1702-1713: Stop Loss input logic fixed
+      - Lines 1723-1734: Take Profit input logic fixed
+      
+      Both fixes verified with manual testing via screenshot tool.
+      Ready for user confirmation.
