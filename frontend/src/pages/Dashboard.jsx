@@ -473,8 +473,8 @@ const Dashboard = () => {
           </Card>
         )}
 
-        {/* Platform Balance Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        {/* Platform Balance Cards - 3 Platforms */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           {/* MT5 Balance Card */}
           <Card className="bg-gradient-to-br from-blue-900/20 to-slate-900/90 border-blue-700/50 backdrop-blur-sm p-4 shadow-2xl">
             <div className="flex items-center justify-between mb-3">
