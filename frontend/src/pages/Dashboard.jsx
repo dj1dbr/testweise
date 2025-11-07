@@ -1324,6 +1324,9 @@ const Dashboard = () => {
                       onChange={(e) => setChartPeriod(e.target.value)}
                       className="px-2 py-1 bg-slate-900 border border-slate-600 rounded text-xs text-white"
                     >
+                      <option value="1d">1 Tag</option>
+                      <option value="5d">1 Woche</option>
+                      <option value="2wk">2 Wochen</option>
                       <option value="1mo">1 Monat</option>
                       <option value="3mo">3 Monate</option>
                       <option value="6mo">6 Monate</option>
