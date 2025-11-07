@@ -1202,7 +1202,11 @@ const Dashboard = () => {
               <p className="text-sm text-slate-400">Trading Modus</p>
               {settings?.auto_trading ? <Play className="w-5 h-5 text-emerald-400" /> : <Pause className="w-5 h-5 text-slate-400" />}
             </div>
-            <p className="text-2xl font-bold text-white mb-1">{settings?.mode || 'PAPER'}</p>
+            <p className="text-2xl font-bold text-white mb-1">
+              {settings?.active_platforms?.length > 0 
+                ? settings.active_platforms.join(' + ')
+                : 'Keine Platform aktiv'}
+            </p>
             <p className={`text-sm ${settings?.auto_trading ? 'text-emerald-400' : 'text-slate-400'}`}>
               {settings?.auto_trading ? 'Auto-Trading Aktiv' : 'Manueller Modus'}
             </p>
