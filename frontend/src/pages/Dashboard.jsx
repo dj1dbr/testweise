@@ -17,6 +17,9 @@ import IndicatorsPanel from '../components/IndicatorsPanel';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Configure axios defaults with timeout
+axios.defaults.timeout = 10000; // 10 second timeout for all requests
+
 const Dashboard = () => {
   const [marketData, setMarketData] = useState(null);
   const [allMarkets, setAllMarkets] = useState({});  // All commodity markets
