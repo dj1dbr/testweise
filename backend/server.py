@@ -1181,7 +1181,20 @@ async def get_settings():
 async def update_settings(settings: TradingSettings):
     """Update trading settings and reinitialize AI if needed"""
     try:
-        doc = settings.model_dump()
+        # Only update provided fields, keep existing values for others
+        doc = settings.model_dump(exclude_unset=False, exclude_none=False)
+        
+        # Get existing settings first to preserve API keys
+        existing = await db.trading_settings.find_one({"id": "trading_settings"})
+        
+        # Merge: Keep existing values for fields that weren't explicitly set
+        if existing:
+            # Preserve API keys if not provided in update
+            for key in ['openai_api_key', 'gemini_api_key', 'anthropic_api_key', 'bitpanda_api_key',
+                       'mt5_libertex_account_id', 'mt5_icmarkets_account_id']:
+                if key in existing and (key not in doc or doc[key] is None or doc[key] == ''):
+                    doc[key] = existing[key]
+        
         await db.trading_settings.update_one(
             {"id": "trading_settings"},
             {"$set": doc},
