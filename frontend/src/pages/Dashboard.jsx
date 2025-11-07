@@ -328,14 +328,40 @@ const Dashboard = () => {
     }
   };
   
+  // Fetch MT5 Libertex Account
+  const fetchMT5LibertexAccount = async () => {
+    try {
+      const response = await axios.get(`${API}/platforms/MT5_LIBERTEX/account`);
+      if (response.data.success) {
+        setMt5LibertexAccount(response.data.account);
+        setMt5LibertexConnected(true);
+      }
+    } catch (error) {
+      console.error('Error fetching MT5 Libertex account:', error);
+      setMt5LibertexConnected(false);
+    }
+  };
+
+  // Fetch MT5 ICMarkets Account  
+  const fetchMT5ICMarketsAccount = async () => {
+    try {
+      const response = await axios.get(`${API}/platforms/MT5_ICMARKETS/account`);
+      if (response.data.success) {
+        setMt5Account(response.data.account);
+        setMt5Connected(true);
+      }
+    } catch (error) {
+      console.error('Error fetching MT5 ICMarkets account:', error);
+      setMt5Connected(false);
+    }
+  };
+  
   const fetchBitpandaAccount = async () => {
     try {
-      const response = await axios.get(`${API}/bitpanda/account`);
-      setMt5Account(response.data); // Use same state for unified handling
-      setMt5Connected(true);
-      // Update balance with Bitpanda data
-      if (settings?.mode === 'BITPANDA') {
-        setBalance(response.data.balance);
+      const response = await axios.get(`${API}/platforms/BITPANDA/account`);
+      if (response.data.success) {
+        setBitpandaAccount(response.data.account);
+        setBitpandaConnected(true);
       }
     } catch (error) {
       console.error('Error fetching Bitpanda account:', error);
