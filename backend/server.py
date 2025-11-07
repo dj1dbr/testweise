@@ -237,7 +237,8 @@ class Trade(BaseModel):
     price: float
     quantity: float = 1.0
     status: Literal["OPEN", "CLOSED"] = "OPEN"
-    mode: Literal["MT5", "BITPANDA"] = "MT5"
+    platform: Literal["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"] = "MT5_LIBERTEX"  # Updated for multi-platform
+    mode: Optional[str] = None  # Deprecated, kept for backward compatibility
     entry_price: float
     exit_price: Optional[float] = None
     profit_loss: Optional[float] = None
@@ -245,12 +246,15 @@ class Trade(BaseModel):
     take_profit: Optional[float] = None
     strategy_signal: Optional[str] = None
     closed_at: Optional[datetime] = None
+    mt5_ticket: Optional[str] = None  # MT5 order ticket number
 
 class TradingSettings(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
     id: str = "trading_settings"
-    mode: Literal["MT5", "BITPANDA"] = "MT5"
+    # Multi-Platform Support: List of active platforms
+    active_platforms: List[Literal["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"]] = ["MT5_LIBERTEX"]
+    mode: Optional[str] = None  # Deprecated, kept for backward compatibility
     auto_trading: bool = False
     use_ai_analysis: bool = True  # Enable AI analysis
     ai_provider: Literal["emergent", "openai", "gemini", "anthropic", "ollama"] = "emergent"
@@ -267,11 +271,15 @@ class TradingSettings(BaseModel):
     max_trades_per_hour: int = 3
     position_size: float = 1.0
     max_portfolio_risk_percent: float = 20.0  # Max 20% of balance for all open positions
-    default_platform: Literal["MT5", "BITPANDA"] = "MT5"  # Standard-Plattform für neue Trades
-    # Alle Rohstoffe aktiviert (MT5: nur Metalle | Bitpanda: alle)
+    default_platform: Literal["MT5_LIBERTEX", "MT5_ICMARKETS", "BITPANDA"] = "MT5_LIBERTEX"  # Standard-Plattform für neue Trades
+    # Alle Rohstoffe aktiviert
     enabled_commodities: List[str] = ["GOLD", "SILVER", "PLATINUM", "PALLADIUM", "WTI_CRUDE", "BRENT_CRUDE", "NATURAL_GAS", "WHEAT", "CORN", "SOYBEANS", "COFFEE", "SUGAR", "COTTON", "COCOA"]
     
-    # MT5 Credentials
+    # MT5 Libertex Credentials
+    mt5_libertex_account_id: Optional[str] = None
+    # MT5 ICMarkets Credentials
+    mt5_icmarkets_account_id: Optional[str] = None
+    # Deprecated MT5 credentials (kept for compatibility)
     mt5_login: Optional[str] = None
     mt5_password: Optional[str] = None
     mt5_server: Optional[str] = None
