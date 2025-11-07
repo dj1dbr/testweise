@@ -47,6 +47,7 @@ const Dashboard = () => {
   const [aiProcessing, setAiProcessing] = useState(false);
   const [chartTimeframe, setChartTimeframe] = useState('1d');
   const [chartPeriod, setChartPeriod] = useState('1mo');
+  const [chartModalData, setChartModalData] = useState([]);
 
   useEffect(() => {
     fetchAllData();
