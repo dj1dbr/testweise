@@ -54,17 +54,23 @@ const Dashboard = () => {
         fetchTrades();
         fetchStats();
         updateBalance();
-        // Fetch account data based on mode
-        if (settings?.mode === 'MT5') {
-          fetchMT5Account();
-        } else if (settings?.mode === 'BITPANDA') {
-          fetchBitpandaAccount();
+        // Fetch account data for all active platforms
+        if (settings?.active_platforms) {
+          if (settings.active_platforms.includes('MT5_LIBERTEX')) {
+            fetchMT5LibertexAccount();
+          }
+          if (settings.active_platforms.includes('MT5_ICMARKETS')) {
+            fetchMT5ICMarketsAccount();
+          }
+          if (settings.active_platforms.includes('BITPANDA')) {
+            fetchBitpandaAccount();
+          }
         }
       }
     }, 10000);  // Every 10 seconds
 
     return () => clearInterval(liveInterval);
-  }, [autoRefresh, settings?.mode]);
+  }, [autoRefresh, settings?.active_platforms]);
 
   // Load historical data for selected commodity in modal
   useEffect(() => {
