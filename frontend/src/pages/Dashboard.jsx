@@ -94,20 +94,24 @@ const Dashboard = () => {
     }
   }, [settings?.active_platforms]);
 
-  // Load historical data for selected commodity in modal
+  // Load OHLCV data for selected commodity in modal with timeframe
   useEffect(() => {
     if (chartModalOpen && selectedCommodity) {
       const loadChartData = async () => {
         try {
-          const response = await axios.get(`${API}/market/history?commodity=${selectedCommodity.id}&limit=100`);
-          setHistoricalData(response.data);
+          const response = await axios.get(
+            `${API}/market/ohlcv/${selectedCommodity.id}?timeframe=${chartTimeframe}&period=${chartPeriod}`
+          );
+          if (response.data.success) {
+            setHistoricalData(response.data.data || []);
+          }
         } catch (error) {
           console.error('Error loading chart data:', error);
         }
       };
       loadChartData();
     }
-  }, [chartModalOpen, selectedCommodity]);
+  }, [chartModalOpen, selectedCommodity, chartTimeframe, chartPeriod]);
 
   const fetchAllData = async () => {
     setLoading(true);
