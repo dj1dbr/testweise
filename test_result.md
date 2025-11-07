@@ -289,7 +289,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "WTI_CRUDE Manual Trade Execution"
+    - "Chart Timeframe Options Expansion - COMPLETED ✅"
+    - "Stop Loss/Take Profit Input Bug Fix - COMPLETED ✅"
   stuck_tasks:
     - "WTI_CRUDE Manual Trade Execution - Platform check bug in server.py line 884"
   test_all: false
