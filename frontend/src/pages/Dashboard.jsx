@@ -1728,10 +1728,15 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
                 value={formData.take_profit_percent ?? 4.0}
                 onChange={(e) => {
                   const val = e.target.value;
-                  setFormData({ ...formData, take_profit_percent: val === '' ? '' : parseFloat(val) || 4.0 });
+                  if (val === '') {
+                    setFormData({ ...formData, take_profit_percent: '' });
+                  } else {
+                    const parsed = parseFloat(val);
+                    setFormData({ ...formData, take_profit_percent: isNaN(parsed) ? 4.0 : parsed });
+                  }
                 }}
                 onBlur={(e) => {
-                  if (e.target.value === '') {
+                  if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
                     setFormData({ ...formData, take_profit_percent: 4.0 });
                   }
                 }}
