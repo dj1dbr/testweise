@@ -135,12 +135,6 @@ const Dashboard = () => {
       // Clear the timeout and stop loading
       clearTimeout(maxLoadingTimeout);
       setLoading(false);
-      
-      // Fetch account data after everything is loaded and settings are available
-      // This runs after loading screen is removed for better UX
-      setTimeout(() => {
-        fetchAccountData().catch(err => console.error('Account data fetch error:', err));
-      }, 500);
     }
   };
 
