@@ -91,22 +91,24 @@ const Dashboard = () => {
     setLoading(true);
     try {
       // First fetch settings, then everything else
-      await fetchSettings();
+      await fetchSettings().catch(err => console.error('Settings fetch error:', err));
       
+      // Run all fetches with individual error handling
       await Promise.all([
-        fetchCommodities(),
-        fetchAllMarkets(),
-        refreshMarketData(), // Use refresh instead of just fetching cached data
-        fetchHistoricalData(),
-        fetchTrades(),
-        fetchStats()
+        fetchCommodities().catch(err => console.error('Commodities fetch error:', err)),
+        fetchAllMarkets().catch(err => console.error('Markets fetch error:', err)),
+        refreshMarketData().catch(err => console.error('Market refresh error:', err)),
+        fetchHistoricalData().catch(err => console.error('Historical data fetch error:', err)),
+        fetchTrades().catch(err => console.error('Trades fetch error:', err)),
+        fetchStats().catch(err => console.error('Stats fetch error:', err))
       ]);
       
-      // Fetch account data after settings are loaded
-      await fetchAccountData();
+      // Fetch account data after settings are loaded - non-blocking
+      fetchAccountData().catch(err => console.error('Account data fetch error:', err));
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error in fetchAllData:', error);
     } finally {
+      // Always stop loading, even if some calls fail
       setLoading(false);
     }
   };
