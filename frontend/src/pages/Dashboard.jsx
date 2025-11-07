@@ -565,24 +565,6 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Old balance card removed */}
-        <div className="hidden">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <p className="text-sm text-slate-400">
-                  {settings?.mode === 'MT5' ? '🔷 MT5 Konto' : '🟢 Bitpanda'}
-                </p>
-                {mt5Connected && (settings?.mode === 'MT5' || settings?.mode === 'BITPANDA') && (
-                  <Badge variant="success" className="bg-emerald-500/20 text-emerald-400 border-emerald-500/50">
-                    ✓ Verbunden
-                  </Badge>
-                )}
-                {/* Paper Trading Mode entfernt */}
-              </div>
-            </div>
-        </div>
-
         {/* Commodity Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
           {Object.entries(allMarkets).map(([commodityId, market]) => {
