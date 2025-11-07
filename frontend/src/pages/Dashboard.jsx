@@ -594,8 +594,8 @@ const Dashboard = () => {
                   )}
                 </div>
                 
-                <div className="mb-4">
-                  <h2 className="text-3xl font-bold mb-1" style={{ color: '#2dd4bf' }} data-testid={`price-${commodityId}`}>
+                <div className="mb-3">
+                  <h2 className="text-2xl font-bold mb-0.5" style={{ color: '#2dd4bf' }} data-testid={`price-${commodityId}`}>
                     ${market.price?.toFixed(2) || '0.00'}
                   </h2>
                   <p className="text-xs text-slate-500">{commodity.unit}</p>
