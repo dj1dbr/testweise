@@ -1,77 +1,58 @@
 <analysis>
-The previous AI engineer began by transforming a simulated trading app into a real-time Rohstoff Trader with MetaTrader 5 (MT5) integration via MetaAPI. Initial challenges involved debugging MetaAPI connectivity, regional URL mismatches, and incorrect symbol mappings. The system then faced  and  errors due to insufficient margin and incorrect trade volumes, which were resolved by adjusting position sizing and a user-initiated closure of profitable trades.
-
-The application was enhanced with multi-commodity support, a portfolio risk monitor, and dynamic charting. Bitpanda integration was partially completed, but network issues in the cloud blocked full functionality. A significant recent task involved migrating to a new MT5 broker (Libertex), which expanded the available commodities. The current phase is a major UI/UX overhaul, focusing on modular balance displays, a tabbed interface, and robust platform synchronization for open positions, with the immediate task being updating commodity mappings for the new broker.
+The trajectory details the evolution of a Rohstoff Trader application, transitioning from a demo to a real-time multi-platform trading system with MetaTrader 5 (MT5) via MetaAPI and Bitpanda integration. The previous AI engineer systematically addressed user requests, starting with foundational multi-platform backend support and a comprehensive UI overhaul. Key challenges included debugging MetaAPI connectivity, handling broker-specific symbols (ICMarkets to Libertex), and resolving frontend loading issues. A significant portion involved fixing data synchronization for trades and statistics, enhancing chart functionality with real OHLCV data and timeframes, and ensuring API key persistence. The engineer followed a structured plan, iteratively debugging and implementing, often involving extensive frontend  and backend  and  modifications. The work concluded with addressing chart rendering stability and UI layout, with two issues remaining: expanding chart timeframe options and fixing stop loss/take profit input.
 </analysis>
 
 <product_requirements>
-The user requested transforming a demo trading app into Rohstoff Trader with real MT5 via MetaAPI, supporting 14 commodities, 20% portfolio risk, trailing stops, and multi-platform (MT5, Bitpanda, Paper) trading with dynamic charts. Key bug fixes included balance displays, input fields, trade quantities, and symbol mapping. Later, the user requested switching to a new MT5 broker (Libertex), major UI redesigns (narrower cards, no RSI/MACD, compact values), separate balance and risk per platform, active platform checkboxes, deleting all fake trades, individual trade deletion from a list, synchronization of manually closed MT5 positions, hybrid platform operation, display of open position values, a 3-tab UI (Cards, Trades, Charts), and a default platform setting.
+The user initially requested transforming a demo trading app into Rohstoff Trader with real MT5 via MetaAPI, supporting 14 commodities, 20% portfolio risk, trailing stops, and multi-platform (MT5, Bitpanda, Paper) trading with dynamic charts. Subsequent requests included switching to a new MT5 broker (Libertex), major UI redesigns (narrower cards, no RSI/MACD, compact values), separate balance and risk per platform, active platform checkboxes, deleting all fake trades, individual trade deletion from a list, synchronization of manually closed MT5 positions, hybrid platform operation, display of open position values, a 3-tab UI (Cards, Trades, Charts), and a default platform setting. Later, specific issues arose: MT5 trades missing from the list, no credential input fields in settings, unrealistic chart data without timeframe selection, API keys being deleted, total trades count incorrect, Paper Mode text visible, chart disappearing, and an inability to input '0.5' for stop loss/take profit.
 </product_requirements>
 
 <key_technical_concepts>
 -   **Full-stack Architecture**: React.js (Frontend), FastAPI (Backend), MongoDB (Database).
--   **Trading APIs**: MetaAPI (MetaTrader 5), Bitpanda API.
+-   **Trading APIs**: MetaAPI (MetaTrader 5 for Libertex and ICMarkets), Bitpanda API.
 -   **Backend Task Scheduling**: .
 -   **Data Validation**: Pydantic models.
 -   **UI Framework**: Tailwind CSS, Shadcn/UI.
--   **Charting**:  library.
+-   **Charting**:  library,  for historical data.
+-   **Multi-Platform Logic**: Distinct connectors and settings for each trading platform.
 </key_technical_concepts>
 
 <code_architecture>
-The application utilizes a standard full-stack setup:
+The application uses a standard full-stack setup:
 
 
 -   ****:
-    -   **Importance**: Central FastAPI application.
-    -   **Changes**: Integrated , , . Added API endpoints for MT5 symbols, . Modified trade execution for MetaAPI and Bitpanda. Updated  mapping for Libertex. Refined position size calculation. Temporarily disabled AI analysis. Scheduled  background task. Removed PAPER mode.
+    -   **Importance**: Central FastAPI application with all API endpoints.
+    -   **Changes**:  updated for Libertex and ICMarkets symbols.  model updated for multi-platform activation and API keys. New API endpoints (, , ) added for multi-platform and OHLCV data.  endpoint modified to use partial updates () to prevent overwriting other fields.  updated to combine DB and MT5 positions. Logic for trade execution updated for platform-specific handling.
 -   ****:
-    -   **Importance**: Handles MetaAPI communication.
-    -   **Changes**: Implemented . Updated base URL logic for regional MetaAPI endpoints. Corrected MetaAPI response parsing for symbols. Modified for new Libertex account ID.
+    -   **Importance**: Stores environment variables like  and .
+    -   **Changes**: Updated with  and  and respective tokens for both MT5 brokers.
 -   ****:
     -   **Importance**: Market data processing and trading strategy.
-    -   **Changes**: Updated  dictionary with broker-specific symbols (initially ICMarkets, then Libertex), added Bitpanda-specific commodity definitions. Adjusted  to consider actual open positions and .
--   ****:
-    -   **Importance**: Stores environment variables.
-    -   **Changes**: Updated  and  for the new Libertex broker account.
+    -   **Changes**:  dictionary updated with broker-specific symbols for Libertex and ICMarkets. New  function added using  for real historical data with timeframe options.
+-   ** (New File)**:
+    -   **Importance**: Handles MetaAPI communication for multiple MT5 accounts.
+    -   **Changes**: Created to abstract MetaAPI interactions for different MT5 platforms (Libertex, ICMarkets). Includes functions to fetch account info, positions, and execute trades for specific platforms.
 -   ****:
     -   **Importance**: Main UI for the trading dashboard.
-    -   **Changes**: Updated title. Implemented commodity selection, dynamic cards, Trailing Stop. Fixed balance and input field bugs. Integrated chart carousel. Added chart icons with modals for detailed analysis. Removed PAPER trading mode. Added warnings for non-tradeable commodities. UI updated for narrower cards, removed RSI/MACD, compacted elements. Started implementing separate balance cards for MT5/Bitpanda with risk warnings and checkboxes for active platforms. Started 3-tab structure and trade list.
+    -   **Changes**: Extensive updates for multi-platform UI. Implemented three separate balance cards (MT5 Libertex, MT5 ICMarkets, Bitpanda) with activation checkboxes. State variables for each platform's connection, balance, and risk.  hooks updated to load data asynchronously, handling  availability. Error handling improved for API calls. Trades tab now displays MT5 open positions with live synchronized P&L and a Close button. Settings modal expanded to include input fields for MT5 and Bitpanda credentials. Paper Mode text removed. Chart modal updated to use  state, fetch OHLCV data, display only price (no SMA/EMA), and move KAUFEN / VERKAUFEN buttons to the top. Timeframe selection options for charts added.
 -   ****:
-    -   **Importance**: Helper script to create a backend endpoint for deleting individual trades.
-    -   **Changes**: New file that adds a DELETE API endpoint to  for trades.
--   ****:
-    -   **Importance**: Documentation for switching brokers.
-    -   **Changes**: New file outlining steps for updating broker settings and symbols.
--   ****:
-    -   **Importance**: Documentation for local setup.
-    -   **Changes**: New file detailing steps to run the app locally on a Mac.
-
+    -   **Importance**: Recharts component for displaying price charts.
+    -   **Changes**: Modified to correctly render OHLCV  prices. Dynamic title display. Time axis formatting adjusted for varying timeframes. SMA/EMA lines removed to show only price.
 </code_architecture>
 
 <pending_tasks>
--   Complete UI overhaul: Implement the 3-tab structure (Cards, Trades, Charts) in the frontend.
--   Enhance trade list: Display current values of open positions, implement trade deletion.
--   Complete hybrid platform mode: Ensure platforms can run parallel with distinct logic.
--   Refine default platform setting in the frontend.
--   Address LLM budget for AI analysis features.
+-   Expand chart timeframe options to include 2 weeks, 1 week, and 1 day.
+-   Fix the input field for Stop Loss and Take Profit in settings to allow typing '0.5'.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was engaged in a significant UI/UX overhaul and backend feature implementation, driven by user requests and the new Libertex MT5 broker integration.
+Immediately before this summary request, the AI engineer was addressing two key user-reported issues:
+1.  **Chart Timeframe Expansion**: The user requested adding smaller time intervals (two weeks, one week, one day) to the existing chart timeframe options, which currently starts at one month. This involves modifying the frontend UI to present these new options and ensuring the backend API () can support fetching data for these intervals.
+2.  **Stop Loss/Take Profit Input Bug**: The user reported that they could not input  into the Stop Loss and Take Profit fields within the application's settings. Specifically, the  character would disappear, preventing the input of decimal values. This is likely a frontend input handling bug (e.g., related to state management or input type/validation) in .
 
-The work accomplished in this phase includes:
-1.  **Libertex MT5 Broker Setup**: Successfully integrated the new Libertex account. This involved automatically discovering the correct MetaAPI account ID and region, then fetching and mapping Libertex-specific commodity symbols (which significantly expanded the range of tradeable commodities compared to the previous broker).
-2.  **Trade Data Cleanup**: All existing fake and real trades were deleted from the database, and trading statistics reset, as requested by the user.
-3.  **UI Redesign (Partial)**:
-    *   **Narrower Commodity Cards**: The frontend  was modified to make commodity cards narrower, displaying more per row (3-column layout).
-    *   **RSI/MACD Removal**: RSI and MACD indicators were removed from the visible card display, making the cards more compact.
-    *   **Separate Balance Fields**: The UI was updated to support separate balance display and portfolio risk assessment for each active platform (MT5, Bitpanda) with checkboxes for activation.
-4.  **Backend PAPER Trading Removal**: The PAPER trading mode was removed from the backend settings.
-5.  **Platform Sync (In Progress)**: A background task () has been initiated and added to the scheduler in  to synchronize closed positions between the MT5 platform and the application's database. This is critical for accurate P&L tracking and margin management.
-
-The engineer's very last action was: Jetzt aktualisiere ich die COMMODITIES in server.py mit den Libertex-Symbolen: (Chat Message 605), indicating an ongoing update to the commodity mappings in  to fully reflect the symbols available on the Libertex broker. This is a crucial step for ensuring all new commodities can be properly identified and traded across platforms.
+The AI engineer has just acknowledged these two problems and articulated a plan to systematically fix them, starting with the chart timeframe options.
 </current_work>
 
 <optional_next_step>
-Continue updating  to ensure all Libertex-specific commodity symbols are correctly mapped for proper functioning with the new broker.
+I will expand the chart timeframe options in the frontend to include 2 weeks, 1 week, and 1 day.
 </optional_next_step>

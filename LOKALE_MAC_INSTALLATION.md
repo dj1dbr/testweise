@@ -97,8 +97,8 @@ DB_NAME="rohstoff_trader_db"
 CORS_ORIGINS="*"
 
 # MT5 Libertex (MetaAPI)
-METAAPI_ACCOUNT_ID=142e1085-f20b-437e-93c7-b87a0e639a30
-METAAPI_ICMARKETS_ACCOUNT_ID=d2605e89-7bc2-4144-9f7c-951edd596c39
+METAAPI_ACCOUNT_ID=multiplatformtrader
+METAAPI_ICMARKETS_ACCOUNT_ID=multiplatformtrader
 METAAPI_TOKEN=<IHR_METAAPI_TOKEN>
 
 # Bitpanda (auf Mac verfügbar!)
