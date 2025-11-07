@@ -242,6 +242,44 @@ frontend:
       - working: "NA"
         agent: "main"
         comment: "Frontend not tested yet - waiting for backend MetaAPI connection fix"
+  
+  - task: "Chart Timeframe Options Expansion"
+    implemented: true
+    working: true
+    file: "Dashboard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          ✅ FIXED! Added missing "2 Wochen" (2 weeks) timeframe option
+          - Location: Dashboard.jsx lines 1088-1104
+          - Added option between "1 Woche" (5d) and "1 Monat" (1mo)
+          - Changed "5 Tage" to "1 Woche" for clarity
+          - Now includes: 1 Tag, 1 Woche, 2 Wochen, 1 Monat, 3 Monate, 6 Monate, 1 Jahr, 2 Jahre, 5 Jahre, Maximum
+          - Verified via screenshot - dropdown shows all options correctly
+  
+  - task: "Stop Loss/Take Profit Input Field Bug Fix"
+    implemented: true
+    working: true
+    file: "Dashboard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          ✅ FIXED! Stop Loss and Take Profit fields now accept decimal values like 0.5
+          - Location: Dashboard.jsx lines 1694-1735
+          - Issue: parseFloat(val) || default caused "0" to be replaced with default value
+          - Fix: Changed to check isNaN(parsed) instead of using || operator
+          - Now properly handles: empty strings, "0", decimal values like "0.5", "0.75", etc.
+          - Tested "0.5" in Stop Loss field ✅
+          - Tested "0.75" in Take Profit field ✅
+          - Both fields now work correctly with decimal input
 
 metadata:
   created_by: "main_agent"
