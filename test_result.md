@@ -253,7 +253,7 @@ test_plan:
   current_focus:
     - "WTI_CRUDE Manual Trade Execution"
   stuck_tasks:
-    - "WTI_CRUDE Manual Trade Execution - Broker restrictions"
+    - "WTI_CRUDE Manual Trade Execution - Platform check bug in server.py line 884"
   test_all: false
   test_priority: "high_first"
 
