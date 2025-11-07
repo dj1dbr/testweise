@@ -103,16 +103,24 @@ const Dashboard = () => {
   };
 
   const fetchAccountData = async () => {
-    // Fetch account data based on current mode
-    if (settings?.mode === 'MT5') {
-      await fetchMT5Account();
-    } else if (settings?.mode === 'BITPANDA') {
-      await fetchBitpandaAccount();
-    } else {
-      // Paper trading - no external account needed
-      await fetchStats();
-      updateBalance();
+    // Fetch account data for all active platforms
+    if (settings?.active_platforms) {
+      const promises = [];
+      if (settings.active_platforms.includes('MT5_LIBERTEX')) {
+        promises.push(fetchMT5LibertexAccount());
+      }
+      if (settings.active_platforms.includes('MT5_ICMARKETS')) {
+        promises.push(fetchMT5ICMarketsAccount());
+      }
+      if (settings.active_platforms.includes('BITPANDA')) {
+        promises.push(fetchBitpandaAccount());
+      }
+      await Promise.all(promises);
     }
+    
+    // Always fetch stats for paper trading fallback
+    await fetchStats();
+    updateBalance();
   };
 
   const fetchCommodities = async () => {
