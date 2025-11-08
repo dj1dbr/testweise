@@ -48,38 +48,48 @@ class BitpandaConnector:
             return False
     
     async def get_account_info(self) -> Optional[Dict[str, Any]]:
-        """Get account information from Bitpanda"""
+        """Get account information from Bitpanda Hauptplattform"""
         try:
-            url = f"{self.base_url}/account/balances"
+            # Hauptplattform API: /wallets für alle Asset-Wallets
+            url = f"{self.base_url}/wallets"
             
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, headers=self._get_headers(), timeout=aiohttp.ClientTimeout(total=10)) as response:
                     if response.status == 200:
                         data = await response.json()
                         
-                        # Parse balances
-                        balances_data = data.get('balances', [])
+                        # Parse wallets from Hauptplattform API
+                        wallets_data = data.get('data', [])
                         total_balance_eur = 0
                         
-                        for balance in balances_data:
-                            currency = balance.get('currency_code', '')
-                            available = float(balance.get('available', 0))
-                            locked = float(balance.get('locked', 0))
-                            total = available + locked
+                        for wallet in wallets_data:
+                            attributes = wallet.get('attributes', {})
+                            crypto_id = attributes.get('cryptocoin_id', '')
+                            crypto_symbol = attributes.get('cryptocoin_symbol', '')
+                            fiat_id = attributes.get('fiat_id', '')
+                            fiat_symbol = attributes.get('fiat_symbol', '')
                             
-                            self.balances[currency] = {
-                                'available': available,
-                                'locked': locked,
-                                'total': total
-                            }
+                            # Balance in wallet
+                            balance_amount = float(attributes.get('balance', 0))
                             
-                            # Estimate EUR value (simplified)
-                            if currency == 'EUR':
-                                total_balance_eur += total
+                            # Determine currency
+                            currency = crypto_symbol or fiat_symbol or 'UNKNOWN'
+                            
+                            if balance_amount > 0:
+                                self.balances[currency] = {
+                                    'available': balance_amount,
+                                    'locked': 0,
+                                    'total': balance_amount,
+                                    'type': 'fiat' if fiat_id else 'crypto'
+                                }
+                                
+                                # Estimate EUR value (simplified - nur echte EUR zählen)
+                                if currency == 'EUR':
+                                    total_balance_eur += balance_amount
                         
                         self.balance = total_balance_eur
                         
-                        logger.info(f"Bitpanda Account Info: Balance={self.balance:.2f} EUR")
+                        logger.info(f"Bitpanda Account Info: Balance={self.balance:.2f} EUR, Wallets={len(self.balances)}")
                         
                         return {
                             "balance": self.balance,
@@ -90,10 +100,10 @@ class BitpandaConnector:
                             "currency": "EUR",
                             "leverage": 1,
                             "login": "Bitpanda Account",
-                            "server": "Bitpanda Pro",
+                            "server": "Bitpanda",
                             "trade_mode": "LIVE",
                             "name": "Bitpanda Trading Account",
-                            "broker": "Bitpanda Pro",
+                            "broker": "Bitpanda",
                             "balances": self.balances
                         }
                     else:
