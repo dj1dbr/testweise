@@ -91,8 +91,22 @@ cd backend
 python3.11 -m venv venv
 source venv/bin/activate
 
+# pip und setuptools aktualisieren
+pip install --upgrade pip setuptools wheel
+
+# WICHTIG: Für Apple Silicon (M1/M2/M3/M4)
+# Umgebungsvariablen für grpcio und cryptography setzen
+export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
+export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
+
 # Dependencies installieren
 pip install -r requirements.txt
+
+# Falls Fehler bei grpcio auftreten:
+# pip install grpcio==1.75.1 --no-binary=grpcio
+
+# Falls Fehler bei cryptography auftreten:
+# pip install cryptography==46.0.2 --no-binary=cryptography
 
 # .env Datei anpassen
 nano .env
