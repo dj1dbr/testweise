@@ -198,49 +198,29 @@ class BitpandaConnector:
                          price: Optional[float] = None,
                          sl: Optional[float] = None, 
                          tp: Optional[float] = None) -> Optional[Dict[str, Any]]:
-        """Place a trading order via Bitpanda"""
+        """Place a trading order via Bitpanda Hauptplattform
+        
+        WICHTIG: Die Hauptplattform API unterstützt nur Buy/Sell Transaktionen,
+        keine komplexen Trading-Orders mit SL/TP.
+        Dies ist für einfache Käufe/Verkäufe gedacht.
+        """
         try:
-            url = f"{self.base_url}/account/orders"
+            # Hinweis: Die Hauptplattform API v1 hat begrenzte Trading-Funktionen
+            # Für vollständiges Trading sollte man die Bitpanda Pro API verwenden
             
-            # Prepare order payload
-            payload = {
-                "instrument_code": symbol,
-                "side": "BUY" if order_type.upper() == "BUY" else "SELL",
-                "amount": str(volume),
-                "type": "MARKET" if not price else "LIMIT"
+            logger.warning(f"Bitpanda Hauptplattform: Direct trading via API ist eingeschränkt")
+            logger.warning(f"Für echtes Trading bitte Bitpanda Pro verwenden oder manuell handeln")
+            
+            # Simuliere erfolgreiche Order für Demo-Zwecke
+            return {
+                "success": False,
+                "ticket": "N/A",
+                "volume": volume,
+                "price": price or 0.0,
+                "type": order_type,
+                "message": "Bitpanda Hauptplattform: Automatisches Trading nicht unterstützt. Bitte manuell auf bitpanda.com handeln."
             }
             
-            if price:
-                payload["price"] = str(price)
-            if sl:
-                payload["stop_price"] = str(sl)
-            if tp:
-                payload["take_profit"] = str(tp)
-            
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
-                    url, 
-                    headers=self._get_headers(), 
-                    json=payload,
-                    timeout=aiohttp.ClientTimeout(total=15)
-                ) as response:
-                    if response.status in [200, 201]:
-                        result = await response.json()
-                        
-                        logger.info(f"✅ Bitpanda Order placed: {order_type} {volume} {symbol}")
-                        
-                        return {
-                            "success": True,
-                            "ticket": result.get('order_id', 'unknown'),
-                            "volume": volume,
-                            "price": price or 0.0,
-                            "type": order_type,
-                            "response": result
-                        }
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"Bitpanda order failed {response.status}: {error_text}")
-                        return None
         except Exception as e:
             logger.error(f"Error placing Bitpanda order: {e}")
             return None
