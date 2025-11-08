@@ -243,9 +243,9 @@ class BitpandaConnector:
             return False
     
     def disconnect(self):
-        """Disconnect from Bitpanda"""
+        """Disconnect from Bitpanda Hauptplattform"""
         self.connected = False
-        logger.info("Disconnected from Bitpanda")
+        logger.info("Disconnected from Bitpanda Hauptplattform")
 
 
 # Global Bitpanda connector instance
