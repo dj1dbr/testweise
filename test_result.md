@@ -412,3 +412,29 @@ agent_communication:
       
       Both fixes verified with manual testing via screenshot tool.
       Ready for user confirmation.
+
+  - agent: "main"
+    message: |
+      MT5 PLATFORM VERBINDUNGEN HERGESTELLT ✅
+      
+      Problem: Keine Plattform-Verbindungen, Balance wurde nicht aktualisiert
+      Ursache: Falsche MetaAPI Account-IDs in .env Datei
+      
+      Lösung:
+      1. Korrekte Account-IDs vom Benutzer erhalten:
+         - Libertex: 6d29e270-4404-4be2-af6c-e3903dadb6e1 (MT5-510038470)
+         - ICMarkets: d2605e89-7bc2-4144-9f7c-951edd596c39 (MT5-52565616)
+      
+      2. Backend .env aktualisiert mit korrekten IDs
+      
+      3. Backend neu gestartet
+      
+      Ergebnis ✅:
+      - MT5 Libertex: Verbunden, Balance €50.000,00
+      - MT5 ICMarkets: Verbunden, Balance €2.204,69
+      - Portfolio-Risiko wird korrekt angezeigt
+      - Offene Positionen werden synchronisiert
+      
+      Bitpanda: Funktioniert nicht in Cloud (Netzwerk blockiert)
+      → Nur lokal auf Mac verfügbar (siehe LOKALE_INSTALLATION_MAC.md)
+
