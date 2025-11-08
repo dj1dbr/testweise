@@ -134,42 +134,54 @@ class BitpandaConnector:
             return None
     
     async def get_positions(self) -> List[Dict[str, Any]]:
-        """Get open positions (orders) from Bitpanda"""
+        """Get open positions from Bitpanda Hauptplattform
+        
+        Hinweis: Die Hauptplattform ist ein Broker, keine Exchange.
+        Positionen sind hier die Crypto/Asset Holdings, nicht offene Orders.
+        """
         try:
-            url = f"{self.base_url}/account/orders"
+            # Die Hauptplattform zeigt Holdings in Wallets
+            url = f"{self.base_url}/wallets"
             
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, headers=self._get_headers(), timeout=aiohttp.ClientTimeout(total=10)) as response:
                     if response.status == 200:
                         data = await response.json()
-                        orders = data.get('order_history', [])
+                        wallets = data.get('data', [])
                         
                         result = []
-                        for order in orders:
-                            if order.get('status') == 'FILLED_FULLY':
-                                continue  # Skip filled orders
+                        for wallet in wallets:
+                            attributes = wallet.get('attributes', {})
+                            balance = float(attributes.get('balance', 0))
                             
-                            result.append({
-                                "ticket": order.get('order_id', ''),
-                                "symbol": order.get('instrument_code', ''),
-                                "type": order.get('side', 'BUY').upper(),
-                                "volume": float(order.get('amount', 0)),
-                                "price_open": float(order.get('price', 0)),
-                                "price_current": float(order.get('price', 0)),
-                                "profit": 0.0,
-                                "swap": 0.0,
-                                "time": order.get('time', ''),
-                                "sl": order.get('stop_price'),
-                                "tp": order.get('take_profit')
-                            })
+                            # Nur Wallets mit Guthaben anzeigen
+                            if balance > 0:
+                                crypto_symbol = attributes.get('cryptocoin_symbol', '')
+                                fiat_symbol = attributes.get('fiat_symbol', '')
+                                symbol = crypto_symbol or fiat_symbol or 'UNKNOWN'
+                                
+                                # Formatiere als "Position"
+                                result.append({
+                                    "ticket": wallet.get('id', ''),
+                                    "symbol": symbol,
+                                    "type": "HOLD",  # Bitpanda ist kein Trading, sondern Buy & Hold
+                                    "volume": balance,
+                                    "price_open": 0,  # Nicht verfügbar in Hauptplattform API
+                                    "price_current": 0,  # Müsste separat abgefragt werden
+                                    "profit": 0.0,
+                                    "swap": 0.0,
+                                    "time": attributes.get('created_at', ''),
+                                    "sl": None,
+                                    "tp": None
+                                })
                         
-                        logger.info(f"Bitpanda Positions: {len(result)} open")
+                        logger.info(f"Bitpanda Holdings: {len(result)} assets")
                         return result
                     else:
-                        logger.error(f"Failed to get positions")
+                        logger.error(f"Failed to get Bitpanda holdings")
                         return []
         except Exception as e:
-            logger.error(f"Error getting Bitpanda positions: {e}")
+            logger.error(f"Error getting Bitpanda holdings: {e}")
             return []
     
     async def place_order(self, symbol: str, order_type: str, volume: float, 
