@@ -115,17 +115,27 @@ class BitpandaConnector:
             return None
     
     async def get_market_price(self, symbol: str) -> Optional[float]:
-        """Get current market price for a symbol"""
+        """Get current market price for a symbol from Bitpanda Hauptplattform
+        
+        Hinweis: Die Hauptplattform API hat kein öffentliches Ticker-Endpoint.
+        Preise werden über die Wallet-Daten oder separate Ticker-API abgerufen.
+        """
         try:
-            # Bitpanda uses ticker endpoint
-            url = f"{self.base_url}/market-ticker/{symbol}"
+            # Hauptplattform: Ticker API (öffentlich, kein API-Key nötig)
+            # Support-Artikel: https://support.bitpanda.com/hc/en-us/articles/360000727459
+            ticker_url = f"https://api.bitpanda.com/v1/ticker"
             
             async with aiohttp.ClientSession() as session:
-                async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
+                async with session.get(ticker_url, timeout=aiohttp.ClientTimeout(total=10)) as response:
                     if response.status == 200:
                         data = await response.json()
-                        price = float(data.get('last_price', 0))
-                        return price
+                        # Ticker format: {"BTC": "45000.50", "ETH": "3200.30", ...}
+                        price_str = data.get(symbol.upper())
+                        if price_str:
+                            return float(price_str)
+                        else:
+                            logger.warning(f"Symbol {symbol} not found in Bitpanda ticker")
+                            return None
                     else:
                         logger.error(f"Failed to get price for {symbol}")
                         return None
