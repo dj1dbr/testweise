@@ -19,11 +19,16 @@ Ihr Mac benötigt:
 
 ---
 
-## Schritt 1: Software installieren
+## Schritt 1: System-Abhängigkeiten installieren
+
+### Für alle Macs (Intel & Apple Silicon)
 
 ```bash
 # Homebrew (falls noch nicht installiert)
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# System-Bibliotheken für Python-Pakete
+brew install openssl rust postgresql libjpeg libpng
 
 # Python 3.11
 brew install python@3.11
@@ -38,6 +43,16 @@ brew install mongodb-community
 
 # MongoDB starten
 brew services start mongodb-community
+```
+
+### Für Apple Silicon (M1/M2/M3/M4) - Zusätzliche Schritte
+
+```bash
+# Rosetta 2 installieren (falls noch nicht vorhanden)
+softwareupdate --install-rosetta
+
+# XCode Command Line Tools
+xcode-select --install
 ```
 
 ---
