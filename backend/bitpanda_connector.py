@@ -1,6 +1,9 @@
 """
-Bitpanda API Connector for Cryptocurrency Trading (Hauptplattform)
-Verwendet die offizielle Bitpanda Retail API (nicht Pro/Exchange)
+Bitpanda Public API Connector (Offizielle API)
+Basierend auf: https://developers.bitpanda.com/#bitpanda-public-api
+
+Base URL: https://api.bitpanda.com/v1
+Authentication: X-Api-Key Header
 """
 
 import logging
@@ -12,33 +15,32 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 class BitpandaConnector:
-    """Bitpanda Hauptplattform API connection handler"""
+    """Bitpanda Public API connection handler"""
     
     def __init__(self, api_key: str):
         self.api_key = api_key
-        # WICHTIG: Hauptplattform API, nicht Pro/Exchange!
         self.base_url = "https://api.bitpanda.com/v1"
         self.connected = False
         self.balance = 0.0
         self.balances = {}
         
-        logger.info(f"Bitpanda Connector (Hauptplattform) initialized")
+        logger.info(f"Bitpanda Public API Connector initialized")
     
     def _get_headers(self) -> Dict[str, str]:
-        """Get authorization headers for Bitpanda Hauptplattform"""
+        """Get authorization headers for Bitpanda Public API"""
         return {
-            "X-API-KEY": self.api_key,  # Hauptplattform nutzt X-API-KEY Header
+            "X-Api-Key": self.api_key,
             "Content-Type": "application/json",
             "Accept": "application/json"
         }
     
     async def connect(self) -> bool:
-        """Connect to Bitpanda Hauptplattform and verify credentials"""
+        """Connect to Bitpanda and verify credentials"""
         try:
             account_info = await self.get_account_info()
             if account_info:
                 self.connected = True
-                logger.info(f"✅ Connected to Bitpanda Hauptplattform")
+                logger.info(f"✅ Connected to Bitpanda Public API")
                 return True
             else:
                 logger.error("Failed to connect to Bitpanda")
@@ -48,48 +50,85 @@ class BitpandaConnector:
             return False
     
     async def get_account_info(self) -> Optional[Dict[str, Any]]:
-        """Get account information from Bitpanda Hauptplattform"""
+        """Get account information from Bitpanda
+        
+        Ruft Fiat Wallets und Asset Wallets ab und kombiniert sie.
+        """
         try:
-            # Hauptplattform API: /wallets für alle Asset-Wallets
-            url = f"{self.base_url}/wallets"
+            # Fiat Wallets abrufen
+            fiat_url = f"{self.base_url}/fiatwallets"
             
             async with aiohttp.ClientSession() as session:
-                async with session.get(url, headers=self._get_headers(), timeout=aiohttp.ClientTimeout(total=10)) as response:
+                # 1. Fiat Wallets
+                async with session.get(fiat_url, headers=self._get_headers(), timeout=aiohttp.ClientTimeout(total=10)) as response:
                     if response.status == 200:
-                        data = await response.json()
+                        fiat_data = await response.json()
                         
-                        # Parse wallets from Hauptplattform API
-                        wallets_data = data.get('data', [])
                         total_balance_eur = 0
                         
-                        for wallet in wallets_data:
-                            attributes = wallet.get('attributes', {})
-                            crypto_id = attributes.get('cryptocoin_id', '')
-                            crypto_symbol = attributes.get('cryptocoin_symbol', '')
-                            fiat_id = attributes.get('fiat_id', '')
-                            fiat_symbol = attributes.get('fiat_symbol', '')
+                        # Parse Fiat Wallets
+                        for wallet in fiat_data.get('data', []):
+                            attrs = wallet.get('attributes', {})
+                            fiat_symbol = attrs.get('fiat_symbol', '')
+                            balance = float(attrs.get('balance', 0))
                             
-                            # Balance in wallet
-                            balance_amount = float(attributes.get('balance', 0))
+                            self.balances[fiat_symbol] = {
+                                'available': balance,
+                                'locked': 0,
+                                'total': balance,
+                                'type': 'fiat'
+                            }
                             
-                            # Determine currency
-                            currency = crypto_symbol or fiat_symbol or 'UNKNOWN'
-                            
-                            if balance_amount > 0:
-                                self.balances[currency] = {
-                                    'available': balance_amount,
-                                    'locked': 0,
-                                    'total': balance_amount,
-                                    'type': 'fiat' if fiat_id else 'crypto'
-                                }
+                            # EUR-Balance für Gesamt-Balance
+                            if fiat_symbol == 'EUR':
+                                total_balance_eur += balance
+                        
+                        # 2. Asset Wallets (Crypto + Commodities)
+                        asset_url = f"{self.base_url}/asset-wallets"
+                        async with session.get(asset_url, headers=self._get_headers(), timeout=aiohttp.ClientTimeout(total=10)) as asset_response:
+                            if asset_response.status == 200:
+                                asset_data = await asset_response.json()
                                 
-                                # Estimate EUR value (simplified - nur echte EUR zählen)
-                                if currency == 'EUR':
-                                    total_balance_eur += balance_amount
+                                # Parse Asset Wallets (verschachtelte Struktur)
+                                data_attrs = asset_data.get('data', {}).get('attributes', {})
+                                
+                                # Cryptocoin Wallets
+                                crypto_wallets = data_attrs.get('cryptocoin', {}).get('attributes', {}).get('wallets', [])
+                                for wallet in crypto_wallets:
+                                    attrs = wallet.get('attributes', {})
+                                    symbol = attrs.get('cryptocoin_symbol', '')
+                                    balance = float(attrs.get('balance', 0))
+                                    
+                                    if balance > 0:
+                                        self.balances[symbol] = {
+                                            'available': balance,
+                                            'locked': 0,
+                                            'total': balance,
+                                            'type': 'crypto'
+                                        }
+                                
+                                # Commodity Wallets (Gold, Silver, etc.)
+                                commodity_data = data_attrs.get('commodity', {})
+                                if isinstance(commodity_data, dict):
+                                    for category, category_data in commodity_data.items():
+                                        if isinstance(category_data, dict):
+                                            wallets = category_data.get('attributes', {}).get('wallets', [])
+                                            for wallet in wallets:
+                                                attrs = wallet.get('attributes', {})
+                                                symbol = attrs.get('cryptocoin_symbol', '')
+                                                balance = float(attrs.get('balance', 0))
+                                                
+                                                if balance > 0:
+                                                    self.balances[symbol] = {
+                                                        'available': balance,
+                                                        'locked': 0,
+                                                        'total': balance,
+                                                        'type': 'commodity'
+                                                    }
                         
                         self.balance = total_balance_eur
                         
-                        logger.info(f"Bitpanda Account Info: Balance={self.balance:.2f} EUR, Wallets={len(self.balances)}")
+                        logger.info(f"Bitpanda Account Info: EUR Balance={self.balance:.2f}, Total Wallets={len(self.balances)}")
                         
                         return {
                             "balance": self.balance,
@@ -114,78 +153,71 @@ class BitpandaConnector:
             logger.error(f"Error getting Bitpanda account info: {e}")
             return None
     
-    async def get_market_price(self, symbol: str) -> Optional[float]:
-        """Get current market price for a symbol from Bitpanda Hauptplattform
-        
-        Hinweis: Die Hauptplattform API hat kein öffentliches Ticker-Endpoint.
-        Preise werden über die Wallet-Daten oder separate Ticker-API abgerufen.
-        """
-        try:
-            # Hauptplattform: Ticker API (öffentlich, kein API-Key nötig)
-            # Support-Artikel: https://support.bitpanda.com/hc/en-us/articles/360000727459
-            ticker_url = f"https://api.bitpanda.com/v1/ticker"
-            
-            async with aiohttp.ClientSession() as session:
-                async with session.get(ticker_url, timeout=aiohttp.ClientTimeout(total=10)) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        # Ticker format: {"BTC": "45000.50", "ETH": "3200.30", ...}
-                        price_str = data.get(symbol.upper())
-                        if price_str:
-                            return float(price_str)
-                        else:
-                            logger.warning(f"Symbol {symbol} not found in Bitpanda ticker")
-                            return None
-                    else:
-                        logger.error(f"Failed to get price for {symbol}")
-                        return None
-        except Exception as e:
-            logger.error(f"Error getting market price for {symbol}: {e}")
-            return None
-    
     async def get_positions(self) -> List[Dict[str, Any]]:
-        """Get open positions from Bitpanda Hauptplattform
+        """Get holdings (wallet balances) from Bitpanda
         
-        Hinweis: Die Hauptplattform ist ein Broker, keine Exchange.
-        Positionen sind hier die Crypto/Asset Holdings, nicht offene Orders.
+        Bitpanda ist ein Broker, keine Exchange. "Positionen" sind hier
+        die Wallet-Guthaben (Holdings).
         """
         try:
-            # Die Hauptplattform zeigt Holdings in Wallets
-            url = f"{self.base_url}/wallets"
+            # Asset Wallets abrufen
+            url = f"{self.base_url}/asset-wallets"
             
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, headers=self._get_headers(), timeout=aiohttp.ClientTimeout(total=10)) as response:
                     if response.status == 200:
                         data = await response.json()
-                        wallets = data.get('data', [])
                         
                         result = []
-                        for wallet in wallets:
-                            attributes = wallet.get('attributes', {})
-                            balance = float(attributes.get('balance', 0))
+                        data_attrs = data.get('data', {}).get('attributes', {})
+                        
+                        # Cryptocoin Wallets
+                        crypto_wallets = data_attrs.get('cryptocoin', {}).get('attributes', {}).get('wallets', [])
+                        for wallet in crypto_wallets:
+                            attrs = wallet.get('attributes', {})
+                            balance = float(attrs.get('balance', 0))
                             
-                            # Nur Wallets mit Guthaben anzeigen
                             if balance > 0:
-                                crypto_symbol = attributes.get('cryptocoin_symbol', '')
-                                fiat_symbol = attributes.get('fiat_symbol', '')
-                                symbol = crypto_symbol or fiat_symbol or 'UNKNOWN'
-                                
-                                # Formatiere als "Position"
                                 result.append({
                                     "ticket": wallet.get('id', ''),
-                                    "symbol": symbol,
-                                    "type": "HOLD",  # Bitpanda ist kein Trading, sondern Buy & Hold
+                                    "symbol": attrs.get('cryptocoin_symbol', ''),
+                                    "type": "HOLD",
                                     "volume": balance,
-                                    "price_open": 0,  # Nicht verfügbar in Hauptplattform API
-                                    "price_current": 0,  # Müsste separat abgefragt werden
+                                    "price_open": 0,
+                                    "price_current": 0,
                                     "profit": 0.0,
                                     "swap": 0.0,
-                                    "time": attributes.get('created_at', ''),
+                                    "time": "",
                                     "sl": None,
                                     "tp": None
                                 })
                         
-                        logger.info(f"Bitpanda Holdings: {len(result)} assets")
+                        # Commodity Wallets
+                        commodity_data = data_attrs.get('commodity', {})
+                        if isinstance(commodity_data, dict):
+                            for category, category_data in commodity_data.items():
+                                if isinstance(category_data, dict):
+                                    wallets = category_data.get('attributes', {}).get('wallets', [])
+                                    for wallet in wallets:
+                                        attrs = wallet.get('attributes', {})
+                                        balance = float(attrs.get('balance', 0))
+                                        
+                                        if balance > 0:
+                                            result.append({
+                                                "ticket": wallet.get('id', ''),
+                                                "symbol": attrs.get('cryptocoin_symbol', ''),
+                                                "type": "HOLD",
+                                                "volume": balance,
+                                                "price_open": 0,
+                                                "price_current": 0,
+                                                "profit": 0.0,
+                                                "swap": 0.0,
+                                                "time": "",
+                                                "sl": None,
+                                                "tp": None
+                                            })
+                        
+                        logger.info(f"Bitpanda Holdings: {len(result)} assets with balance")
                         return result
                     else:
                         logger.error(f"Failed to get Bitpanda holdings")
@@ -194,58 +226,88 @@ class BitpandaConnector:
             logger.error(f"Error getting Bitpanda holdings: {e}")
             return []
     
+    async def get_trades(self, trade_type: Optional[str] = None, page_size: int = 50) -> List[Dict[str, Any]]:
+        """Get trade history from Bitpanda
+        
+        Args:
+            trade_type: Optional filter for "buy" or "sell"
+            page_size: Number of trades to return
+        
+        Returns:
+            List of trades
+        """
+        try:
+            url = f"{self.base_url}/trades"
+            params = {"page_size": page_size}
+            if trade_type:
+                params["type"] = trade_type
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, headers=self._get_headers(), params=params, timeout=aiohttp.ClientTimeout(total=10)) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        
+                        trades = []
+                        for trade_item in data.get('data', []):
+                            attrs = trade_item.get('attributes', {})
+                            
+                            trades.append({
+                                "id": trade_item.get('id', ''),
+                                "type": attrs.get('type', ''),
+                                "status": attrs.get('status', ''),
+                                "cryptocoin_id": attrs.get('cryptocoin_id', ''),
+                                "amount_fiat": float(attrs.get('amount_fiat', 0)),
+                                "amount_cryptocoin": float(attrs.get('amount_cryptocoin', 0)),
+                                "price": float(attrs.get('price', 0)),
+                                "time": attrs.get('time', {}).get('date_iso8601', ''),
+                                "is_swap": attrs.get('is_swap', False)
+                            })
+                        
+                        logger.info(f"Bitpanda Trades: {len(trades)} retrieved")
+                        return trades
+                    else:
+                        logger.error(f"Failed to get Bitpanda trades")
+                        return []
+        except Exception as e:
+            logger.error(f"Error getting Bitpanda trades: {e}")
+            return []
+    
     async def place_order(self, symbol: str, order_type: str, volume: float, 
                          price: Optional[float] = None,
                          sl: Optional[float] = None, 
                          tp: Optional[float] = None) -> Optional[Dict[str, Any]]:
-        """Place a trading order via Bitpanda Hauptplattform
+        """Place a trading order via Bitpanda
         
-        WICHTIG: Die Hauptplattform API unterstützt nur Buy/Sell Transaktionen,
-        keine komplexen Trading-Orders mit SL/TP.
-        Dies ist für einfache Käufe/Verkäufe gedacht.
+        HINWEIS: Die Public API bietet KEIN direktes Trading-Endpoint.
+        Trading muss über die Bitpanda Webseite oder Mobile App erfolgen.
         """
-        try:
-            # Hinweis: Die Hauptplattform API v1 hat begrenzte Trading-Funktionen
-            # Für vollständiges Trading sollte man die Bitpanda Pro API verwenden
-            
-            logger.warning(f"Bitpanda Hauptplattform: Direct trading via API ist eingeschränkt")
-            logger.warning(f"Für echtes Trading bitte Bitpanda Pro verwenden oder manuell handeln")
-            
-            # Simuliere erfolgreiche Order für Demo-Zwecke
-            return {
-                "success": False,
-                "ticket": "N/A",
-                "volume": volume,
-                "price": price or 0.0,
-                "type": order_type,
-                "message": "Bitpanda Hauptplattform: Automatisches Trading nicht unterstützt. Bitte manuell auf bitpanda.com handeln."
-            }
-            
-        except Exception as e:
-            logger.error(f"Error placing Bitpanda order: {e}")
-            return None
+        logger.warning(f"Bitpanda Public API: Automatisches Trading nicht unterstützt")
+        logger.warning(f"Bitte handeln Sie manuell auf bitpanda.com oder in der App")
+        
+        return {
+            "success": False,
+            "message": "Bitpanda Public API unterstützt kein automatisches Trading. Bitte manuell auf bitpanda.com handeln.",
+            "ticket": "N/A",
+            "volume": volume,
+            "price": price or 0.0,
+            "type": order_type
+        }
     
     async def close_position(self, position_id: str) -> bool:
-        """Close an open position via Bitpanda Hauptplattform
+        """Close a position (sell asset) via Bitpanda
         
-        WICHTIG: Bitpanda Hauptplattform ist ein Broker, kein Trading-Desk.
-        "Positionen schließen" bedeutet hier Assets verkaufen.
-        Dies ist via API nur eingeschränkt möglich.
+        HINWEIS: Die Public API bietet KEIN direktes Verkaufs-Endpoint.
+        Verkäufe müssen über die Bitpanda Webseite oder Mobile App erfolgen.
         """
-        try:
-            logger.warning(f"Bitpanda Hauptplattform: Position schließen via API nicht unterstützt")
-            logger.warning(f"Bitte Assets manuell auf bitpanda.com verkaufen")
-            
-            return False
-            
-        except Exception as e:
-            logger.error(f"Error closing Bitpanda position: {e}")
-            return False
+        logger.warning(f"Bitpanda Public API: Automatisches Verkaufen nicht unterstützt")
+        logger.warning(f"Bitte verkaufen Sie Assets manuell auf bitpanda.com oder in der App")
+        
+        return False
     
     def disconnect(self):
-        """Disconnect from Bitpanda Hauptplattform"""
+        """Disconnect from Bitpanda"""
         self.connected = False
-        logger.info("Disconnected from Bitpanda Hauptplattform")
+        logger.info("Disconnected from Bitpanda Public API")
 
 
 # Global Bitpanda connector instance
