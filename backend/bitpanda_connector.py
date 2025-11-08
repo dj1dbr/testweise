@@ -33,12 +33,12 @@ class BitpandaConnector:
         }
     
     async def connect(self) -> bool:
-        """Connect to Bitpanda and verify credentials"""
+        """Connect to Bitpanda Hauptplattform and verify credentials"""
         try:
             account_info = await self.get_account_info()
             if account_info:
                 self.connected = True
-                logger.info(f"✅ Connected to Bitpanda Pro")
+                logger.info(f"✅ Connected to Bitpanda Hauptplattform")
                 return True
             else:
                 logger.error("Failed to connect to Bitpanda")
