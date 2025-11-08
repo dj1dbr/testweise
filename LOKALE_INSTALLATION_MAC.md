@@ -256,6 +256,71 @@ curl https://api.exchange.bitpanda.com/public/v1/time
 # Wenn das funktioniert, ist Bitpanda erreichbar
 ```
 
+### Problem: grpcio Installation schlägt fehl (Apple Silicon)
+```bash
+# Lösung 1: Mit Umgebungsvariablen
+export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
+export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
+pip install grpcio==1.75.1
+
+# Lösung 2: Von Quelle kompilieren
+pip install grpcio==1.75.1 --no-binary=grpcio
+
+# Lösung 3: Ältere Version verwenden
+pip install grpcio==1.54.0
+```
+
+### Problem: cryptography Installation schlägt fehl
+```bash
+# Sicherstellen dass OpenSSL und Rust installiert sind
+brew install openssl rust
+
+# Mit spezifischen Pfaden installieren
+export LDFLAGS="-L$(brew --prefix openssl)/lib"
+export CPPFLAGS="-I$(brew --prefix openssl)/include"
+pip install cryptography==46.0.2
+
+# Oder ohne Binary:
+pip install cryptography==46.0.2 --no-binary=cryptography
+```
+
+### Problem: pillow Installation schlägt fehl
+```bash
+# Bild-Bibliotheken installieren
+brew install libjpeg libpng
+
+# Dann pillow installieren
+pip install pillow==12.0.0
+```
+
+### Problem: "xcrun: error: invalid active developer path"
+```bash
+# XCode Command Line Tools installieren
+xcode-select --install
+
+# Nach Installation nochmal versuchen:
+pip install -r requirements.txt
+```
+
+### Problem: numpy/pandas Fehler auf Apple Silicon
+```bash
+# Sicherstellen dass Sie native ARM-Version von Python verwenden
+python3 -c "import platform; print(platform.machine())"
+# Sollte "arm64" ausgeben auf Apple Silicon
+
+# Falls "x86_64": Python neu installieren
+brew reinstall python@3.11
+```
+
+### Problem: "command 'gcc' failed"
+```bash
+# Compiler-Tools installieren
+xcode-select --install
+
+# Falls schon installiert, neu setzen:
+sudo xcode-select --reset
+```
+
 ---
 
 ## Wichtige Befehle
