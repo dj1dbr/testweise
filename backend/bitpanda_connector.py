@@ -1,5 +1,6 @@
 """
-Bitpanda Pro API Connector for Cryptocurrency Trading
+Bitpanda API Connector for Cryptocurrency Trading (Hauptplattform)
+Verwendet die offizielle Bitpanda Retail API (nicht Pro/Exchange)
 """
 
 import logging
@@ -11,21 +12,22 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 class BitpandaConnector:
-    """Bitpanda Pro API connection handler"""
+    """Bitpanda Hauptplattform API connection handler"""
     
     def __init__(self, api_key: str):
         self.api_key = api_key
-        self.base_url = "https://api.exchange.bitpanda.com/public/v1"
+        # WICHTIG: Hauptplattform API, nicht Pro/Exchange!
+        self.base_url = "https://api.bitpanda.com/v1"
         self.connected = False
         self.balance = 0.0
         self.balances = {}
         
-        logger.info(f"Bitpanda Connector initialized")
+        logger.info(f"Bitpanda Connector (Hauptplattform) initialized")
     
     def _get_headers(self) -> Dict[str, str]:
-        """Get authorization headers for Bitpanda"""
+        """Get authorization headers for Bitpanda Hauptplattform"""
         return {
-            "Authorization": f"Bearer {self.api_key}",
+            "X-API-KEY": self.api_key,  # Hauptplattform nutzt X-API-KEY Header
             "Content-Type": "application/json",
             "Accept": "application/json"
         }
