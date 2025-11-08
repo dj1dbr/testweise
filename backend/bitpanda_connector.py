@@ -226,23 +226,18 @@ class BitpandaConnector:
             return None
     
     async def close_position(self, position_id: str) -> bool:
-        """Close an open position via Bitpanda"""
+        """Close an open position via Bitpanda Hauptplattform
+        
+        WICHTIG: Bitpanda Hauptplattform ist ein Broker, kein Trading-Desk.
+        "Positionen schließen" bedeutet hier Assets verkaufen.
+        Dies ist via API nur eingeschränkt möglich.
+        """
         try:
-            url = f"{self.base_url}/account/orders/{position_id}"
+            logger.warning(f"Bitpanda Hauptplattform: Position schließen via API nicht unterstützt")
+            logger.warning(f"Bitte Assets manuell auf bitpanda.com verkaufen")
             
-            async with aiohttp.ClientSession() as session:
-                async with session.delete(
-                    url, 
-                    headers=self._get_headers(),
-                    timeout=aiohttp.ClientTimeout(total=15)
-                ) as response:
-                    if response.status in [200, 204]:
-                        logger.info(f"✅ Bitpanda Position {position_id} closed")
-                        return True
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"Bitpanda close failed {response.status}: {error_text}")
-                        return False
+            return False
+            
         except Exception as e:
             logger.error(f"Error closing Bitpanda position: {e}")
             return False
