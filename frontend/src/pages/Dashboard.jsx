@@ -1784,6 +1784,113 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
             )}
           </div>
 
+          {/* KI Trading Strategie-Einstellungen */}
+          <div className="space-y-4 mt-6 p-4 bg-gradient-to-br from-purple-900/20 to-blue-900/20 rounded-lg border-2 border-purple-500/30">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-purple-300">🤖 KI Trading Strategie</h3>
+              <Button
+                type="button"
+                onClick={handleResetSettings}
+                variant="outline"
+                size="sm"
+                className="border-purple-500 text-purple-300 hover:bg-purple-500/20"
+              >
+                🔄 Zurücksetzen
+              </Button>
+            </div>
+            <p className="text-sm text-slate-400">
+              Passen Sie die KI-Parameter an, um die Trading-Strategie zu optimieren
+            </p>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="rsi_oversold">RSI Kaufsignal (Oversold)</Label>
+                <Input
+                  id="rsi_oversold"
+                  type="number"
+                  step="1"
+                  min="0"
+                  max="50"
+                  value={formData.rsi_oversold_threshold ?? 30}
+                  onChange={(e) => setFormData({ ...formData, rsi_oversold_threshold: parseFloat(e.target.value) || 30 })}
+                  className="bg-slate-800 border-slate-700"
+                />
+                <p className="text-xs text-slate-500">Standard: 30 (niedrigere Werte = konservativer)</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="rsi_overbought">RSI Verkaufssignal (Overbought)</Label>
+                <Input
+                  id="rsi_overbought"
+                  type="number"
+                  step="1"
+                  min="50"
+                  max="100"
+                  value={formData.rsi_overbought_threshold ?? 70}
+                  onChange={(e) => setFormData({ ...formData, rsi_overbought_threshold: parseFloat(e.target.value) || 70 })}
+                  className="bg-slate-800 border-slate-700"
+                />
+                <p className="text-xs text-slate-500">Standard: 70 (höhere Werte = konservativer)</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="min_confidence">Minimale Konfidenz für Auto-Trading</Label>
+              <Input
+                id="min_confidence"
+                type="number"
+                step="0.1"
+                min="0"
+                max="1"
+                value={formData.min_confidence_score ?? 0.6}
+                onChange={(e) => setFormData({ ...formData, min_confidence_score: parseFloat(e.target.value) || 0.6 })}
+                className="bg-slate-800 border-slate-700"
+              />
+              <p className="text-xs text-slate-500">Standard: 0.6 (60% Konfidenz) - Höhere Werte = weniger aber sicherere Trades</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="risk_per_trade">Risiko pro Trade (% der Balance)</Label>
+              <Input
+                id="risk_per_trade"
+                type="number"
+                step="0.1"
+                min="0.5"
+                max="10"
+                value={formData.risk_per_trade_percent ?? 2.0}
+                onChange={(e) => setFormData({ ...formData, risk_per_trade_percent: parseFloat(e.target.value) || 2.0 })}
+                className="bg-slate-800 border-slate-700"
+              />
+              <p className="text-xs text-slate-500">Standard: 2% - Empfohlen: 1-3% für konservatives Risikomanagement</p>
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded border border-slate-700">
+              <div>
+                <Label htmlFor="trend_following" className="font-semibold">Trend-Following aktivieren</Label>
+                <p className="text-xs text-slate-400">Kaufe nur bei Aufwärtstrends, verkaufe bei Abwärtstrends</p>
+              </div>
+              <Switch
+                id="trend_following"
+                checked={formData.trend_following ?? true}
+                onCheckedChange={(checked) => setFormData({ ...formData, trend_following: checked })}
+                className="data-[state=checked]:bg-emerald-600"
+              />
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded border border-slate-700">
+              <div>
+                <Label htmlFor="volume_confirmation" className="font-semibold">Volumen-Bestätigung</Label>
+                <p className="text-xs text-slate-400">Verwende Handelsvolumen zur Signal-Bestätigung</p>
+              </div>
+              <Switch
+                id="volume_confirmation"
+                checked={formData.use_volume_confirmation ?? true}
+                onCheckedChange={(checked) => setFormData({ ...formData, use_volume_confirmation: checked })}
+                className="data-[state=checked]:bg-emerald-600"
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="max_trades">Max. Trades pro Stunde</Label>
             <Input
