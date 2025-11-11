@@ -1059,7 +1059,7 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
         # MT5 Mode (Libertex or ICMarkets)
         if default_platform in ['MT5_LIBERTEX', 'MT5_ICMARKETS', 'MT5']:
             try:
-                from metaapi_connector import get_metaapi_connector
+                from multi_platform_connector import multi_platform
                 from commodity_processor import COMMODITIES
                 
                 commodity_info = COMMODITIES.get(commodity, {})
