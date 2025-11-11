@@ -188,6 +188,48 @@ const Dashboard = () => {
       console.error('Error fetching all markets:', error);
     }
   };
+
+  // NEW: Fetch LIVE tick prices from MetaAPI
+  const fetchLiveTicks = async () => {
+    try {
+      const response = await axios.get(`${API}/market/live-ticks`);
+      const livePrices = response.data.live_prices || {};
+      
+      // Update allMarkets with live prices
+      setAllMarkets(prev => {
+        const updated = { ...prev };
+        Object.keys(livePrices).forEach(commodityId => {
+          const tick = livePrices[commodityId];
+          if (updated[commodityId]) {
+            // Update existing market data with live price
+            updated[commodityId] = {
+              ...updated[commodityId],
+              price: tick.price,
+              timestamp: tick.time,
+              bid: tick.bid,
+              ask: tick.ask,
+              source: 'LIVE'
+            };
+          } else {
+            // Create new entry if doesn't exist
+            updated[commodityId] = {
+              commodity: commodityId,
+              price: tick.price,
+              timestamp: tick.time,
+              bid: tick.bid,
+              ask: tick.ask,
+              source: 'LIVE'
+            };
+          }
+        });
+        return updated;
+      });
+      
+      console.log(`✅ Live ticks updated: ${Object.keys(livePrices).length} commodities`);
+    } catch (error) {
+      console.error('Error fetching live ticks:', error);
+    }
+  };
   
   const calculateTotalExposure = () => {
     // Calculate actual exposure from open trades
