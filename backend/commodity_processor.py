@@ -382,6 +382,32 @@ async def fetch_historical_ohlcv_async(commodity_id: str, timeframe: str = "1d",
         return None
 
 
+
+def fetch_historical_ohlcv(commodity_id: str, timeframe: str = "1d", period: str = "1mo"):
+    """
+    Synchronous wrapper for fetch_historical_ohlcv_async
+    For backwards compatibility with synchronous code
+    """
+    import asyncio
+    try:
+        # Check if we're already in an event loop
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            # We're in an async context - return a future
+            logger.warning(f"fetch_historical_ohlcv called from async context - use fetch_historical_ohlcv_async instead")
+            # Create a new thread to run the async function
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(asyncio.run, fetch_historical_ohlcv_async(commodity_id, timeframe, period))
+                return future.result()
+        else:
+            # We're in a sync context - use asyncio.run
+            return asyncio.run(fetch_historical_ohlcv_async(commodity_id, timeframe, period))
+    except RuntimeError:
+        # No event loop - use asyncio.run
+        return asyncio.run(fetch_historical_ohlcv_async(commodity_id, timeframe, period))
+
+
 def calculate_indicators(df):
     """Calculate technical indicators"""
     try:
