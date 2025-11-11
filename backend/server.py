@@ -545,6 +545,63 @@ async def process_market_data():
 
 async def process_commodity_market_data(commodity_id: str, settings):
     """Process market data for a specific commodity"""
+    try:
+        from commodity_processor import fetch_commodity_data, calculate_indicators
+        
+        # Fetch data from yfinance
+        hist = fetch_commodity_data(commodity_id)
+        
+        if hist is None or hist.empty:
+            logger.warning(f"No data for {commodity_id}")
+            return
+        
+        # Get latest data point
+        latest = hist.iloc[-1]
+        
+        # Calculate indicators if not already present
+        if 'RSI' not in hist.columns:
+            hist = calculate_indicators(hist)
+            latest = hist.iloc[-1]
+        
+        # Determine trend and signal
+        trend = "UP" if latest.get('Close', 0) > latest.get('SMA_20', 0) else "DOWN"
+        
+        # Signal logic
+        signal = "HOLD"
+        if latest.get('RSI', 50) > 70:
+            signal = "SELL"
+        elif latest.get('RSI', 50) < 30:
+            signal = "BUY"
+        
+        # Prepare market data
+        market_data = {
+            "id": str(uuid.uuid4()),
+            "timestamp": datetime.now(timezone.utc),
+            "commodity": commodity_id,
+            "price": float(latest['Close']),
+            "volume": float(latest.get('Volume', 0)),
+            "sma_20": float(latest.get('SMA_20', latest['Close'])),
+            "ema_20": float(latest.get('EMA_20', latest['Close'])),
+            "rsi": float(latest.get('RSI', 50)),
+            "macd": float(latest.get('MACD', 0)),
+            "macd_signal": float(latest.get('MACD_signal', 0)),
+            "macd_histogram": float(latest.get('MACD_hist', 0)),
+            "trend": trend,
+            "signal": signal
+        }
+        
+        # Store in database (upsert by commodity)
+        await db.market_data.update_one(
+            {"commodity": commodity_id},
+            {"$set": market_data},
+            upsert=True
+        )
+        
+        # Update in-memory cache
+        latest_market_data[commodity_id] = market_data
+        
+    except Exception as e:
+        logger.error(f"Error processing commodity {commodity_id}: {e}")
 
 
 async def sync_mt5_positions():
