@@ -1426,6 +1426,24 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
     onSave(formData);
   };
 
+  const handleResetSettings = async () => {
+    if (!window.confirm('Möchten Sie wirklich alle Einstellungen auf die Standardwerte zurücksetzen?')) {
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${backendUrl}/api/settings/reset`);
+      if (response.data.success) {
+        // Update form with reset values
+        setFormData(response.data.settings);
+        alert('✅ Einstellungen wurden auf Standardwerte zurückgesetzt!');
+      }
+    } catch (error) {
+      console.error('Fehler beim Zurücksetzen der Einstellungen:', error);
+      alert('❌ Fehler beim Zurücksetzen der Einstellungen');
+    }
+  };
+
   const aiProviderModels = {
     emergent: ['gpt-5', 'gpt-4-turbo', 'gpt-4'],
     openai: ['gpt-5', 'gpt-4-turbo', 'gpt-4', 'gpt-3.5-turbo'],
