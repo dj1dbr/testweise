@@ -280,7 +280,7 @@ async def fetch_metaapi_candles(commodity_id: str, timeframe: str = "1h", limit:
         return None
 
 
-def fetch_historical_ohlcv(commodity_id: str, timeframe: str = "1d", period: str = "1mo"):
+async def fetch_historical_ohlcv_async(commodity_id: str, timeframe: str = "1d", period: str = "1mo"):
     """
     Fetch historical OHLCV data with timeframe selection
     Hybrid approach: MetaAPI (preferred) → yfinance with extended cache
