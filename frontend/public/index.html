@@ -40,16 +40,25 @@
             }
         </style>
         <script>
-            // Remove badge after page load
+            // Continuously remove badge
+            function removeBadge() {
+                const badge = document.getElementById('emergent-badge');
+                if (badge) badge.remove();
+                
+                const links = document.querySelectorAll('a[href*="emergent"]');
+                links.forEach(link => link.remove());
+            }
+            
+            // Run immediately and continuously
+            setInterval(removeBadge, 100);
+            
+            // Also use MutationObserver for instant removal
             window.addEventListener('DOMContentLoaded', function() {
-                setTimeout(function() {
-                    const badge = document.getElementById('emergent-badge');
-                    if (badge) badge.remove();
-                    
-                    // Also remove any emergent links
-                    const links = document.querySelectorAll('a[href*="emergent"]');
-                    links.forEach(link => link.remove());
-                }, 100);
+                const observer = new MutationObserver(removeBadge);
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
             });
         </script>
         <!--
