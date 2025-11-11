@@ -561,29 +561,46 @@ async def process_commodity_market_data(commodity_id: str, settings):
         hist = fetch_commodity_data(commodity_id)
         
         if hist is None or hist.empty:
-            logger.warning(f"No data for {commodity_id}")
+            logger.warning(f"No data for {commodity_id}, skipping update")
             return
-        
-        # Get latest data point
-        latest = hist.iloc[-1]
         
         # Calculate indicators if not already present
         if 'RSI' not in hist.columns:
             hist = calculate_indicators(hist)
-            latest = hist.iloc[-1]
+            
+            # Check again if calculate_indicators returned None
+            if hist is None or hist.empty:
+                logger.warning(f"Indicators calculation failed for {commodity_id}")
+                return
+        
+        # Get latest data point - with safety check
+        if len(hist) == 0:
+            logger.warning(f"Empty history for {commodity_id}")
+            return
+            
+        latest = hist.iloc[-1]
+        
+        # Safely get values with defaults
+        close_price = float(latest.get('Close', 0))
+        if close_price == 0:
+            logger.warning(f"Invalid close price for {commodity_id}")
+            return
+        
+        sma_20 = float(latest.get('SMA_20', close_price))
         
         # Determine trend and signal
-        trend = "UP" if latest.get('Close', 0) > latest.get('SMA_20', 0) else "DOWN"
+        trend = "UP" if close_price > sma_20 else "DOWN"
         
         # Get trading strategy parameters from settings
         rsi_oversold = settings.get('rsi_oversold_threshold', 30.0) if settings else 30.0
         rsi_overbought = settings.get('rsi_overbought_threshold', 70.0) if settings else 70.0
         
         # Signal logic using configurable thresholds
+        rsi = float(latest.get('RSI', 50))
         signal = "HOLD"
-        if latest.get('RSI', 50) > rsi_overbought:
+        if rsi > rsi_overbought:
             signal = "SELL"
-        elif latest.get('RSI', 50) < rsi_oversold:
+        elif rsi < rsi_oversold:
             signal = "BUY"
         
         # Prepare market data
@@ -591,11 +608,11 @@ async def process_commodity_market_data(commodity_id: str, settings):
             "id": str(uuid.uuid4()),
             "timestamp": datetime.now(timezone.utc),
             "commodity": commodity_id,
-            "price": float(latest['Close']),
+            "price": close_price,
             "volume": float(latest.get('Volume', 0)),
-            "sma_20": float(latest.get('SMA_20', latest['Close'])),
-            "ema_20": float(latest.get('EMA_20', latest['Close'])),
-            "rsi": float(latest.get('RSI', 50)),
+            "sma_20": sma_20,
+            "ema_20": float(latest.get('EMA_20', close_price)),
+            "rsi": rsi,
             "macd": float(latest.get('MACD', 0)),
             "macd_signal": float(latest.get('MACD_signal', 0)),
             "macd_histogram": float(latest.get('MACD_hist', 0)),
@@ -613,8 +630,12 @@ async def process_commodity_market_data(commodity_id: str, settings):
         # Update in-memory cache
         latest_market_data[commodity_id] = market_data
         
+        logger.info(f"✅ Updated market data for {commodity_id}: ${close_price:.2f}, Signal: {signal}")
+        
     except Exception as e:
         logger.error(f"Error processing commodity {commodity_id}: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
 
 
 async def sync_mt5_positions():
