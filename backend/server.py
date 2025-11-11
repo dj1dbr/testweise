@@ -1046,14 +1046,13 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
             
             # Berechne Position Size (max 20% des verfügbaren Kapitals) PRO PLATTFORM
             from commodity_processor import calculate_position_size
-            current_platform = settings.get('mode', 'MT5')
             quantity = await calculate_position_size(
                 balance=balance, 
                 price=price, 
                 db=db, 
                 max_risk_percent=settings.get('max_portfolio_risk_percent', 20.0), 
                 free_margin=free_margin,
-                platform=current_platform
+                platform=default_platform
             )
             
             # Minimum 0.01 (Broker-Minimum), Maximum 0.1 für Sicherheit
