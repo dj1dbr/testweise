@@ -275,6 +275,15 @@ class TradingSettings(BaseModel):
     # Alle Rohstoffe aktiviert
     enabled_commodities: List[str] = ["GOLD", "SILVER", "PLATINUM", "PALLADIUM", "WTI_CRUDE", "BRENT_CRUDE", "NATURAL_GAS", "WHEAT", "CORN", "SOYBEANS", "COFFEE", "SUGAR", "COTTON", "COCOA"]
     
+    # KI Trading Strategie-Parameter (anpassbar)
+    rsi_oversold_threshold: float = 30.0  # RSI Kaufsignal (Standard: 30)
+    rsi_overbought_threshold: float = 70.0  # RSI Verkaufssignal (Standard: 70)
+    macd_signal_threshold: float = 0.0  # MACD Schwellenwert für Signale
+    trend_following: bool = True  # Folge dem Trend (kaufe bei UP, verkaufe bei DOWN)
+    min_confidence_score: float = 0.6  # Minimale Konfidenz für automatisches Trading (0-1)
+    use_volume_confirmation: bool = True  # Verwende Volumen zur Bestätigung
+    risk_per_trade_percent: float = 2.0  # Maximales Risiko pro Trade (% der Balance)
+    
     # MT5 Libertex Credentials
     mt5_libertex_account_id: Optional[str] = None
     # MT5 ICMarkets Credentials
