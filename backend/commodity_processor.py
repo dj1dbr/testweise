@@ -326,7 +326,7 @@ async def fetch_historical_ohlcv_async(commodity_id: str, timeframe: str = "1d",
                 tf_map = {'1d': '1h', '1wk': '4h', '1mo': '1d'}
                 metaapi_tf = tf_map.get(timeframe, timeframe)
                 
-                metaapi_data = asyncio.run(fetch_metaapi_candles(commodity_id, metaapi_tf, limit))
+                metaapi_data = await fetch_metaapi_candles(commodity_id, metaapi_tf, limit)
                 if metaapi_data is not None and not metaapi_data.empty:
                     # Cache for 1 hour (MetaAPI data is fresh)
                     _ohlcv_cache[cache_key] = metaapi_data
