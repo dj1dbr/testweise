@@ -8,8 +8,17 @@ import pandas as pd
 from ta.trend import SMAIndicator, EMAIndicator, MACD
 from ta.momentum import RSIIndicator
 from datetime import datetime, timezone
+from typing import Optional
 
 logger = logging.getLogger(__name__)
+
+# Global reference to platform connector (will be set by server.py)
+_platform_connector = None
+
+def set_platform_connector(connector):
+    """Set the platform connector for fetching MetaAPI data"""
+    global _platform_connector
+    _platform_connector = connector
 
 # Commodity definitions - Multi-Platform Support mit separaten MT5 Brokern
 # MT5 Libertex: Erweiterte Auswahl
