@@ -1261,7 +1261,7 @@ const Dashboard = () => {
 
               {/* Open Trades for this Asset */}
               {(() => {
-                const assetTrades = allTrades.filter(trade => 
+                const assetTrades = trades.filter(trade => 
                   trade.commodity === selectedCommodity.id && 
                   trade.status === 'OPEN'
                 );
