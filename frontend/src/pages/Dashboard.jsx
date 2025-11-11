@@ -1076,12 +1076,13 @@ const Dashboard = () => {
                       <option value="5m">5 Minuten</option>
                       <option value="15m">15 Minuten</option>
                       <option value="30m">30 Minuten</option>
-                      <option value="1h">1 Stunde</option>
+                      <option value="1h">1 Stunde (empfohlen für Live-Daten)</option>
                       <option value="4h">4 Stunden</option>
                       <option value="1d">1 Tag</option>
                       <option value="1wk">1 Woche</option>
                       <option value="1mo">1 Monat</option>
                     </select>
+                    <p className="text-xs text-slate-400">💡 Für aktuelle Intraday-Daten: 1h oder 4h wählen</p>
                   </div>
                   
                   {/* Period Selection */}
