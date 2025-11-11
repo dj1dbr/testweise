@@ -843,7 +843,7 @@ async def get_all_markets():
     """Get current market data for all enabled commodities"""
     try:
         settings = await db.trading_settings.find_one({"id": "trading_settings"})
-        enabled = settings.get('enabled_commodities', ["WTI_CRUDE"]) if settings else ["WTI_CRUDE"]
+        enabled = settings.get('enabled_commodities', list(COMMODITIES.keys())) if settings else list(COMMODITIES.keys())
         
         results = {}
         for commodity_id in enabled:
@@ -855,7 +855,20 @@ async def get_all_markets():
             if market_data:
                 results[commodity_id] = market_data
         
-        return {"markets": results, "enabled_commodities": enabled}
+        # Return commodities list for frontend compatibility
+        commodities_list = []
+        for commodity_id in enabled:
+            if commodity_id in COMMODITIES:
+                commodity_info = COMMODITIES[commodity_id].copy()
+                commodity_info['id'] = commodity_id
+                commodity_info['marketData'] = results.get(commodity_id)
+                commodities_list.append(commodity_info)
+        
+        return {
+            "markets": results, 
+            "enabled_commodities": enabled,
+            "commodities": commodities_list  # Add this for frontend
+        }
     except Exception as e:
         logger.error(f"Error fetching all markets: {e}")
         raise HTTPException(status_code=500, detail=str(e))
