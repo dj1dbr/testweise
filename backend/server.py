@@ -575,11 +575,15 @@ async def process_commodity_market_data(commodity_id: str, settings):
         # Determine trend and signal
         trend = "UP" if latest.get('Close', 0) > latest.get('SMA_20', 0) else "DOWN"
         
-        # Signal logic
+        # Get trading strategy parameters from settings
+        rsi_oversold = settings.get('rsi_oversold_threshold', 30.0) if settings else 30.0
+        rsi_overbought = settings.get('rsi_overbought_threshold', 70.0) if settings else 70.0
+        
+        # Signal logic using configurable thresholds
         signal = "HOLD"
-        if latest.get('RSI', 50) > 70:
+        if latest.get('RSI', 50) > rsi_overbought:
             signal = "SELL"
-        elif latest.get('RSI', 50) < 30:
+        elif latest.get('RSI', 50) < rsi_oversold:
             signal = "BUY"
         
         # Prepare market data
