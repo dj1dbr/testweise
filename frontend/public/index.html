@@ -20,13 +20,38 @@
     -->
         <title>Rohstoff Trader | Multi-Commodity Trading</title>
         <style>
-            /* Hide Emergent badge */
-            #emergent-badge,
-            a[href*="emergent.sh"] {
+            /* Hide Emergent badge - aggressive approach */
+            #emergent-badge {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+                width: 0 !important;
+                height: 0 !important;
+                overflow: hidden !important;
+                position: absolute !important;
+                left: -9999px !important;
+            }
+            /* Hide all links to emergent.sh */
+            a[href*="emergent.sh"],
+            a[href*="utm_source=emergent"] {
                 display: none !important;
                 visibility: hidden !important;
             }
         </style>
+        <script>
+            // Remove badge after page load
+            window.addEventListener('DOMContentLoaded', function() {
+                setTimeout(function() {
+                    const badge = document.getElementById('emergent-badge');
+                    if (badge) badge.remove();
+                    
+                    // Also remove any emergent links
+                    const links = document.querySelectorAll('a[href*="emergent"]');
+                    links.forEach(link => link.remove());
+                }, 100);
+            });
+        </script>
         <!--
         These two scripts have been added for the testing, please do not edit or remove them
         -->
