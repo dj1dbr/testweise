@@ -1328,6 +1328,67 @@ async def update_settings(settings: TradingSettings):
         logger.error(f"Error updating settings: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.post("/settings/reset")
+async def reset_settings_to_default():
+    """Reset trading settings to default values"""
+    try:
+        # Create default settings
+        default_settings = TradingSettings(
+            id="trading_settings",
+            active_platforms=["MT5_LIBERTEX", "MT5_ICMARKETS"],
+            auto_trading=False,
+            use_ai_analysis=True,
+            ai_provider="emergent",
+            ai_model="gpt-5",
+            stop_loss_percent=2.0,
+            take_profit_percent=4.0,
+            use_trailing_stop=False,
+            trailing_stop_distance=1.5,
+            max_trades_per_hour=3,
+            position_size=1.0,
+            max_portfolio_risk_percent=20.0,
+            default_platform="MT5_LIBERTEX",
+            enabled_commodities=["GOLD", "SILVER", "PLATINUM", "PALLADIUM", "WTI_CRUDE", "BRENT_CRUDE", "NATURAL_GAS", "WHEAT", "CORN", "SOYBEANS", "COFFEE", "SUGAR", "COTTON", "COCOA"],
+            # KI Trading Strategie-Parameter (Standardwerte)
+            rsi_oversold_threshold=30.0,
+            rsi_overbought_threshold=70.0,
+            macd_signal_threshold=0.0,
+            trend_following=True,
+            min_confidence_score=0.6,
+            use_volume_confirmation=True,
+            risk_per_trade_percent=2.0
+        )
+        
+        # Get existing settings to preserve API keys
+        existing = await db.trading_settings.find_one({"id": "trading_settings"})
+        
+        # Preserve API keys and credentials
+        if existing:
+            default_settings.openai_api_key = existing.get('openai_api_key')
+            default_settings.gemini_api_key = existing.get('gemini_api_key')
+            default_settings.anthropic_api_key = existing.get('anthropic_api_key')
+            default_settings.bitpanda_api_key = existing.get('bitpanda_api_key')
+            default_settings.mt5_libertex_account_id = existing.get('mt5_libertex_account_id')
+            default_settings.mt5_icmarkets_account_id = existing.get('mt5_icmarkets_account_id')
+            default_settings.bitpanda_email = existing.get('bitpanda_email')
+        
+        # Update database
+        await db.trading_settings.update_one(
+            {"id": "trading_settings"},
+            {"$set": default_settings.model_dump()},
+            upsert=True
+        )
+        
+        # Reinitialize AI with default settings
+        init_ai_chat(provider="emergent", model="gpt-5")
+        
+        logger.info("Settings reset to default values")
+        return {"success": True, "message": "Einstellungen auf Standardwerte zurückgesetzt", "settings": default_settings}
+    except Exception as e:
+        logger.error(f"Error resetting settings: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.post("/market/refresh")
 async def refresh_market_data():
     """Manually refresh market data"""
