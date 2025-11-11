@@ -189,7 +189,7 @@ def fetch_commodity_data(commodity_id: str):
         # Get historical data
         hist = ticker.history(period="100d", interval="1h")
         
-        if hist.empty:
+        if hist.empty or len(hist) == 0:
             logger.warning(f"No data received for {commodity['name']}")
             return None
             
@@ -361,7 +361,7 @@ def fetch_historical_ohlcv(commodity_id: str, timeframe: str = "1d", period: str
         
         hist = ticker.history(period=period, interval=interval)
         
-        if hist.empty:
+        if hist.empty or len(hist) == 0:
             logger.warning(f"No data received for {commodity['name']}")
             return None
         
