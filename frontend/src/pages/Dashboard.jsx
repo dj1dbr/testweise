@@ -1930,7 +1930,20 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
                   min="0"
                   max="50"
                   value={formData.rsi_oversold_threshold ?? 30}
-                  onChange={(e) => setFormData({ ...formData, rsi_oversold_threshold: parseFloat(e.target.value) || 30 })}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '') {
+                      setFormData({ ...formData, rsi_oversold_threshold: '' });
+                    } else {
+                      const num = parseFloat(val);
+                      setFormData({ ...formData, rsi_oversold_threshold: isNaN(num) ? 30 : num });
+                    }
+                  }}
+                  onBlur={(e) => {
+                    if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
+                      setFormData({ ...formData, rsi_oversold_threshold: 30 });
+                    }
+                  }}
                   className="bg-slate-800 border-slate-700"
                 />
                 <p className="text-xs text-slate-500">Standard: 30 (niedrigere Werte = konservativer)</p>
@@ -1945,7 +1958,20 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
                   min="50"
                   max="100"
                   value={formData.rsi_overbought_threshold ?? 70}
-                  onChange={(e) => setFormData({ ...formData, rsi_overbought_threshold: parseFloat(e.target.value) || 70 })}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '') {
+                      setFormData({ ...formData, rsi_overbought_threshold: '' });
+                    } else {
+                      const num = parseFloat(val);
+                      setFormData({ ...formData, rsi_overbought_threshold: isNaN(num) ? 70 : num });
+                    }
+                  }}
+                  onBlur={(e) => {
+                    if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
+                      setFormData({ ...formData, rsi_overbought_threshold: 70 });
+                    }
+                  }}
                   className="bg-slate-800 border-slate-700"
                 />
                 <p className="text-xs text-slate-500">Standard: 70 (höhere Werte = konservativer)</p>
@@ -1961,7 +1987,20 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
                 min="0"
                 max="1"
                 value={formData.min_confidence_score ?? 0.6}
-                onChange={(e) => setFormData({ ...formData, min_confidence_score: parseFloat(e.target.value) || 0.6 })}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '') {
+                    setFormData({ ...formData, min_confidence_score: '' });
+                  } else {
+                    const num = parseFloat(val);
+                    setFormData({ ...formData, min_confidence_score: isNaN(num) ? 0.6 : num });
+                  }
+                }}
+                onBlur={(e) => {
+                  if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
+                    setFormData({ ...formData, min_confidence_score: 0.6 });
+                  }
+                }}
                 className="bg-slate-800 border-slate-700"
               />
               <p className="text-xs text-slate-500">Standard: 0.6 (60% Konfidenz) - Höhere Werte = weniger aber sicherere Trades</p>
@@ -1976,7 +2015,20 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
                 min="0.5"
                 max="10"
                 value={formData.risk_per_trade_percent ?? 2.0}
-                onChange={(e) => setFormData({ ...formData, risk_per_trade_percent: parseFloat(e.target.value) || 2.0 })}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '') {
+                    setFormData({ ...formData, risk_per_trade_percent: '' });
+                  } else {
+                    const num = parseFloat(val);
+                    setFormData({ ...formData, risk_per_trade_percent: isNaN(num) ? 2.0 : num });
+                  }
+                }}
+                onBlur={(e) => {
+                  if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
+                    setFormData({ ...formData, risk_per_trade_percent: 2.0 });
+                  }
+                }}
                 className="bg-slate-800 border-slate-700"
               />
               <p className="text-xs text-slate-500">Standard: 2% - Empfohlen: 1-3% für konservatives Risikomanagement</p>
