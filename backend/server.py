@@ -895,8 +895,9 @@ async def get_all_markets():
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/market/current", response_model=MarketData)
-async def get_current_market():
-
+async def get_current_market_legacy():
+    """Legacy endpoint - redirects to /market/all"""
+    return await get_all_markets()
 
 @api_router.get("/market/live-ticks")
 async def get_live_ticks():
