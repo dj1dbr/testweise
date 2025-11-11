@@ -110,7 +110,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Global variables
-latest_market_data = None
+latest_market_data = {}  # Dictionary to cache latest market data
 scheduler = BackgroundScheduler()
 auto_trading_enabled = False
 trade_count_per_hour = 0
