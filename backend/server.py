@@ -1096,10 +1096,10 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
                 
                 if result and result.get('success'):
                     platform_ticket = result.get('ticket')
-                    logger.info(f"✅ Order an MT5 gesendet: Ticket #{platform_ticket}")
+                    logger.info(f"✅ Order an {default_platform} gesendet: Ticket #{platform_ticket}")
                 else:
-                    logger.error("❌ MT5 Order fehlgeschlagen!")
-                    raise HTTPException(status_code=500, detail="MT5 Order konnte nicht platziert werden")
+                    logger.error(f"❌ {default_platform} Order fehlgeschlagen!")
+                    raise HTTPException(status_code=500, detail=f"{default_platform} Order konnte nicht platziert werden")
                     
             except HTTPException:
                 raise
