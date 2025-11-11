@@ -939,7 +939,7 @@ async def get_ohlcv_data(
     Example: /api/market/ohlcv/GOLD?timeframe=1h&period=1mo
     """
     try:
-        from commodity_processor import fetch_historical_ohlcv
+        from commodity_processor import fetch_historical_ohlcv_async
         
         # Validate timeframe
         valid_timeframes = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1wk', '1mo']
@@ -957,8 +957,8 @@ async def get_ohlcv_data(
                 detail=f"Invalid period. Must be one of: {', '.join(valid_periods)}"
             )
         
-        # Fetch data
-        df = fetch_historical_ohlcv(commodity, timeframe=timeframe, period=period)
+        # Fetch data (async version for MetaAPI support)
+        df = await fetch_historical_ohlcv_async(commodity, timeframe=timeframe, period=period)
         
         if df is None or df.empty:
             raise HTTPException(
