@@ -1259,6 +1259,82 @@ const Dashboard = () => {
                 </Button>
               </div>
 
+              {/* Open Trades for this Asset */}
+              {(() => {
+                const assetTrades = allTrades.filter(trade => 
+                  trade.commodity === selectedCommodity.id && 
+                  trade.status === 'OPEN'
+                );
+                
+                if (assetTrades.length > 0) {
+                  return (
+                    <div className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 p-4 rounded-lg border border-blue-500/30">
+                      <h4 className="text-sm font-semibold text-blue-300 mb-3 flex items-center gap-2">
+                        <Activity className="w-4 h-4" />
+                        Offene Positionen für {selectedCommodity.name} ({assetTrades.length})
+                      </h4>
+                      <div className="space-y-2">
+                        {assetTrades.map((trade) => (
+                          <div key={trade.ticket || trade.id} className="bg-slate-800/50 p-3 rounded-lg flex items-center justify-between">
+                            <div className="flex-1 grid grid-cols-4 gap-3 text-sm">
+                              <div>
+                                <p className="text-xs text-slate-400">Typ</p>
+                                <Badge className={trade.type === 'BUY' ? 'bg-green-600' : 'bg-red-600'}>
+                                  {trade.type}
+                                </Badge>
+                              </div>
+                              <div>
+                                <p className="text-xs text-slate-400">Menge</p>
+                                <p className="font-semibold text-white">{trade.quantity || trade.volume}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-slate-400">Einstieg</p>
+                                <p className="font-semibold text-white">${(trade.entry_price || trade.price_open)?.toFixed(2)}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-slate-400">P&L</p>
+                                <p className={`font-bold ${
+                                  (trade.current_pl || trade.profit || 0) >= 0 ? 'text-green-400' : 'text-red-400'
+                                }`}>
+                                  {(trade.current_pl || trade.profit || 0) >= 0 ? '+' : ''}
+                                  {(trade.current_pl || trade.profit || 0)?.toFixed(2)} {trade.currency || 'EUR'}
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              onClick={async () => {
+                                if (window.confirm(`Position ${trade.ticket || trade.id} schließen?`)) {
+                                  try {
+                                    await axios.post(`${backendUrl}/api/trades/close`, {
+                                      trade_id: trade.id,
+                                      ticket: trade.ticket,
+                                      platform: trade.platform
+                                    });
+                                    alert('✅ Position erfolgreich geschlossen!');
+                                    // Refresh trades
+                                    fetchTrades();
+                                  } catch (error) {
+                                    console.error('Fehler beim Schließen:', error);
+                                    alert('❌ Fehler beim Schließen der Position');
+                                  }
+                                }
+                              }}
+                              size="sm"
+                              variant="destructive"
+                              className="ml-3"
+                            >
+                              <X className="w-4 h-4 mr-1" />
+                              Schließen
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
               {/* Price Info */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-slate-800/50 p-4 rounded-lg">
