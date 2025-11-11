@@ -1497,6 +1497,23 @@ const Dashboard = () => {
 const SettingsForm = ({ settings, onSave, commodities, balance }) => {
   const [formData, setFormData] = useState(settings || { enabled_commodities: ['WTI_CRUDE'] });
 
+  // Update formData when settings prop changes
+  useEffect(() => {
+    if (settings) {
+      setFormData({
+        ...settings,
+        // Ensure new KI trading parameters have default values
+        rsi_oversold_threshold: settings.rsi_oversold_threshold ?? 30,
+        rsi_overbought_threshold: settings.rsi_overbought_threshold ?? 70,
+        macd_signal_threshold: settings.macd_signal_threshold ?? 0,
+        trend_following: settings.trend_following ?? true,
+        min_confidence_score: settings.min_confidence_score ?? 0.6,
+        use_volume_confirmation: settings.use_volume_confirmation ?? true,
+        risk_per_trade_percent: settings.risk_per_trade_percent ?? 2.0
+      });
+    }
+  }, [settings]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave(formData);
