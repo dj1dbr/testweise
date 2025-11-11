@@ -223,6 +223,55 @@ class MetaAPIConnector:
             logger.error(f"Error placing MetaAPI order: {e}")
             return None
     
+    async def get_candles(self, symbol: str, timeframe: str = "1h", limit: int = 100) -> Optional[List[Dict[str, Any]]]:
+        """
+        Get historical candle data from MetaAPI
+        
+        Args:
+            symbol: Trading symbol (e.g., 'XAUUSD', 'XAGUSD')
+            timeframe: Timeframe - '1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'
+            limit: Number of candles to retrieve (max 1000)
+        
+        Returns:
+            List of candle data with OHLCV
+        """
+        try:
+            # Map timeframe to MetaAPI format
+            timeframe_map = {
+                '1m': '1m', '5m': '5m', '15m': '15m', '30m': '30m',
+                '1h': '1h', '4h': '4h', '1d': '1d', '1w': '1w'
+            }
+            tf = timeframe_map.get(timeframe, '1h')
+            
+            url = f"{self.base_url}/users/current/accounts/{self.account_id}/historical-market-data/symbols/{symbol}/timeframes/{tf}/candles"
+            
+            # Create SSL context
+            import ssl
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            
+            connector = aiohttp.TCPConnector(ssl=ssl_context)
+            
+            async with aiohttp.ClientSession(connector=connector) as session:
+                async with session.get(
+                    url,
+                    headers=self._get_headers(),
+                    params={"limit": min(limit, 1000)},
+                    timeout=aiohttp.ClientTimeout(total=30)
+                ) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        logger.info(f"✅ Retrieved {len(data)} candles for {symbol} ({tf})")
+                        return data
+                    else:
+                        error_text = await response.text()
+                        logger.warning(f"MetaAPI candles unavailable for {symbol}: {response.status}")
+                        return None
+        except Exception as e:
+            logger.warning(f"Error fetching MetaAPI candles for {symbol}: {e}")
+            return None
+    
     async def close_position(self, position_id: str) -> bool:
         """Close an open position via MetaAPI"""
         try:
