@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BACKEND_URL = "https://multiplatformtrader.preview.emergentagent.com"
+BACKEND_URL = "https://trade-hub-116.preview.emergentagent.com"
 
 async def list_positions():
     """Liste alle offenen Positionen auf"""
