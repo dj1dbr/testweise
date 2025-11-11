@@ -1495,26 +1495,26 @@ const Dashboard = () => {
 };
 
 const SettingsForm = ({ settings, onSave, commodities, balance }) => {
-  const [formData, setFormData] = useState(settings || { enabled_commodities: ['WTI_CRUDE'] });
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // Update formData ONLY on initial load, not on every settings change
-  useEffect(() => {
-    if (settings && !isInitialized) {
-      setFormData({
-        ...settings,
-        // Ensure new KI trading parameters have default values
-        rsi_oversold_threshold: settings.rsi_oversold_threshold ?? 30,
-        rsi_overbought_threshold: settings.rsi_overbought_threshold ?? 70,
-        macd_signal_threshold: settings.macd_signal_threshold ?? 0,
-        trend_following: settings.trend_following ?? true,
-        min_confidence_score: settings.min_confidence_score ?? 0.6,
-        use_volume_confirmation: settings.use_volume_confirmation ?? true,
-        risk_per_trade_percent: settings.risk_per_trade_percent ?? 2.0
-      });
-      setIsInitialized(true);
+  // Initialize with defaults, then merge with settings only once
+  const [formData, setFormData] = useState(() => {
+    const defaults = {
+      enabled_commodities: ['WTI_CRUDE'],
+      rsi_oversold_threshold: 30,
+      rsi_overbought_threshold: 70,
+      macd_signal_threshold: 0,
+      trend_following: true,
+      min_confidence_score: 0.6,
+      use_volume_confirmation: true,
+      risk_per_trade_percent: 2.0,
+      stop_loss_percent: 2.0,
+      take_profit_percent: 4.0
+    };
+    
+    if (settings) {
+      return { ...defaults, ...settings };
     }
-  }, [settings, isInitialized]);
+    return defaults;
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
