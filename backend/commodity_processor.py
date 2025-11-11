@@ -368,9 +368,9 @@ def fetch_historical_ohlcv(commodity_id: str, timeframe: str = "1d", period: str
         # Add indicators
         hist = calculate_indicators(hist)
         
-        # Cache the result for 5 minutes
+        # Cache successful result (24 hours for yfinance to avoid rate limiting)
         _ohlcv_cache[cache_key] = hist
-        _cache_expiry[cache_key] = now + timedelta(minutes=5)
+        _cache_expiry[cache_key] = now + timedelta(hours=24)
         
         return hist
     except Exception as e:
