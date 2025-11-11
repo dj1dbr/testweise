@@ -1072,8 +1072,7 @@ const Dashboard = () => {
                       value={chartTimeframe}
                       onChange={(e) => setChartTimeframe(e.target.value)}
                     >
-                      <option value="1m">1 Minute (Live Trading)</option>
-                      <option value="5m">5 Minuten</option>
+                      <option value="5m">5 Minuten (Live Trading)</option>
                       <option value="15m">15 Minuten</option>
                       <option value="30m">30 Minuten</option>
                       <option value="1h">1 Stunde</option>
@@ -1082,7 +1081,7 @@ const Dashboard = () => {
                       <option value="1wk">1 Woche</option>
                       <option value="1mo">1 Monat</option>
                     </select>
-                    <p className="text-xs text-slate-400">📊 Live Trading: 1m oder 5m wählen</p>
+                    <p className="text-xs text-slate-400">⚡ Trading-optimiert: Alle 5 Minuten aktuelle Daten</p>
                   </div>
                   
                   {/* Period Selection */}
