@@ -1108,7 +1108,7 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
                 raise HTTPException(status_code=500, detail=f"MT5 Fehler: {str(e)}")
         
         # Bitpanda Mode
-        elif settings.get('mode') == 'BITPANDA':
+        elif default_platform == 'BITPANDA':
             try:
                 from bitpanda_connector import get_bitpanda_connector
                 from commodity_processor import COMMODITIES
