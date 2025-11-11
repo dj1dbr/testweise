@@ -1084,7 +1084,16 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
                         detail=f"{commodity_info.get('name', commodity)} ist auf MT5 nicht verfügbar. Nutzen Sie Bitpanda für diesen Rohstoff oder wählen Sie einen verfügbaren Rohstoff."
                     )
                 
-                connector = await get_metaapi_connector()
+                # Get the correct platform connector
+                await multi_platform.connect_platform(default_platform)
+                
+                if default_platform not in multi_platform.platforms:
+                    raise HTTPException(status_code=503, detail=f"{default_platform} ist nicht verbunden")
+                
+                connector = multi_platform.platforms[default_platform].get('connector')
+                if not connector:
+                    raise HTTPException(status_code=503, detail=f"{default_platform} Connector nicht verfügbar")
+                
                 result = await connector.place_order(
                     symbol=mt5_symbol,
                     order_type=trade_type.upper(),
