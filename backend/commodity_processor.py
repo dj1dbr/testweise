@@ -271,6 +271,16 @@ def fetch_historical_ohlcv(commodity_id: str, timeframe: str = "1d", period: str
 def calculate_indicators(df):
     """Calculate technical indicators"""
     try:
+        # Safety check
+        if df is None or df.empty:
+            logger.warning("Cannot calculate indicators on None or empty DataFrame")
+            return None
+        
+        # Check if required column exists
+        if 'Close' not in df.columns:
+            logger.error("DataFrame missing 'Close' column")
+            return None
+        
         # SMA
         sma_indicator = SMAIndicator(close=df['Close'], window=20)
         df['SMA_20'] = sma_indicator.sma_indicator()
@@ -292,7 +302,7 @@ def calculate_indicators(df):
         return df
     except Exception as e:
         logger.error(f"Error calculating indicators: {e}")
-        return df
+        return None  # Return None on error instead of broken df
 
 
 def generate_signal(latest_data):
