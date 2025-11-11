@@ -1053,8 +1053,11 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
         # WICHTIG: Order an Trading-Plattform senden!
         platform_ticket = None
         
-        # MT5 Mode
-        if settings.get('mode') == 'MT5':
+        # Get default platform (new multi-platform architecture)
+        default_platform = settings.get('default_platform', 'MT5_LIBERTEX')
+        
+        # MT5 Mode (Libertex or ICMarkets)
+        if default_platform in ['MT5_LIBERTEX', 'MT5_ICMARKETS', 'MT5']:
             try:
                 from metaapi_connector import get_metaapi_connector
                 from commodity_processor import COMMODITIES
