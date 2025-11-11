@@ -1058,7 +1058,7 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
             # Minimum 0.01 (Broker-Minimum), Maximum 0.1 für Sicherheit
             quantity = max(0.01, min(quantity, 0.1))
             
-            logger.info(f"📊 [{current_platform}] Auto Position Size: {quantity:.4f} lots (Balance: {balance:.2f}, Free Margin: {free_margin}, Price: {price:.2f})")
+            logger.info(f"📊 [{default_platform}] Auto Position Size: {quantity:.4f} lots (Balance: {balance:.2f}, Free Margin: {free_margin}, Price: {price:.2f})")
         
         # Stop Loss und Take Profit richtig berechnen für BUY und SELL
         if trade_type.upper() == 'BUY':
