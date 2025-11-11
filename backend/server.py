@@ -1137,7 +1137,7 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
         # Bitpanda Mode
         elif default_platform == 'BITPANDA':
             try:
-                from bitpanda_connector import get_bitpanda_connector
+                from multi_platform_connector import multi_platform
                 from commodity_processor import COMMODITIES
                 
                 commodity_info = COMMODITIES.get(commodity, {})
@@ -1152,7 +1152,16 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
                         detail=f"{commodity_info.get('name', commodity)} ist auf Bitpanda nicht verfügbar."
                     )
                 
-                connector = await get_bitpanda_connector()
+                # Connect to Bitpanda
+                await multi_platform.connect_platform('BITPANDA')
+                
+                if 'BITPANDA' not in multi_platform.platforms:
+                    raise HTTPException(status_code=503, detail="Bitpanda ist nicht verbunden")
+                
+                connector = multi_platform.platforms['BITPANDA'].get('connector')
+                if not connector:
+                    raise HTTPException(status_code=503, detail="Bitpanda Connector nicht verfügbar")
+                
                 result = await connector.place_order(
                     symbol=bitpanda_symbol,
                     order_type=trade_type.upper(),
