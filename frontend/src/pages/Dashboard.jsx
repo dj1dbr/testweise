@@ -1437,6 +1437,11 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
         // Update form with reset values
         setFormData(response.data.settings);
         alert('✅ Einstellungen wurden auf Standardwerte zurückgesetzt!');
+        
+        // Reload page to ensure all components get fresh data
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       }
     } catch (error) {
       console.error('Fehler beim Zurücksetzen der Einstellungen:', error);
