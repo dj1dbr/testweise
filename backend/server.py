@@ -1064,18 +1064,14 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
                 
                 commodity_info = COMMODITIES.get(commodity, {})
                 
-                # Determine which MT5 platform is active and select correct symbol
-                active_platforms = settings.active_platforms if settings else []
-                mt5_symbol = None
-                
-                # Check which MT5 platform to use
-                if 'MT5_LIBERTEX' in active_platforms:
+                # Select correct symbol based on default platform
+                if default_platform == 'MT5_LIBERTEX':
                     mt5_symbol = commodity_info.get('mt5_libertex_symbol')
-                elif 'MT5_ICMARKETS' in active_platforms:
+                elif default_platform == 'MT5_ICMARKETS':
                     mt5_symbol = commodity_info.get('mt5_icmarkets_symbol')
                 else:
-                    # Fallback to default platform or legacy symbol
-                    mt5_symbol = commodity_info.get('mt5_libertex_symbol') or commodity_info.get('mt5_icmarkets_symbol') or commodity_info.get('mt5_symbol', 'XAUUSD')
+                    # Fallback
+                    mt5_symbol = commodity_info.get('mt5_icmarkets_symbol') or commodity_info.get('mt5_libertex_symbol')
                 
                 # Prüfen ob Rohstoff auf MT5 verfügbar
                 platforms = commodity_info.get('platforms', [])
