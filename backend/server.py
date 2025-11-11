@@ -896,6 +896,68 @@ async def get_all_markets():
 
 @api_router.get("/market/current", response_model=MarketData)
 async def get_current_market():
+
+
+@api_router.get("/market/live-ticks")
+async def get_live_ticks():
+    """
+    Get LIVE tick prices from MetaAPI for all available commodities
+    Returns real-time broker prices (Bid/Ask) - NO CACHING!
+    """
+    try:
+        from multi_platform_connector import multi_platform
+        from commodity_processor import COMMODITIES
+        
+        live_prices = {}
+        
+        # Connect platforms if not already connected
+        await multi_platform.connect_platform('MT5_ICMARKETS')
+        await multi_platform.connect_platform('MT5_LIBERTEX')
+        
+        # Get connector (prefer ICMarkets)
+        connector = None
+        if 'MT5_ICMARKETS' in multi_platform.platforms:
+            connector = multi_platform.platforms['MT5_ICMARKETS'].get('connector')
+        elif 'MT5_LIBERTEX' in multi_platform.platforms:
+            connector = multi_platform.platforms['MT5_LIBERTEX'].get('connector')
+        
+        if not connector:
+            logger.warning("No MetaAPI connector available for live ticks")
+            return {"error": "MetaAPI not connected", "live_prices": {}}
+        
+        # Fetch live ticks for all MT5-available commodities
+        for commodity_id, commodity_info in COMMODITIES.items():
+            # Get symbol (prefer ICMarkets)
+            symbol = commodity_info.get('mt5_icmarkets_symbol') or commodity_info.get('mt5_libertex_symbol')
+            
+            if symbol:
+                tick = await connector.get_symbol_price(symbol)
+                if tick:
+                    live_prices[commodity_id] = {
+                        'commodity': commodity_id,
+                        'name': commodity_info.get('name'),
+                        'symbol': symbol,
+                        'price': tick['price'],
+                        'bid': tick['bid'],
+                        'ask': tick['ask'],
+                        'time': tick['time'],
+                        'source': 'MetaAPI_LIVE'
+                    }
+        
+        logger.info(f"✅ Fetched {len(live_prices)} live tick prices from MetaAPI")
+        
+        return {
+            "live_prices": live_prices,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "source": "MetaAPI",
+            "count": len(live_prices)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error fetching live ticks: {e}")
+        return {"error": str(e), "live_prices": {}}
+
+
     """Get current market data with indicators"""
     if latest_market_data is None:
         # Fetch data synchronously if not available
