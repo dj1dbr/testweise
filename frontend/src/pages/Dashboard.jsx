@@ -1496,10 +1496,11 @@ const Dashboard = () => {
 
 const SettingsForm = ({ settings, onSave, commodities, balance }) => {
   const [formData, setFormData] = useState(settings || { enabled_commodities: ['WTI_CRUDE'] });
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Update formData when settings prop changes
+  // Update formData ONLY on initial load, not on every settings change
   useEffect(() => {
-    if (settings) {
+    if (settings && !isInitialized) {
       setFormData({
         ...settings,
         // Ensure new KI trading parameters have default values
@@ -1511,8 +1512,9 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
         use_volume_confirmation: settings.use_volume_confirmation ?? true,
         risk_per_trade_percent: settings.risk_per_trade_percent ?? 2.0
       });
+      setIsInitialized(true);
     }
-  }, [settings]);
+  }, [settings, isInitialized]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
