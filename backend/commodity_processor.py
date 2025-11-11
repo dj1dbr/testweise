@@ -206,9 +206,84 @@ from datetime import datetime, timedelta
 _ohlcv_cache = {}
 _cache_expiry = {}
 
+async def fetch_metaapi_candles(commodity_id: str, timeframe: str = "1h", limit: int = 100) -> Optional[pd.DataFrame]:
+    """
+    Fetch historical candle data from MetaAPI for supported commodities
+    
+    Args:
+        commodity_id: Commodity identifier (e.g., 'GOLD', 'SILVER', 'WTI_CRUDE')
+        timeframe: Timeframe - '1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'
+        limit: Number of candles
+    
+    Returns:
+        pandas DataFrame with OHLCV data or None if not available
+    """
+    try:
+        if commodity_id not in COMMODITIES:
+            return None
+        
+        commodity = COMMODITIES[commodity_id]
+        
+        # Check if MetaAPI is available for this commodity
+        if _platform_connector is None:
+            return None
+        
+        # Try ICMarkets first (primary broker)
+        symbol = commodity.get('mt5_icmarkets_symbol')
+        if symbol and 'MT5_ICMARKETS' in _platform_connector.platforms:
+            connector = _platform_connector.platforms['MT5_ICMARKETS'].get('connector')
+            if connector:
+                candles = await connector.get_candles(symbol, timeframe, limit)
+                if candles and len(candles) > 0:
+                    # Convert to DataFrame
+                    df = pd.DataFrame(candles)
+                    # Rename columns to match yfinance format
+                    if 'time' in df.columns:
+                        df['Date'] = pd.to_datetime(df['time'])
+                        df.set_index('Date', inplace=True)
+                    if 'open' in df.columns:
+                        df.rename(columns={
+                            'open': 'Open',
+                            'high': 'High',
+                            'low': 'Low',
+                            'close': 'Close',
+                            'volume': 'Volume'
+                        }, inplace=True)
+                    logger.info(f"✅ Fetched {len(df)} candles from MetaAPI for {commodity_id}")
+                    return df
+        
+        # Fallback to Libertex if ICMarkets unavailable
+        symbol = commodity.get('mt5_libertex_symbol')
+        if symbol and 'MT5_LIBERTEX' in _platform_connector.platforms:
+            connector = _platform_connector.platforms['MT5_LIBERTEX'].get('connector')
+            if connector:
+                candles = await connector.get_candles(symbol, timeframe, limit)
+                if candles and len(candles) > 0:
+                    df = pd.DataFrame(candles)
+                    if 'time' in df.columns:
+                        df['Date'] = pd.to_datetime(df['time'])
+                        df.set_index('Date', inplace=True)
+                    if 'open' in df.columns:
+                        df.rename(columns={
+                            'open': 'Open',
+                            'high': 'High',
+                            'low': 'Low',
+                            'close': 'Close',
+                            'volume': 'Volume'
+                        }, inplace=True)
+                    logger.info(f"✅ Fetched {len(df)} candles from MetaAPI Libertex for {commodity_id}")
+                    return df
+        
+        return None
+    except Exception as e:
+        logger.warning(f"MetaAPI candles unavailable for {commodity_id}: {e}")
+        return None
+
+
 def fetch_historical_ohlcv(commodity_id: str, timeframe: str = "1d", period: str = "1mo"):
     """
     Fetch historical OHLCV data with timeframe selection
+    Hybrid approach: MetaAPI (preferred) → yfinance with extended cache
     
     Args:
         commodity_id: Commodity identifier (e.g., 'GOLD', 'WTI_CRUDE')
@@ -223,7 +298,7 @@ def fetch_historical_ohlcv(commodity_id: str, timeframe: str = "1d", period: str
             logger.error(f"Unknown commodity: {commodity_id}")
             return None
         
-        # Check cache first (cache for 5 minutes)
+        # Check cache first (extended to 24 hours for yfinance data)
         cache_key = f"{commodity_id}_{timeframe}_{period}"
         now = datetime.now()
         
@@ -233,6 +308,36 @@ def fetch_historical_ohlcv(commodity_id: str, timeframe: str = "1d", period: str
                 return _ohlcv_cache[cache_key]
         
         commodity = COMMODITIES[commodity_id]
+        
+        # Priority 1: Try MetaAPI for supported commodities (Gold, Silver, Platinum, WTI, Brent)
+        import asyncio
+        metaapi_supported = ["GOLD", "SILVER", "PLATINUM", "PALLADIUM", "WTI_CRUDE", "BRENT_CRUDE"]
+        
+        if commodity_id in metaapi_supported:
+            try:
+                # Map period to number of candles
+                period_to_limit = {
+                    '1d': 24, '5d': 120, '1mo': 720, '3mo': 2160,
+                    '6mo': 4320, '1y': 8760, '2y': 17520, '5y': 43800, 'max': 1000
+                }
+                limit = period_to_limit.get(period, 720)
+                
+                # Convert timeframe for MetaAPI
+                tf_map = {'1d': '1h', '1wk': '4h', '1mo': '1d'}
+                metaapi_tf = tf_map.get(timeframe, timeframe)
+                
+                metaapi_data = asyncio.run(fetch_metaapi_candles(commodity_id, metaapi_tf, limit))
+                if metaapi_data is not None and not metaapi_data.empty:
+                    # Cache for 1 hour (MetaAPI data is fresh)
+                    _ohlcv_cache[cache_key] = metaapi_data
+                    _cache_expiry[cache_key] = now + timedelta(hours=1)
+                    return metaapi_data
+                else:
+                    logger.info(f"MetaAPI unavailable for {commodity_id}, falling back to yfinance")
+            except Exception as e:
+                logger.warning(f"MetaAPI fetch failed for {commodity_id}: {e}, using yfinance")
+        
+        # Priority 2: yfinance with extended caching (24h)
         ticker = yf.Ticker(commodity["symbol"])
         
         # Timeframe mapping
