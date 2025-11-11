@@ -1892,6 +1892,12 @@ async def startup_event():
         
         logger.info(f"MT5 credentials loaded: Server={mt5_server}, Login={mt5_login}")
     
+    # Initialize platform connector for commodity_processor
+    from multi_platform_connector import multi_platform
+    import commodity_processor
+    commodity_processor.set_platform_connector(multi_platform)
+    logger.info("Platform connector initialized for MetaAPI chart data")
+    
     # Fetch initial market data
     await process_market_data()
     
