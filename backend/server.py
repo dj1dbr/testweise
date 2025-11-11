@@ -1012,18 +1012,37 @@ async def execute_trade(trade_type: str, price: float, quantity: float = None, c
         # Automatische Position Size Berechnung wenn nicht angegeben
         if quantity is None or quantity == 1.0:
             # Hole aktuelle Balance und Free Margin
-            balance = 2199.81  # Default
+            balance = 50000.0  # Default
             free_margin = None
-            if settings.get('mode') == 'MT5':
+            
+            # Get balance from selected platform
+            default_platform = settings.get('default_platform', 'MT5_LIBERTEX')
+            
+            if default_platform in ['MT5_LIBERTEX', 'MT5_ICMARKETS']:
                 try:
-                    from metaapi_connector import get_metaapi_connector
-                    connector = await get_metaapi_connector()
-                    account_info = await connector.get_account_info()
-                    if account_info:
-                        balance = account_info['balance']
-                        free_margin = account_info.get('free_margin')
-                except:
-                    pass
+                    from multi_platform_connector import multi_platform
+                    await multi_platform.connect_platform(default_platform)
+                    
+                    if default_platform in multi_platform.platforms:
+                        connector = multi_platform.platforms[default_platform].get('connector')
+                        if connector:
+                            account_info = await connector.get_account_info()
+                            if account_info:
+                                balance = account_info.get('balance', balance)
+                                free_margin = account_info.get('free_margin')
+                except Exception as e:
+                    logger.warning(f"Could not fetch balance from {default_platform}: {e}")
+            elif default_platform == 'BITPANDA':
+                try:
+                    from multi_platform_connector import multi_platform
+                    await multi_platform.connect_platform('BITPANDA')
+                    
+                    if 'BITPANDA' in multi_platform.platforms:
+                        bp_balance = multi_platform.platforms['BITPANDA'].get('balance', 0.0)
+                        if bp_balance > 0:
+                            balance = bp_balance
+                except Exception as e:
+                    logger.warning(f"Could not fetch Bitpanda balance: {e}")
             
             # Berechne Position Size (max 20% des verfügbaren Kapitals) PRO PLATTFORM
             from commodity_processor import calculate_position_size
