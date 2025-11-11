@@ -190,6 +190,13 @@ def fetch_commodity_data(commodity_id: str):
         return None
 
 
+import time
+from datetime import datetime, timedelta
+
+# Cache for OHLCV data to avoid rate limiting
+_ohlcv_cache = {}
+_cache_expiry = {}
+
 def fetch_historical_ohlcv(commodity_id: str, timeframe: str = "1d", period: str = "1mo"):
     """
     Fetch historical OHLCV data with timeframe selection
@@ -206,7 +213,16 @@ def fetch_historical_ohlcv(commodity_id: str, timeframe: str = "1d", period: str
         if commodity_id not in COMMODITIES:
             logger.error(f"Unknown commodity: {commodity_id}")
             return None
-            
+        
+        # Check cache first (cache for 5 minutes)
+        cache_key = f"{commodity_id}_{timeframe}_{period}"
+        now = datetime.now()
+        
+        if cache_key in _ohlcv_cache and cache_key in _cache_expiry:
+            if now < _cache_expiry[cache_key]:
+                logger.info(f"Returning cached data for {commodity_id}")
+                return _ohlcv_cache[cache_key]
+        
         commodity = COMMODITIES[commodity_id]
         ticker = yf.Ticker(commodity["symbol"])
         
@@ -225,6 +241,10 @@ def fetch_historical_ohlcv(commodity_id: str, timeframe: str = "1d", period: str
         
         # Get historical data with specified timeframe
         logger.info(f"Fetching {commodity['name']} data: period={period}, interval={interval}")
+        
+        # Add delay to avoid rate limiting
+        time.sleep(0.5)
+        
         hist = ticker.history(period=period, interval=interval)
         
         if hist.empty:
@@ -234,9 +254,17 @@ def fetch_historical_ohlcv(commodity_id: str, timeframe: str = "1d", period: str
         # Add indicators
         hist = calculate_indicators(hist)
         
+        # Cache the result for 5 minutes
+        _ohlcv_cache[cache_key] = hist
+        _cache_expiry[cache_key] = now + timedelta(minutes=5)
+        
         return hist
     except Exception as e:
         logger.error(f"Error fetching historical data for {commodity_id}: {e}")
+        # If rate limited, try to return cached data even if expired
+        if cache_key in _ohlcv_cache:
+            logger.warning(f"Rate limited, returning stale cached data for {commodity_id}")
+            return _ohlcv_cache[cache_key]
         return None
 
 
