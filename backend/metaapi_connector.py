@@ -223,6 +223,47 @@ class MetaAPIConnector:
             logger.error(f"Error placing MetaAPI order: {e}")
             return None
     
+    async def get_symbol_price(self, symbol: str) -> Optional[Dict[str, Any]]:
+        """
+        Get current price (tick) for a symbol from MetaAPI
+        
+        Args:
+            symbol: Trading symbol (e.g., 'XAUUSD', 'XAGUSD')
+        
+        Returns:
+            Dict with bid, ask, time
+        """
+        try:
+            url = f"{self.base_url}/users/current/accounts/{self.account_id}/symbols/{symbol}/current-tick"
+            
+            import ssl
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            
+            connector = aiohttp.TCPConnector(ssl=ssl_context)
+            
+            async with aiohttp.ClientSession(connector=connector) as session:
+                async with session.get(
+                    url,
+                    headers=self._get_headers(),
+                    timeout=aiohttp.ClientTimeout(total=10)
+                ) as response:
+                    if response.status == 200:
+                        tick = await response.json()
+                        return {
+                            'symbol': symbol,
+                            'bid': tick.get('bid', 0.0),
+                            'ask': tick.get('ask', 0.0),
+                            'price': (tick.get('bid', 0.0) + tick.get('ask', 0.0)) / 2,
+                            'time': tick.get('time', '')
+                        }
+                    else:
+                        return None
+        except Exception as e:
+            logger.debug(f"Error fetching tick for {symbol}: {e}")
+            return None
+    
     async def get_candles(self, symbol: str, timeframe: str = "1h", limit: int = 100) -> Optional[List[Dict[str, Any]]]:
         """
         Get historical candle data from MetaAPI
