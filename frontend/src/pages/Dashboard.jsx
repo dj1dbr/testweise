@@ -45,7 +45,7 @@ const Dashboard = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [aiProcessing, setAiProcessing] = useState(false);
-  const [chartTimeframe, setChartTimeframe] = useState('1d');
+  const [chartTimeframe, setChartTimeframe] = useState('1h'); // Default to 1h for intraday data
   const [chartPeriod, setChartPeriod] = useState('1mo');
   const [chartModalData, setChartModalData] = useState([]);
 
