@@ -126,19 +126,26 @@ async def send_chat_message(message: str, settings: dict, latest_market_data: di
         full_message = f"{context}\n\nBENUTZER FRAGE: {message}"
         
         # Send message based on provider type
-        if hasattr(chat, 'send_message'):
-            # Ollama or custom chat
-            if ai_provider == "ollama":
-                response = await chat.send_message(full_message)
-            else:
-                # Emergentintegrations
-                from emergentintegrations.llm.chat import UserMessage
-                user_msg = UserMessage(text=full_message)
-                response = await chat.send_message(user_msg)
+        if ai_provider == "ollama":
+            # Ollama
+            response = await chat.send_message(full_message)
         else:
-            response = "AI Chat ist nicht verfügbar"
+            # Emergentintegrations - send_message is synchronous
+            from emergentintegrations.llm.chat import UserMessage
+            user_msg = UserMessage(text=full_message)
+            
+            # send_message returns text directly
+            response_obj = chat.send_message(user_msg)
+            
+            # Extract text from response
+            if hasattr(response_obj, 'text'):
+                response = response_obj.text
+            elif isinstance(response_obj, str):
+                response = response_obj
+            else:
+                response = str(response_obj)
         
-        logger.info(f"AI Response generated (length: {len(response)})")
+        logger.info(f"✅ AI Response generated (length: {len(response)})")
         return {
             "success": True,
             "response": response,
