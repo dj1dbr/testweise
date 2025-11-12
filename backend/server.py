@@ -1098,8 +1098,8 @@ async def ai_chat_endpoint(
     try:
         from ai_chat_service import send_chat_message
         
-        # Get settings
-        settings_doc = await db.settings.find_one({"id": "trading_settings"})
+        # Get settings from correct collection
+        settings_doc = await db.trading_settings.find_one({"id": "trading_settings"})
         settings = settings_doc if settings_doc else {}
         
         # Get open trades
