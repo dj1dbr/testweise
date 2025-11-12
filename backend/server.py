@@ -553,16 +553,47 @@ async def process_market_data():
 
 
 async def process_commodity_market_data(commodity_id: str, settings):
-    """Process market data for a specific commodity"""
+    """Process market data for a specific commodity - NOW WITH LIVE TICKS!"""
     try:
-        from commodity_processor import fetch_commodity_data, calculate_indicators
+        from commodity_processor import fetch_commodity_data, calculate_indicators, COMMODITIES
+        from multi_platform_connector import multi_platform
         
-        # Fetch data from yfinance
+        # PRIORITY 1: Try to get LIVE tick price from MetaAPI
+        live_price = None
+        commodity_info = COMMODITIES.get(commodity_id, {})
+        symbol = commodity_info.get('mt5_icmarkets_symbol') or commodity_info.get('mt5_libertex_symbol')
+        
+        if symbol:
+            try:
+                # Get live tick
+                connector = None
+                if 'MT5_ICMARKETS' in multi_platform.platforms:
+                    connector = multi_platform.platforms['MT5_ICMARKETS'].get('connector')
+                elif 'MT5_LIBERTEX' in multi_platform.platforms:
+                    connector = multi_platform.platforms['MT5_LIBERTEX'].get('connector')
+                
+                if connector:
+                    tick = await connector.get_symbol_price(symbol)
+                    if tick:
+                        live_price = tick['price']
+                        logger.debug(f"✅ Live tick for {commodity_id}: ${live_price:.2f}")
+            except Exception as e:
+                logger.debug(f"Could not get live tick for {commodity_id}: {e}")
+        
+        # Fetch historical data for indicators (cached, so not rate-limited)
         hist = fetch_commodity_data(commodity_id)
         
         if hist is None or hist.empty:
-            logger.warning(f"No data for {commodity_id}, skipping update")
-            return
+            # If no historical data but we have live price, use it anyway
+            if live_price:
+                logger.info(f"Using live price only for {commodity_id}: ${live_price:.2f}")
+            else:
+                logger.warning(f"No data for {commodity_id}, skipping update")
+                return
+        else:
+            # If we have live price, update the latest price in hist
+            if live_price:
+                hist.iloc[-1, hist.columns.get_loc('Close')] = live_price
         
         # Calculate indicators if not already present
         if 'RSI' not in hist.columns:
