@@ -231,6 +231,22 @@ const Dashboard = () => {
       console.error('Error fetching live ticks:', error);
     }
   };
+
+  // Live price updates every 5 seconds - placed AFTER fetchLiveTicks definition
+  useEffect(() => {
+    // Initial fetch
+    fetchLiveTicks();
+    
+    // Set up interval for live updates
+    const liveUpdateInterval = setInterval(() => {
+      fetchLiveTicks();
+    }, 5000); // Update every 5 seconds
+    
+    // Cleanup on unmount
+    return () => clearInterval(liveUpdateInterval);
+  }, []);
+
+
   
   const calculateTotalExposure = () => {
     // Calculate actual exposure from open trades
