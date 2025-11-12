@@ -2078,6 +2078,35 @@ async def get_platform_account(platform_name: str):
         account_info = await multi_platform.get_account_info(platform_name)
         
         if account_info:
+            # Calculate portfolio risk
+            balance = account_info.get('balance', 0)
+            
+            # Get open trades for this platform
+            open_trades = await db.trades.find({
+                "mode": platform_name,
+                "status": "OPEN"
+            }).to_list(1000)
+            
+            # Calculate total risk exposure
+            total_risk = 0.0
+            for trade in open_trades:
+                entry_price = trade.get('entry_price', 0)
+                stop_loss = trade.get('stop_loss', 0)
+                quantity = trade.get('quantity', 0)
+                
+                if entry_price > 0 and stop_loss > 0:
+                    # Risk = (Entry - StopLoss) * Quantity
+                    risk_per_trade = abs(entry_price - stop_loss) * quantity
+                    total_risk += risk_per_trade
+            
+            # Portfolio risk as percentage of balance
+            portfolio_risk_percent = (total_risk / balance * 100) if balance > 0 else 0.0
+            
+            # Add risk info to account
+            account_info['portfolio_risk'] = round(total_risk, 2)
+            account_info['portfolio_risk_percent'] = round(portfolio_risk_percent, 2)
+            account_info['open_trades_count'] = len(open_trades)
+            
             return {
                 "success": True,
                 "platform": platform_name,
