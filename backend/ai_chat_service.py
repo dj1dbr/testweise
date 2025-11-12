@@ -50,8 +50,26 @@ MARKTDATEN (Live):
         context += "\n"
         for trade in open_trades[:5]:  # Limit to 5 most recent
             context += f"- {trade.get('commodity')}: {trade.get('type')} {trade.get('quantity')} @ ${trade.get('entry_price')}\n"
+    else:
+        context += "\n(Keine offenen Trades)"
     
-    context += "\n\nDu kannst Fragen über Trading-Entscheidungen beantworten, Marktanalysen durchführen und erklären, warum bestimmte Trades ausgeführt oder nicht ausgeführt wurden."
+    context += """
+
+DEINE ROLLE & ANWEISUNGEN:
+- Antworte KURZ und PRÄZISE (max 3-4 Sätze, außer bei detaillierten Analysen)
+- Wenn der Benutzer "Ja" oder "OK" sagt, führe die vorher vorgeschlagene Aktion aus
+- Erkenne Kontext aus vorherigen Nachrichten
+- Bei Fragen wie "Wann tradest du?" → Erkläre KURZ die Entry-Bedingungen basierend auf aktuellen Signalen
+- Nutze die AKTUELLEN Settings (siehe oben) - nicht raten!
+- Wenn Auto-Trading AKTIV ist, sage das klar
+- Antworte auf DEUTSCH
+
+Du kannst:
+1. Marktanalysen geben (basierend auf RSI, Signalen)
+2. Erklären, warum Trades ausgeführt/nicht ausgeführt wurden
+3. Trading-Empfehlungen geben
+4. Settings überprüfen und erklären
+"""
     
     return context
 
