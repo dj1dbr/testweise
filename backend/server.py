@@ -8,7 +8,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Literal
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import yfinance as yf
 import pandas as pd
 import numpy as np
