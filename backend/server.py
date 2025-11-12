@@ -1016,6 +1016,62 @@ async def get_live_ticks():
         return {"error": str(e), "live_prices": {}}
 
 
+@api_router.get("/market/ohlcv-simple/{commodity}")
+async def get_simple_ohlcv(commodity: str, timeframe: str = "5m", period: str = "1d"):
+    """
+    Simplified OHLCV endpoint when yfinance is rate-limited
+    Returns recent market data from DB and current live tick
+    """
+    try:
+        from commodity_processor import COMMODITIES
+        
+        if commodity not in COMMODITIES:
+            raise HTTPException(status_code=404, detail=f"Unknown commodity: {commodity}")
+        
+        # Get latest market data from DB
+        market_data = await db.market_data.find_one(
+            {"commodity": commodity},
+            sort=[("timestamp", -1)]
+        )
+        
+        if not market_data:
+            raise HTTPException(status_code=404, detail=f"No data available for {commodity}")
+        
+        # Create single candle with current price
+        current_price = market_data.get('price', 0)
+        timestamp = market_data.get('timestamp', datetime.now(timezone.utc))
+        
+        data = [{
+            "timestamp": timestamp.isoformat() if isinstance(timestamp, datetime) else timestamp,
+            "open": current_price,
+            "high": current_price * 1.001,  # Simulate small variance
+            "low": current_price * 0.999,
+            "close": current_price,
+            "volume": market_data.get('volume', 0),
+            "rsi": market_data.get('rsi', 50),
+            "sma_20": market_data.get('sma_20', current_price),
+            "ema_20": market_data.get('ema_20', current_price)
+        }]
+        
+        return {
+            "success": True,
+            "data": data,
+            "commodity": commodity,
+            "timeframe": timeframe,
+            "period": period,
+            "source": "live_db",
+            "message": "Using live database data (yfinance rate-limited)"
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in simple OHLCV: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+
     """Get current market data with indicators"""
     if latest_market_data is None:
         # Fetch data synchronously if not available
