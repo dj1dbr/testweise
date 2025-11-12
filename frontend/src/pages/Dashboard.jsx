@@ -172,21 +172,6 @@ const Dashboard = () => {
   };
 
 
-  // Live price updates every 5 seconds
-  useEffect(() => {
-    // Initial fetch
-    fetchLiveTicks();
-    
-    // Set up interval for live updates
-    const liveUpdateInterval = setInterval(() => {
-      fetchLiveTicks();
-    }, 5000); // Update every 5 seconds
-    
-    // Cleanup on unmount
-    return () => clearInterval(liveUpdateInterval);
-  }, []);
-
-
   const fetchCommodities = async () => {
     try {
       const response = await axios.get(`${API}/commodities`);
