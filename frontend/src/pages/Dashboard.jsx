@@ -2300,13 +2300,7 @@ const SettingsForm = ({ settings, onSave, commodities, balance }) => {
         Einstellungen speichern
       </Button>
     </form>
-
-    {/* AI Chat Component */}
-    <AIChat 
-      aiProvider={formData.ai_trading_strategy || 'openai'}
-      aiModel={formData.ai_trading_strategy === 'ollama' ? 'llama3' : 'gpt-5'}
-    />
-  </>;
+  );
 };
 
 export default Dashboard;
