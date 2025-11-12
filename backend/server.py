@@ -1073,6 +1073,48 @@ async def get_simple_ohlcv(commodity: str, timeframe: str = "5m", period: str = 
             "data": data,
             "commodity": commodity,
             "timeframe": timeframe,
+
+
+@api_router.post("/ai-chat")
+async def ai_chat_endpoint(
+    message: str,
+    ai_provider: str = "openai",
+    model: str = None
+):
+    """
+    AI Chat endpoint for trading bot
+    Supports: GPT-5 (openai), Claude (anthropic), Ollama (local)
+    """
+    try:
+        from ai_chat_service import send_chat_message
+        
+        # Get settings
+        settings_doc = await db.settings.find_one({"id": "trading_settings"})
+        settings = settings_doc if settings_doc else {}
+        
+        # Get open trades
+        open_trades = await db.trades.find({"status": "OPEN"}).to_list(100)
+        
+        # Send message to AI
+        result = await send_chat_message(
+            message=message,
+            settings=settings,
+            latest_market_data=latest_market_data or {},
+            open_trades=open_trades,
+            ai_provider=ai_provider,
+            model=model
+        )
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"AI Chat error: {e}")
+        return {
+            "success": False,
+            "response": f"Fehler beim AI-Chat: {str(e)}"
+        }
+
+
             "period": period,
             "source": "live_db",
             "message": "Using live database data (yfinance rate-limited)"
