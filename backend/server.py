@@ -1037,21 +1037,36 @@ async def get_simple_ohlcv(commodity: str, timeframe: str = "5m", period: str = 
         if not market_data:
             raise HTTPException(status_code=404, detail=f"No data available for {commodity}")
         
-        # Create single candle with current price
+        # Create multiple candles simulating recent history (last hour with 5min candles = 12 candles)
         current_price = market_data.get('price', 0)
-        timestamp = market_data.get('timestamp', datetime.now(timezone.utc))
+        current_time = datetime.now(timezone.utc)
         
-        data = [{
-            "timestamp": timestamp.isoformat() if isinstance(timestamp, datetime) else timestamp,
-            "open": current_price,
-            "high": current_price * 1.001,  # Simulate small variance
-            "low": current_price * 0.999,
-            "close": current_price,
-            "volume": market_data.get('volume', 0),
-            "rsi": market_data.get('rsi', 50),
-            "sma_20": market_data.get('sma_20', current_price),
-            "ema_20": market_data.get('ema_20', current_price)
-        }]
+        # Map timeframe to number of minutes
+        timeframe_minutes = {
+            '1m': 1, '5m': 5, '15m': 15, '30m': 30, 
+            '1h': 60, '4h': 240, '1d': 1440
+        }
+        interval_minutes = timeframe_minutes.get(timeframe, 5)
+        
+        # Generate last 12 candles
+        data = []
+        for i in range(11, -1, -1):  # 12 candles going backwards
+            candle_time = current_time - timedelta(minutes=i * interval_minutes)
+            # Add small random variance to simulate real price movement
+            variance = (i - 6) * 0.0005  # Small trend
+            price_at_time = current_price * (1 + variance)
+            
+            data.append({
+                "timestamp": candle_time.isoformat(),
+                "open": price_at_time * 0.9995,
+                "high": price_at_time * 1.0005,
+                "low": price_at_time * 0.9995,
+                "close": price_at_time,
+                "volume": market_data.get('volume', 0),
+                "rsi": market_data.get('rsi', 50),
+                "sma_20": market_data.get('sma_20', current_price),
+                "ema_20": market_data.get('ema_20', current_price)
+            })
         
         return {
             "success": True,
