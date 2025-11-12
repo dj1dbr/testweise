@@ -14,17 +14,27 @@ _chat_instance = None
 
 def get_trading_context(settings, latest_market_data, open_trades):
     """Generate context about current trading state"""
+    
+    # Extract settings properly (handle both dict and None)
+    auto_trading = settings.get('auto_trading', False) if settings else False
+    use_ai = settings.get('use_ai_analysis', False) if settings else False
+    risk_per_trade = settings.get('risk_per_trade_percent', 2) if settings else 2
+    max_portfolio = settings.get('max_portfolio_risk_percent', 20) if settings else 20
+    platform = settings.get('default_platform', 'MT5_LIBERTEX') if settings else 'MT5_LIBERTEX'
+    stop_loss = settings.get('stop_loss_percent', 2) if settings else 2
+    take_profit = settings.get('take_profit_percent', 4) if settings else 4
+    
     context = f"""
 Du bist ein intelligenter Trading-Assistent für die Rohstoff-Trading-Plattform.
 
 AKTUELLE TRADING-EINSTELLUNGEN:
-- Auto-Trading: {'Aktiv' if settings.get('auto_trading') else 'Inaktiv'}
-- AI-Analyse: {'Aktiv' if settings.get('use_ai_analysis') else 'Inaktiv'}
-- Risiko pro Trade: {settings.get('risk_per_trade_percent', 2)}%
-- Max Portfolio Risiko: {settings.get('max_portfolio_risk_percent', 20)}%
-- Standard-Plattform: {settings.get('default_platform', 'MT5_LIBERTEX')}
-- Stop Loss: {settings.get('stop_loss_percent', 2)}%
-- Take Profit: {settings.get('take_profit_percent', 4)}%
+- Auto-Trading: {'✅ AKTIV' if auto_trading else '❌ INAKTIV'}
+- AI-Analyse: {'✅ AKTIV' if use_ai else '❌ INAKTIV'}
+- Risiko pro Trade: {risk_per_trade}%
+- Max Portfolio Risiko: {max_portfolio}%
+- Standard-Plattform: {platform}
+- Stop Loss: {stop_loss}%
+- Take Profit: {take_profit}%
 
 MARKTDATEN (Live):
 """
