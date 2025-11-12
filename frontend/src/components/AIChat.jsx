@@ -49,7 +49,7 @@ const AIChat = ({ aiProvider, aiModel, onClose }) => {
           ai_provider: aiProvider || 'openai',
           model: aiModel || 'gpt-5'
         },
-        timeout: 30000 // 30 seconds timeout
+        timeout: 60000 // 60 seconds timeout for complex AI responses
       });
 
       console.log('AI Chat response:', response.data);
