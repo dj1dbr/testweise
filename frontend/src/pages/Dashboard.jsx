@@ -101,15 +101,32 @@ const Dashboard = () => {
       const loadChartData = async () => {
         try {
           console.log('Loading chart data for:', selectedCommodity.id, chartTimeframe, chartPeriod);
-          const response = await axios.get(
-            `${API}/market/ohlcv/${selectedCommodity.id}?timeframe=${chartTimeframe}&period=${chartPeriod}`
+          
+          // Try normal endpoint first
+          try {
+            const response = await axios.get(
+              `${API}/market/ohlcv/${selectedCommodity.id}?timeframe=${chartTimeframe}&period=${chartPeriod}`
+            );
+            console.log('Chart data received:', response.data);
+            if (response.data.success && response.data.data && response.data.data.length > 0) {
+              setChartModalData(response.data.data || []);
+              return;
+            }
+          } catch (err) {
+            console.warn('Primary chart endpoint failed, trying fallback...');
+          }
+          
+          // Fallback to simple endpoint (uses live DB data)
+          const fallbackResponse = await axios.get(
+            `${API}/market/ohlcv-simple/${selectedCommodity.id}?timeframe=${chartTimeframe}&period=${chartPeriod}`
           );
-          console.log('Chart data received:', response.data);
-          if (response.data.success) {
-            setChartModalData(response.data.data || []);
+          console.log('Fallback chart data received:', fallbackResponse.data);
+          if (fallbackResponse.data.success) {
+            setChartModalData(fallbackResponse.data.data || []);
           }
         } catch (error) {
           console.error('Error loading chart data:', error);
+          setChartModalData([]); // Clear on error
         }
       };
       loadChartData();
