@@ -2177,8 +2177,12 @@ async def startup_event():
     # Fetch initial market data
     await process_market_data()
     
-    # NOTE: Background scheduler disabled due to asyncio event loop conflicts
-    # Frontend will poll the /api/market/refresh endpoint instead
+    # Start Auto-Trading Engine (LIVE TICKER MODE)
+    from auto_trading_engine import get_auto_trading_engine
+    auto_engine = get_auto_trading_engine(db)
+    asyncio.create_task(auto_engine.start())
+    logger.info("🤖 Auto-Trading Engine gestartet (LIVE TICKER - alle 10 Sekunden)")
+    
     logger.info("API ready - market data available via /api/market/current and /api/market/refresh")
     logger.info("AI analysis enabled for intelligent trading decisions")
 
