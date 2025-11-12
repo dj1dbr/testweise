@@ -1568,6 +1568,12 @@ const Dashboard = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* AI Chat Component */}
+      <AIChat 
+        aiProvider={settings?.ai_trading_strategy || 'openai'}
+        aiModel={settings?.ai_trading_strategy === 'ollama' ? 'llama3' : 'gpt-5'}
+      />
     </div>
   );
 };
