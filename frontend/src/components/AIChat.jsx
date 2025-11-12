@@ -41,26 +41,38 @@ const AIChat = ({ aiProvider, aiModel, onClose }) => {
     setLoading(true);
 
     try {
+      console.log('Sending AI chat message:', input, 'Provider:', aiProvider);
+      
       const response = await axios.post(`${API}/api/ai-chat`, null, {
         params: {
           message: input,
           ai_provider: aiProvider || 'openai',
-          model: aiModel
-        }
+          model: aiModel || 'gpt-5'
+        },
+        timeout: 30000 // 30 seconds timeout
       });
 
-      const aiMessage = {
-        role: 'assistant',
-        content: response.data.response || 'Keine Antwort erhalten.',
-        timestamp: new Date()
-      };
+      console.log('AI Chat response:', response.data);
 
-      setMessages(prev => [...prev, aiMessage]);
+      if (response.data && response.data.success) {
+        const aiMessage = {
+          role: 'assistant',
+          content: response.data.response || 'Keine Antwort erhalten.',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, aiMessage]);
+      } else {
+        throw new Error(response.data.response || 'Keine gültige Antwort');
+      }
     } catch (error) {
       console.error('AI Chat error:', error);
+      const errorMsg = error.response?.data?.response 
+        || error.message 
+        || 'Konnte keine Antwort von der KI erhalten.';
+      
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: '❌ Fehler: Konnte keine Antwort von der KI erhalten.',
+        content: `❌ Fehler: ${errorMsg}`,
         timestamp: new Date()
       }]);
     } finally {
