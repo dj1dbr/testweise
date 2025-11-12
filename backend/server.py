@@ -583,20 +583,46 @@ async def process_commodity_market_data(commodity_id: str, settings):
         # Fetch historical data for indicators (cached, so not rate-limited)
         hist = fetch_commodity_data(commodity_id)
         
+        # If no historical data, create minimal data with live price
         if hist is None or hist.empty:
-            # If no historical data but we have live price, use it anyway
             if live_price:
                 logger.info(f"Using live price only for {commodity_id}: ${live_price:.2f}")
+                # Create minimal market data without indicators
+                market_data = {
+                    "id": str(uuid.uuid4()),
+                    "timestamp": datetime.now(timezone.utc),
+                    "commodity": commodity_id,
+                    "price": live_price,
+                    "volume": 0,
+                    "sma_20": live_price,
+                    "ema_20": live_price,
+                    "rsi": 50.0,  # Neutral
+                    "macd": 0.0,
+                    "macd_signal": 0.0,
+                    "macd_histogram": 0.0,
+                    "trend": "NEUTRAL",
+                    "signal": "HOLD"
+                }
+                
+                # Store in database
+                await db.market_data.update_one(
+                    {"commodity": commodity_id},
+                    {"$set": market_data},
+                    upsert=True
+                )
+                latest_market_data[commodity_id] = market_data
+                logger.info(f"✅ Updated market data for {commodity_id}: ${live_price:.2f}, Signal: HOLD (live only)")
+                return
             else:
                 logger.warning(f"No data for {commodity_id}, skipping update")
                 return
-        else:
-            # If we have live price, update the latest price in hist
-            if live_price:
-                hist.iloc[-1, hist.columns.get_loc('Close')] = live_price
+        
+        # If we have live price, update the latest price in hist
+        if live_price:
+            hist.iloc[-1, hist.columns.get_loc('Close')] = live_price
         
         # Calculate indicators if not already present
-        if 'RSI' not in hist.columns:
+        if hist is not None and 'RSI' not in hist.columns:
             hist = calculate_indicators(hist)
             
             # Check again if calculate_indicators returned None
