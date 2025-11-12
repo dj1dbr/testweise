@@ -1494,12 +1494,20 @@ async def get_trades(status: Optional[str] = None):
         if status:
             query['status'] = status.upper()
         
-        trades = await db.trades.find(query, {"_id": 0}).sort("timestamp", -1).to_list(1000)
+        # Sort by created_at (new field) or timestamp (legacy)
+        trades = await db.trades.find(query, {"_id": 0}).to_list(1000)
+        
+        # Sort manually if needed
+        trades.sort(key=lambda x: x.get('created_at') or x.get('timestamp') or '', reverse=True)
         
         # Convert timestamps
         for trade in trades:
-            if isinstance(trade['timestamp'], str):
+            # Handle both created_at and timestamp fields
+            if 'timestamp' in trade and isinstance(trade['timestamp'], str):
                 trade['timestamp'] = datetime.fromisoformat(trade['timestamp']).isoformat()
+            if 'created_at' in trade and isinstance(trade['created_at'], str):
+                # Add timestamp field for frontend compatibility
+                trade['timestamp'] = trade['created_at']
             if trade.get('closed_at') and isinstance(trade['closed_at'], str):
                 trade['closed_at'] = datetime.fromisoformat(trade['closed_at']).isoformat()
         
