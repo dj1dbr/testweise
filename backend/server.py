@@ -1073,6 +1073,16 @@ async def get_simple_ohlcv(commodity: str, timeframe: str = "5m", period: str = 
             "data": data,
             "commodity": commodity,
             "timeframe": timeframe,
+            "period": period,
+            "source": "live_db",
+            "message": "Using live database data (yfinance rate-limited)"
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in simple OHLCV: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.post("/ai-chat")
