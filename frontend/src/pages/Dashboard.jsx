@@ -45,7 +45,7 @@ const Dashboard = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [aiProcessing, setAiProcessing] = useState(false);
-  const [chartTimeframe, setChartTimeframe] = useState('15m'); // Default to 15m for near-real-time trading data
+  const [chartTimeframe, setChartTimeframe] = useState('5m'); // Default to 5m for live trading data
   const [chartPeriod, setChartPeriod] = useState('1d'); // Default to 1 day for live trading
   const [chartModalData, setChartModalData] = useState([]);
 
