@@ -1123,12 +1123,6 @@ async def ai_chat_endpoint(
             "success": False,
             "response": f"Fehler beim AI-Chat: {str(e)}"
         }
-
-
-            "period": period,
-            "source": "live_db",
-            "message": "Using live database data (yfinance rate-limited)"
-        }
     
     except HTTPException:
         raise
