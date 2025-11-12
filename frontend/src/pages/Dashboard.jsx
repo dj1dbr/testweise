@@ -13,6 +13,7 @@ import { Badge } from '../components/ui/badge';
 import PriceChart from '../components/PriceChart';
 import TradesTable from '../components/TradesTable';
 import IndicatorsPanel from '../components/IndicatorsPanel';
+import AIChat from '../components/AIChat';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
